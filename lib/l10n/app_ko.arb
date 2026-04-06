@@ -1,0 +1,265 @@
+{
+  "@@locale": "ko",
+  "commonSave": "저장",
+  "commonCancel": "취소",
+  "commonError": "오류가 발생했습니다",
+  "commonRetry": "다시 시도",
+  "commonDelete": "삭제",
+  "commonEdit": "편집",
+  "commonAll": "전체",
+  "commonShare": "공유",
+  "commonSearch": "검색",
+
+  "homeTitle": "Exacta",
+  "homeThisWeek": "이번 주",
+  "homeTotalShots": "총 촬영",
+  "homeProjects": "프로젝트",
+  "homeSecureShots": "보안 촬영",
+  "homeQuickActions": "빠른 실행",
+  "homeActiveProject": "진행중 프로젝트",
+  "homeContinueShooting": "이어서 촬영",
+
+  "cameraConstruction": "시공 기록",
+  "cameraSecure": "보안 촬영",
+  "cameraConstructionDesc": "GPS + 주소 + 시간",
+  "cameraSecureDesc": "위치 완전차단",
+  "cameraTimelapse": "타임랩스",
+  "cameraSecureBadge": "SECURE · EXIF STRIPPED",
+  "cameraRecording": "녹화 중",
+  "cameraRecordingDone": "영상이 저장되었습니다",
+  "cameraModePhoto": "사진",
+  "cameraModeVideo": "영상",
+  "cameraModeTimelapse": "타임랩스",
+  "cameraTimelapseRunning": "촬영 중 · {count}장",
+  "@cameraTimelapseRunning": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraTimelapseInterval": "촬영 간격",
+  "cameraTimelapseDone": "타임랩스 완료 · {count}장 저장",
+  "@cameraTimelapseDone": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraInterval1s": "1초",
+  "cameraInterval3s": "3초",
+  "cameraInterval5s": "5초",
+  "cameraInterval10s": "10초",
+  "cameraInterval30s": "30초",
+  "cameraInterval1m": "1분",
+  "cameraInterval5m": "5분",
+  "cameraInterval10m": "10분",
+  "cameraInterval30m": "30분",
+  "cameraIntervalShooting": "인터벌 촬영 중 · {count}장",
+  "@cameraIntervalShooting": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraIntervalDone": "인터벌 촬영 완료 · {count}장",
+  "@cameraIntervalDone": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraModeInterval": "인터벌",
+
+  "stampEditTitle": "스탬프 편집",
+  "stampMemoPlaceholder": "촬영 메모를 입력하세요...",
+  "stampProject": "프로젝트",
+  "stampDisplayItems": "표시 항목",
+  "stampTagsPlaceholder": "태그를 입력하세요 (쉼표로 구분)",
+  "stampTags": "태그",
+  "stampOverlays": "오버레이",
+  "stampTime": "시간",
+  "stampDate": "날짜",
+  "stampAddress": "주소",
+  "stampGps": "GPS 좌표",
+  "stampCompass": "나침반",
+  "stampAltitude": "해발",
+  "stampSpeed": "속도",
+  "stampLogo": "로고",
+  "stampLogoSelect": "로고 이미지 선택",
+  "stampSignature": "손글씨 서명",
+  "stampSignatureDraw": "서명 그리기",
+
+  "galleryTitle": "갤러리",
+  "galleryToday": "오늘",
+  "galleryYesterday": "어제",
+  "galleryNoProject": "프로젝트 없음",
+  "galleryPhotos": "{count}장",
+  "@galleryPhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "projectsTitle": "프로젝트",
+  "projectsSearch": "프로젝트 검색...",
+  "projectsActive": "진행중",
+  "projectsDone": "완료",
+  "projectsNew": "새 프로젝트",
+
+  "settingsTitle": "설정",
+  "settingsTimestamp": "타임스탬프",
+  "settingsDateFormat": "날짜 포맷",
+  "settingsFont": "폰트",
+  "settingsStampColor": "스탬프 색상",
+  "settingsStampPosition": "스탬프 위치",
+  "settingsCamera": "카메라",
+  "settingsResolution": "해상도",
+  "settingsShutterSound": "셔터음 끄기",
+  "settingsBatterySaver": "배터리 세이버",
+  "settingsStorage": "저장",
+  "settingsShowInGallery": "순정 갤러리에 표시",
+  "settingsSecureAlwaysHidden": "보안 촬영분 항상 숨김",
+  "settingsForced": "강제",
+  "settingsSecurity": "보안",
+  "settingsTheme": "테마",
+  "settingsLanguage": "언어",
+  "settingsExifStrip": "EXIF 위치 제거",
+  "settingsSecureShareLimit": "보안모드 공유제한",
+  "exportTitle": "내보내기",
+  "exportSelectPhotos": "사진 선택",
+  "exportShareSelected": "선택 공유",
+  "exportZipDone": "ZIP 파일이 저장되었습니다",
+  "exportNoPhotos": "내보낼 사진이 없습니다",
+  "exportSelectedCount": "{count}장 선택",
+  "@exportSelectedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "projectsDeleteConfirm": "{name}을(를) 삭제하시겠습니까?",
+  "@projectsDeleteConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "projectsStatusChanged": "프로젝트 상태가 변경되었습니다",
+  "commonDeleteSuccess": "삭제되었습니다",
+
+  "emptyGallery": "아직 촬영한 사진이 없습니다",
+  "emptyGalleryAction": "첫 사진을 촬영해보세요",
+  "emptyProjects": "프로젝트가 없습니다",
+  "emptyProjectsAction": "새 프로젝트를 만들어보세요",
+  "errorCameraPermission": "카메라 권한이 필요합니다",
+  "errorSaveFailed": "사진 저장에 실패했습니다",
+
+  "settingsAbout": "앱 정보",
+  "settingsVersion": "버전",
+  "settingsPrivacyPolicy": "개인정보 처리방침",
+  "settingsTerms": "이용약관",
+  "privacyTitle": "개인정보 처리방침",
+  "privacyBody": "Exacta는 사용자의 개인정보를 수집하지 않습니다.\n\n모든 사진과 데이터는 기기 내부에만 저장되며, 외부 서버로 전송되지 않습니다.\n\n위치 정보는 스탬프 번인 목적으로만 사용되며, 보안 모드 사용 시 위치 정보가 완전히 제거됩니다.\n\n카메라 및 저장소 권한은 촬영과 사진 저장에만 사용됩니다.",
+  "termsTitle": "이용약관",
+  "termsBody": "Exacta를 이용해 주셔서 감사합니다.\n\n1. 본 앱은 현장 촬영 기록용으로 제공됩니다.\n2. 촬영된 사진의 관리 책임은 사용자에게 있습니다.\n3. 앱 사용 중 발생한 데이터 손실에 대해 개발자는 책임지지 않습니다.\n4. 본 앱은 무료이며 광고를 포함하지 않습니다.",
+
+  "navHome": "홈",
+  "navGallery": "갤러리",
+  "navCamera": "촬영",
+  "themeSystem": "시스템",
+  "undoDelete": "삭제 취소",
+  "photoDeleted": "사진이 삭제되었습니다",
+  "onboarding1TitleFull": "현장 촬영, 정확하게",
+  "onboarding1DescFull": "GPS · 주소 · 시간 · 날씨를 사진에 자동 기록합니다",
+  "onboarding2TitleFull": "프로젝트별 관리",
+  "onboarding2DescFull": "현장별로 사진을 분류하고 PDF 리포트로 내보내세요",
+  "onboarding3TitleFull": "보안 촬영 모드",
+  "onboarding3DescFull": "위치정보 완전 차단 · EXIF 제거 · 위변조 방지 NTP 시간",
+  "themeLight": "라이트",
+  "themeDark": "다크",
+  "navProjects": "프로젝트",
+  "navSettings": "설정",
+
+  "commonUndo": "실행 취소",
+  "projectNameHint": "새 프로젝트 이름",
+  "projectsMarkDone": "완료 처리",
+  "projectsMarkActive": "진행중으로",
+  "projectsMovedToDone": "{name} → 완료 탭으로 이동",
+  "@projectsMovedToDone": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "projectsMovedToActive": "{name} → 진행중 탭으로 이동",
+  "@projectsMovedToActive": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "projectsDeleteWithCount": "{name}\n연결된 사진 {count}장",
+  "@projectsDeleteWithCount": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "projectsDeleteKeepPhotos": "프로젝트만 삭제 (사진 유지)",
+  "projectsDeleteWithPhotos": "사진도 함께 삭제",
+  "projectsPhotoCount": "사진 {count}장",
+  "@projectsPhotoCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "galleryNoProjectFilter": "미지정",
+  "photoDetailInfo": "정보",
+  "photoDetailProject": "프로젝트",
+  "photoDetailNoProject": "프로젝트 없음",
+  "photoDetailChangeProject": "프로젝트 변경",
+  "photoDetailTimestamp": "촬영 시각",
+  "photoDetailAddress": "주소",
+  "photoDetailGps": "GPS",
+  "photoDetailMemo": "메모",
+  "photoDetailTags": "태그",
+  "photoDetailCode": "코드",
+  "photoProjectChanged": "프로젝트가 변경되었습니다",
+
+  "ntpSynced": "NTP 동기화됨",
+  "ntpNotSynced": "NTP 미동기화 · 기기 시간 사용",
+  "pdfReportGenerated": "PDF 리포트가 생성되었습니다",
+  "pdfPhotosCount": "{count}장의 사진",
+  "@pdfPhotosCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "pdfGeneratedBy": "Exacta로 생성됨",
+  "pdfImageNotAvailable": "이미지 없음",
+  "pdfWeatherLabel": "날씨",
+  "photoDetailChangeConfirm": "이 사진의 프로젝트를 '{name}'(으)로 변경하시겠습니까?",
+  "@photoDetailChangeConfirm": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "photoDetailClearProjectConfirm": "이 사진을 '프로젝트 없음'으로 변경하시겠습니까?",
+  "settingsReset": "기본값 복원",
+  "settingsResetConfirm": "모든 설정을 기본값으로 복원하시겠습니까?",
+  "settingsResetDone": "설정이 복원되었습니다",
+  "projectNameTooShort": "이름은 1자 이상 입력해주세요",
+  "projectNameTooLong": "이름은 50자 이하로 입력해주세요",
+  "projectNameDuplicate": "같은 이름의 프로젝트가 이미 있습니다",
+  "memoTooLong": "메모는 {max}자 이하로 입력해주세요",
+  "@memoTooLong": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "tagsTooMany": "태그는 최대 {max}개까지 입력 가능합니다",
+  "@tagsTooMany": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "saveError": "저장 중 오류가 발생했습니다",
+  "updateError": "수정 중 오류가 발생했습니다",
+  "deleteError": "삭제 중 오류가 발생했습니다",
+  "cameraBusy": "카메라가 준비되지 않았습니다",
+  "permissionPartial": "일부 권한이 거부되었습니다",
+  "flashNotSupported": "이 기기에서 플래시를 사용할 수 없습니다",
+  "photoDetailWeather": "날씨",
+
+  "homeTodayPhotos": "오늘 {count}장",
+  "@homeTodayPhotos": { "placeholders": { "count": { "type": "int" } } },
+  "homeTodaySecure": "보안 {count}장",
+  "@homeTodaySecure": { "placeholders": { "count": { "type": "int" } } },
+  "homeTodayProjects": "{count}개 프로젝트",
+  "@homeTodayProjects": { "placeholders": { "count": { "type": "int" } } },
+  "homeLastPhoto": "마지막 촬영",
+  "homeNoPhotosYet": "아직 촬영한 사진이 없습니다",
+  "homeRecentProjects": "바로 촬영",
+  "storageUsed": "저장 공간",
+  "storagePhotos": "사진 {count}장",
+  "@storagePhotos": { "placeholders": { "count": { "type": "int" } } },
+  "storageCalculating": "계산 중...",
+
+  "settingsStampLayout": "스탬프 레이아웃",
+  "stampLayoutBar": "풀 바",
+  "stampLayoutCard": "카드",
+
+  "localeSystem": "시스템",
+  "localeKorean": "한국어",
+  "localeEnglish": "English",
+  "localeJapanese": "日本語"
+}

@@ -1,0 +1,265 @@
+{
+  "@@locale": "ja",
+  "commonSave": "保存",
+  "commonCancel": "キャンセル",
+  "commonError": "エラーが発生しました",
+  "commonRetry": "再試行",
+  "commonDelete": "削除",
+  "commonEdit": "編集",
+  "commonAll": "すべて",
+  "commonShare": "共有",
+  "commonSearch": "検索",
+
+  "homeTitle": "Exacta",
+  "homeThisWeek": "今週",
+  "homeTotalShots": "総撮影",
+  "homeProjects": "プロジェクト",
+  "homeSecureShots": "セキュア撮影",
+  "homeQuickActions": "クイックアクション",
+  "homeActiveProject": "進行中プロジェクト",
+  "homeContinueShooting": "続けて撮影",
+
+  "cameraConstruction": "施工記録",
+  "cameraSecure": "セキュア撮影",
+  "cameraConstructionDesc": "GPS + 住所 + 時間",
+  "cameraSecureDesc": "位置情報完全遮断",
+  "cameraTimelapse": "タイムラプス",
+  "cameraSecureBadge": "SECURE · EXIF STRIPPED",
+  "cameraRecording": "録画中",
+  "cameraRecordingDone": "動画が保存されました",
+  "cameraModePhoto": "写真",
+  "cameraModeVideo": "動画",
+  "cameraModeTimelapse": "タイムラプス",
+  "cameraTimelapseRunning": "撮影中 · {count}枚",
+  "@cameraTimelapseRunning": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraTimelapseInterval": "撮影間隔",
+  "cameraTimelapseDone": "タイムラプス完了 · {count}枚保存",
+  "@cameraTimelapseDone": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraInterval1s": "1秒",
+  "cameraInterval3s": "3秒",
+  "cameraInterval5s": "5秒",
+  "cameraInterval10s": "10秒",
+  "cameraInterval30s": "30秒",
+  "cameraInterval1m": "1分",
+  "cameraInterval5m": "5分",
+  "cameraInterval10m": "10分",
+  "cameraInterval30m": "30分",
+  "cameraIntervalShooting": "インターバル撮影中 · {count}枚",
+  "@cameraIntervalShooting": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraIntervalDone": "インターバル撮影完了 · {count}枚",
+  "@cameraIntervalDone": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraModeInterval": "インターバル",
+
+  "stampEditTitle": "スタンプ編集",
+  "stampMemoPlaceholder": "撮影メモを入力...",
+  "stampProject": "プロジェクト",
+  "stampDisplayItems": "表示項目",
+  "stampTagsPlaceholder": "タグを入力（カンマ区切り）",
+  "stampTags": "タグ",
+  "stampOverlays": "オーバーレイ",
+  "stampTime": "時間",
+  "stampDate": "日付",
+  "stampAddress": "住所",
+  "stampGps": "GPS座標",
+  "stampCompass": "コンパス",
+  "stampAltitude": "標高",
+  "stampSpeed": "速度",
+  "stampLogo": "ロゴ",
+  "stampLogoSelect": "ロゴ画像を選択",
+  "stampSignature": "手書きサイン",
+  "stampSignatureDraw": "サインを描く",
+
+  "galleryTitle": "ギャラリー",
+  "galleryToday": "今日",
+  "galleryYesterday": "昨日",
+  "galleryNoProject": "プロジェクトなし",
+  "galleryPhotos": "{count}枚",
+  "@galleryPhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "projectsTitle": "プロジェクト",
+  "projectsSearch": "プロジェクト検索...",
+  "projectsActive": "進行中",
+  "projectsDone": "完了",
+  "projectsNew": "新規プロジェクト",
+
+  "settingsTitle": "設定",
+  "settingsTimestamp": "タイムスタンプ",
+  "settingsDateFormat": "日付フォーマット",
+  "settingsFont": "フォント",
+  "settingsStampColor": "スタンプ色",
+  "settingsStampPosition": "スタンプ位置",
+  "settingsCamera": "カメラ",
+  "settingsResolution": "解像度",
+  "settingsShutterSound": "シャッター音オフ",
+  "settingsBatterySaver": "バッテリーセーバー",
+  "settingsStorage": "ストレージ",
+  "settingsShowInGallery": "標準ギャラリーに表示",
+  "settingsSecureAlwaysHidden": "セキュア撮影は常に非表示",
+  "settingsForced": "強制",
+  "settingsSecurity": "セキュリティ",
+  "settingsTheme": "テーマ",
+  "settingsLanguage": "言語",
+  "settingsExifStrip": "EXIF位置情報削除",
+  "settingsSecureShareLimit": "セキュアモード共有制限",
+  "exportTitle": "エクスポート",
+  "exportSelectPhotos": "写真を選択",
+  "exportShareSelected": "選択を共有",
+  "exportZipDone": "ZIPファイルが保存されました",
+  "exportNoPhotos": "エクスポートする写真がありません",
+  "exportSelectedCount": "{count}枚選択",
+  "@exportSelectedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "projectsDeleteConfirm": "{name}を削除しますか？",
+  "@projectsDeleteConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "projectsStatusChanged": "プロジェクトの状態が変更されました",
+  "commonDeleteSuccess": "削除しました",
+
+  "emptyGallery": "まだ撮影した写真がありません",
+  "emptyGalleryAction": "最初の写真を撮影しましょう",
+  "emptyProjects": "プロジェクトがありません",
+  "emptyProjectsAction": "新しいプロジェクトを作成しましょう",
+  "errorCameraPermission": "カメラの権限が必要です",
+  "errorSaveFailed": "写真の保存に失敗しました",
+
+  "settingsAbout": "アプリ情報",
+  "settingsVersion": "バージョン",
+  "settingsPrivacyPolicy": "プライバシーポリシー",
+  "settingsTerms": "利用規約",
+  "privacyTitle": "プライバシーポリシー",
+  "privacyBody": "Exactaは個人情報を一切収集しません。\n\nすべての写真とデータはデバイス内にのみ保存され、外部サーバーには送信されません。\n\n位置情報はスタンプ焼き込み目的でのみ使用されます。セキュアモード使用時は位置情報が完全に削除されます。\n\nカメラとストレージの権限は撮影と写真保存にのみ使用されます。",
+  "termsTitle": "利用規約",
+  "termsBody": "Exactaをご利用いただきありがとうございます。\n\n1. 本アプリは現場撮影記録用に提供されます。\n2. 撮影した写真の管理責任はユーザーにあります。\n3. アプリ使用中のデータ損失について開発者は責任を負いません。\n4. 本アプリは無料で広告を含みません。",
+
+  "navHome": "ホーム",
+  "navGallery": "ギャラリー",
+  "navCamera": "撮影",
+  "themeSystem": "システム",
+  "undoDelete": "取り消し",
+  "photoDeleted": "写真が削除されました",
+  "onboarding1TitleFull": "正確な現場撮影",
+  "onboarding1DescFull": "GPS・住所・時間・天気を写真に自動記録します",
+  "onboarding2TitleFull": "プロジェクト管理",
+  "onboarding2DescFull": "現場別に写真を分類しPDFレポートで出力",
+  "onboarding3TitleFull": "セキュア撮影モード",
+  "onboarding3DescFull": "位置情報完全遮断・EXIF削除・NTP改ざん防止時間",
+  "themeLight": "ライト",
+  "themeDark": "ダーク",
+  "navProjects": "プロジェクト",
+  "navSettings": "設定",
+
+  "commonUndo": "取り消し",
+  "projectNameHint": "新しいプロジェクト名",
+  "projectsMarkDone": "完了にする",
+  "projectsMarkActive": "進行中に戻す",
+  "projectsMovedToDone": "{name} → 完了タブへ移動",
+  "@projectsMovedToDone": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "projectsMovedToActive": "{name} → 進行中タブへ移動",
+  "@projectsMovedToActive": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "projectsDeleteWithCount": "{name}\n紐づいた写真 {count}枚",
+  "@projectsDeleteWithCount": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "projectsDeleteKeepPhotos": "プロジェクトのみ削除 (写真は保持)",
+  "projectsDeleteWithPhotos": "写真も一緒に削除",
+  "projectsPhotoCount": "写真 {count}枚",
+  "@projectsPhotoCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "galleryNoProjectFilter": "未割当",
+  "photoDetailInfo": "情報",
+  "photoDetailProject": "プロジェクト",
+  "photoDetailNoProject": "プロジェクトなし",
+  "photoDetailChangeProject": "プロジェクト変更",
+  "photoDetailTimestamp": "撮影時刻",
+  "photoDetailAddress": "住所",
+  "photoDetailGps": "GPS",
+  "photoDetailMemo": "メモ",
+  "photoDetailTags": "タグ",
+  "photoDetailCode": "コード",
+  "photoProjectChanged": "プロジェクトが変更されました",
+
+  "ntpSynced": "NTP同期済み",
+  "ntpNotSynced": "NTP未同期・端末時刻を使用",
+  "pdfReportGenerated": "PDFレポートが生成されました",
+  "pdfPhotosCount": "{count}枚の写真",
+  "@pdfPhotosCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "pdfGeneratedBy": "Exactaで生成",
+  "pdfImageNotAvailable": "画像なし",
+  "pdfWeatherLabel": "天気",
+  "photoDetailChangeConfirm": "この写真を「{name}」に変更しますか?",
+  "@photoDetailChangeConfirm": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "photoDetailClearProjectConfirm": "この写真を「プロジェクトなし」に変更しますか?",
+  "settingsReset": "デフォルトに戻す",
+  "settingsResetConfirm": "すべての設定をデフォルトに戻しますか?",
+  "settingsResetDone": "設定を復元しました",
+  "projectNameTooShort": "名前を1文字以上入力してください",
+  "projectNameTooLong": "名前は50文字以下で入力してください",
+  "projectNameDuplicate": "同じ名前のプロジェクトが既に存在します",
+  "memoTooLong": "メモは{max}文字以下で入力してください",
+  "@memoTooLong": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "tagsTooMany": "タグは最大{max}個まで入力できます",
+  "@tagsTooMany": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "saveError": "保存中にエラーが発生しました",
+  "updateError": "更新中にエラーが発生しました",
+  "deleteError": "削除中にエラーが発生しました",
+  "cameraBusy": "カメラの準備ができていません",
+  "permissionPartial": "一部の権限が拒否されました",
+  "flashNotSupported": "この端末ではフラッシュを使用できません",
+  "photoDetailWeather": "天気",
+
+  "homeTodayPhotos": "今日 {count}枚",
+  "@homeTodayPhotos": { "placeholders": { "count": { "type": "int" } } },
+  "homeTodaySecure": "セキュア {count}枚",
+  "@homeTodaySecure": { "placeholders": { "count": { "type": "int" } } },
+  "homeTodayProjects": "{count}プロジェクト",
+  "@homeTodayProjects": { "placeholders": { "count": { "type": "int" } } },
+  "homeLastPhoto": "最後の撮影",
+  "homeNoPhotosYet": "まだ撮影した写真がありません",
+  "homeRecentProjects": "すぐ撮影",
+  "storageUsed": "ストレージ",
+  "storagePhotos": "写真 {count}枚",
+  "@storagePhotos": { "placeholders": { "count": { "type": "int" } } },
+  "storageCalculating": "計算中...",
+
+  "settingsStampLayout": "スタンプレイアウト",
+  "stampLayoutBar": "フルバー",
+  "stampLayoutCard": "カード",
+
+  "localeSystem": "システム",
+  "localeKorean": "한국어",
+  "localeEnglish": "English",
+  "localeJapanese": "日本語"
+}

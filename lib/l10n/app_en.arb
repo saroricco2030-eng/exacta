@@ -1,0 +1,265 @@
+{
+  "@@locale": "en",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonError": "An error occurred",
+  "commonRetry": "Retry",
+  "commonDelete": "Delete",
+  "commonEdit": "Edit",
+  "commonAll": "All",
+  "commonShare": "Share",
+  "commonSearch": "Search",
+
+  "homeTitle": "Exacta",
+  "homeThisWeek": "This Week",
+  "homeTotalShots": "Total Shots",
+  "homeProjects": "Projects",
+  "homeSecureShots": "Secure Shots",
+  "homeQuickActions": "Quick Actions",
+  "homeActiveProject": "Active Project",
+  "homeContinueShooting": "Continue Shooting",
+
+  "cameraConstruction": "Construction",
+  "cameraSecure": "Secure",
+  "cameraConstructionDesc": "GPS + Address + Time",
+  "cameraSecureDesc": "Location blocked",
+  "cameraTimelapse": "Timelapse",
+  "cameraSecureBadge": "SECURE · EXIF STRIPPED",
+  "cameraRecording": "Recording",
+  "cameraRecordingDone": "Video saved",
+  "cameraModePhoto": "Photo",
+  "cameraModeVideo": "Video",
+  "cameraModeTimelapse": "Timelapse",
+  "cameraTimelapseRunning": "Shooting · {count} photos",
+  "@cameraTimelapseRunning": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraTimelapseInterval": "Interval",
+  "cameraTimelapseDone": "Timelapse done · {count} photos saved",
+  "@cameraTimelapseDone": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraInterval1s": "1s",
+  "cameraInterval3s": "3s",
+  "cameraInterval5s": "5s",
+  "cameraInterval10s": "10s",
+  "cameraInterval30s": "30s",
+  "cameraInterval1m": "1min",
+  "cameraInterval5m": "5min",
+  "cameraInterval10m": "10min",
+  "cameraInterval30m": "30min",
+  "cameraIntervalShooting": "Interval · {count} photos",
+  "@cameraIntervalShooting": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraIntervalDone": "Interval done · {count} photos",
+  "@cameraIntervalDone": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "cameraModeInterval": "Interval",
+
+  "stampEditTitle": "Edit Stamp",
+  "stampMemoPlaceholder": "Enter a memo...",
+  "stampProject": "Project",
+  "stampDisplayItems": "Display Items",
+  "stampTagsPlaceholder": "Enter tags (comma separated)",
+  "stampTags": "Tags",
+  "stampOverlays": "Overlays",
+  "stampTime": "Time",
+  "stampDate": "Date",
+  "stampAddress": "Address",
+  "stampGps": "GPS Coordinates",
+  "stampCompass": "Compass",
+  "stampAltitude": "Altitude",
+  "stampSpeed": "Speed",
+  "stampLogo": "Logo",
+  "stampLogoSelect": "Select logo image",
+  "stampSignature": "Signature",
+  "stampSignatureDraw": "Draw signature",
+
+  "galleryTitle": "Gallery",
+  "galleryToday": "Today",
+  "galleryYesterday": "Yesterday",
+  "galleryNoProject": "No Project",
+  "galleryPhotos": "{count} photos",
+  "@galleryPhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "projectsTitle": "Projects",
+  "projectsSearch": "Search projects...",
+  "projectsActive": "Active",
+  "projectsDone": "Done",
+  "projectsNew": "New Project",
+
+  "settingsTitle": "Settings",
+  "settingsTimestamp": "Timestamp",
+  "settingsDateFormat": "Date Format",
+  "settingsFont": "Font",
+  "settingsStampColor": "Stamp Color",
+  "settingsStampPosition": "Stamp Position",
+  "settingsCamera": "Camera",
+  "settingsResolution": "Resolution",
+  "settingsShutterSound": "Shutter Sound Off",
+  "settingsBatterySaver": "Battery Saver",
+  "settingsStorage": "Storage",
+  "settingsShowInGallery": "Show in Gallery",
+  "settingsSecureAlwaysHidden": "Always hide secure shots",
+  "settingsForced": "Forced",
+  "settingsSecurity": "Security",
+  "settingsTheme": "Theme",
+  "settingsLanguage": "Language",
+  "settingsExifStrip": "Strip EXIF Location",
+  "settingsSecureShareLimit": "Secure Mode Share Limit",
+  "exportTitle": "Export",
+  "exportSelectPhotos": "Select photos",
+  "exportShareSelected": "Share selected",
+  "exportZipDone": "ZIP file saved",
+  "exportNoPhotos": "No photos to export",
+  "exportSelectedCount": "{count} selected",
+  "@exportSelectedCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "projectsDeleteConfirm": "Delete {name}?",
+  "@projectsDeleteConfirm": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "projectsStatusChanged": "Project status changed",
+  "commonDeleteSuccess": "Deleted",
+
+  "emptyGallery": "No photos yet",
+  "emptyGalleryAction": "Take your first photo",
+  "emptyProjects": "No projects yet",
+  "emptyProjectsAction": "Create a new project",
+  "errorCameraPermission": "Camera permission required",
+  "errorSaveFailed": "Failed to save photo",
+
+  "settingsAbout": "About",
+  "settingsVersion": "Version",
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "settingsTerms": "Terms of Use",
+  "privacyTitle": "Privacy Policy",
+  "privacyBody": "Exacta does not collect any personal information.\n\nAll photos and data are stored only on your device and are never transmitted to external servers.\n\nLocation data is used solely for stamp burn-in purposes. When using Secure Mode, location data is completely removed.\n\nCamera and storage permissions are used only for capturing and saving photos.",
+  "termsTitle": "Terms of Use",
+  "termsBody": "Thank you for using Exacta.\n\n1. This app is provided for on-site photo documentation.\n2. Users are responsible for managing their captured photos.\n3. The developer is not liable for any data loss during app use.\n4. This app is free and contains no advertisements.",
+
+  "navHome": "Home",
+  "navGallery": "Gallery",
+  "navCamera": "Shoot",
+  "themeSystem": "System",
+  "undoDelete": "Undo",
+  "photoDeleted": "Photo deleted",
+  "onboarding1TitleFull": "Precise Field Photos",
+  "onboarding1DescFull": "Auto-stamp GPS, address, time, and weather on every photo",
+  "onboarding2TitleFull": "Project Management",
+  "onboarding2DescFull": "Organize photos by project and export PDF reports",
+  "onboarding3TitleFull": "Secure Capture Mode",
+  "onboarding3DescFull": "Block all location data · Strip EXIF · NTP tamper-proof time",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "navProjects": "Projects",
+  "navSettings": "Settings",
+
+  "commonUndo": "Undo",
+  "projectNameHint": "New project name",
+  "projectsMarkDone": "Mark done",
+  "projectsMarkActive": "Reactivate",
+  "projectsMovedToDone": "{name} → moved to Done",
+  "@projectsMovedToDone": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "projectsMovedToActive": "{name} → moved to Active",
+  "@projectsMovedToActive": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "projectsDeleteWithCount": "{name}\n{count} photos linked",
+  "@projectsDeleteWithCount": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "count": { "type": "int" }
+    }
+  },
+  "projectsDeleteKeepPhotos": "Delete project only (keep photos)",
+  "projectsDeleteWithPhotos": "Delete with all photos",
+  "projectsPhotoCount": "{count} photos",
+  "@projectsPhotoCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "galleryNoProjectFilter": "Unassigned",
+  "photoDetailInfo": "Info",
+  "photoDetailProject": "Project",
+  "photoDetailNoProject": "No project",
+  "photoDetailChangeProject": "Change project",
+  "photoDetailTimestamp": "Timestamp",
+  "photoDetailAddress": "Address",
+  "photoDetailGps": "GPS",
+  "photoDetailMemo": "Memo",
+  "photoDetailTags": "Tags",
+  "photoDetailCode": "Code",
+  "photoProjectChanged": "Project changed",
+
+  "ntpSynced": "NTP Synced",
+  "ntpNotSynced": "NTP not synced · using device time",
+  "pdfReportGenerated": "PDF report generated",
+  "pdfPhotosCount": "{count} photos",
+  "@pdfPhotosCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "pdfGeneratedBy": "Generated by Exacta",
+  "pdfImageNotAvailable": "Image not available",
+  "pdfWeatherLabel": "Weather",
+  "photoDetailChangeConfirm": "Move this photo to '{name}'?",
+  "@photoDetailChangeConfirm": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "photoDetailClearProjectConfirm": "Move this photo to 'No project'?",
+  "settingsReset": "Reset to defaults",
+  "settingsResetConfirm": "Reset all settings to defaults?",
+  "settingsResetDone": "Settings restored",
+  "projectNameTooShort": "Name must be at least 1 character",
+  "projectNameTooLong": "Name must be 50 characters or fewer",
+  "projectNameDuplicate": "A project with this name already exists",
+  "memoTooLong": "Memo must be {max} characters or fewer",
+  "@memoTooLong": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "tagsTooMany": "Up to {max} tags allowed",
+  "@tagsTooMany": {
+    "placeholders": { "max": { "type": "int" } }
+  },
+  "saveError": "Error while saving",
+  "updateError": "Error while updating",
+  "deleteError": "Error while deleting",
+  "cameraBusy": "Camera not ready",
+  "permissionPartial": "Some permissions were denied",
+  "flashNotSupported": "Flash is not available on this device",
+  "photoDetailWeather": "Weather",
+
+  "homeTodayPhotos": "Today {count}",
+  "@homeTodayPhotos": { "placeholders": { "count": { "type": "int" } } },
+  "homeTodaySecure": "Secure {count}",
+  "@homeTodaySecure": { "placeholders": { "count": { "type": "int" } } },
+  "homeTodayProjects": "{count} projects",
+  "@homeTodayProjects": { "placeholders": { "count": { "type": "int" } } },
+  "homeLastPhoto": "Last shot",
+  "homeNoPhotosYet": "No photos yet",
+  "homeRecentProjects": "Quick shoot",
+  "storageUsed": "Storage",
+  "storagePhotos": "{count} photos",
+  "@storagePhotos": { "placeholders": { "count": { "type": "int" } } },
+  "storageCalculating": "Calculating...",
+
+  "settingsStampLayout": "Stamp layout",
+  "stampLayoutBar": "Full bar",
+  "stampLayoutCard": "Card",
+
+  "localeSystem": "System",
+  "localeKorean": "한국어",
+  "localeEnglish": "English",
+  "localeJapanese": "日本語"
+}

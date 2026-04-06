@@ -1,0 +1,318 @@
+/// Gallery - project filter + search + multi-select bulk delete
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+
+import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/data/database.dart';
+import 'package:exacta/data/providers.dart';
+import 'package:exacta/features/gallery/widgets/gallery_filter_chip.dart';
+import 'package:exacta/features/gallery/widgets/gallery_states.dart';
+import 'package:exacta/features/gallery/widgets/gallery_loaded.dart';
+
+class GalleryScreen extends ConsumerStatefulWidget {
+  const GalleryScreen({super.key});
+
+  @override
+  ConsumerState<GalleryScreen> createState() => _GalleryScreenState();
+}
+
+class _GalleryScreenState extends ConsumerState<GalleryScreen> {
+  int? _selectedProjectId;
+  bool _showSearch = false;
+  bool _selectMode = false;
+  final Set<int> _selectedIds = {};
+  final _searchController = TextEditingController();
+  List<Photo>? _searchResults;
+  Timer? _searchDebounce;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    // M3: 300ms debounce — 매 글자 DB 쿼리 방지
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      _performSearch(query);
+    });
+  }
+
+  Future<void> _performSearch(String query) async {
+    if (query.trim().isEmpty) {
+      if (mounted) setState(() => _searchResults = null);
+      return;
+    }
+    try {
+      final results = await AppDatabase.instance.searchPhotos(query.trim());
+      if (mounted) setState(() => _searchResults = results);
+    } catch (e) {
+      debugPrint('searchPhotos failed: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final photosAsync = ref.watch(photosByProjectProvider(_selectedProjectId));
+    final projectsAsync = ref.watch(allProjectsProvider);
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── 헤더 ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              child: Row(
+                children: [
+                  Text(
+                    l.galleryTitle,
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const Spacer(),
+                  // 선택 모드 토글
+                  if (!_showSearch)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Semantics(
+                        button: true,
+                        label: 'Select',
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            setState(() {
+                              _selectMode = !_selectMode;
+                              _selectedIds.clear();
+                            });
+                          },
+                          child: Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: _selectMode ? context.accentDim : context.surfaceHi,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              _selectMode ? LucideIcons.x : LucideIcons.squareCheck,
+                              size: 20,
+                              color: _selectMode ? context.accent : context.text2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  // 검색 토글
+                  Semantics(
+                    button: true,
+                    label: l.projectsSearch,
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          _showSearch = !_showSearch;
+                          if (!_showSearch) {
+                            _searchController.clear();
+                            _searchResults = null;
+                          }
+                        });
+                      },
+                      child: Container(
+                        width: 44, height: 44,
+                        decoration: BoxDecoration(
+                          color: _showSearch ? context.accentDim : context.surfaceHi,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          _showSearch ? LucideIcons.x : LucideIcons.search,
+                          size: 20,
+                          color: _showSearch ? context.accent : context.text2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── 검색 바 ──
+            if (_showSearch)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  style: TextStyle(fontSize: 14, color: context.text1),
+                  decoration: InputDecoration(
+                    hintText: l.commonSearch,
+                    prefixIcon: Icon(LucideIcons.search, size: 18, color: context.text3),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 16),
+
+            // ── 프로젝트 필터 칩 (검색 모드가 아닐 때만) ──
+            if (!_showSearch) ...[
+              SizedBox(
+                height: 44,
+                child: projectsAsync.when(
+                  loading: () => const SizedBox.shrink(),
+                  error: (e, st) => const SizedBox.shrink(),
+                  data: (projects) {
+                    // 대원칙 1: SSoT — 선택된 projectId가 실제 목록에 없으면 자동 리셋
+                    // (예: 다른 화면에서 프로젝트가 삭제된 경우)
+                    if (_selectedProjectId != null &&
+                        _selectedProjectId != -1 &&
+                        !projects.any((p) => p.id == _selectedProjectId)) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) setState(() => _selectedProjectId = null);
+                      });
+                    }
+
+                    // 칩 구성: [전체] + [미지정] + 각 프로젝트
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      itemCount: projects.length + 2,
+                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return GalleryFilterChip(
+                            label: l.commonAll,
+                            isActive: _selectedProjectId == null,
+                            onTap: () => setState(() => _selectedProjectId = null),
+                          );
+                        }
+                        if (index == 1) {
+                          return GalleryFilterChip(
+                            label: l.galleryNoProjectFilter,
+                            isActive: _selectedProjectId == -1,
+                            onTap: () => setState(() => _selectedProjectId = -1),
+                          );
+                        }
+                        final project = projects[index - 2];
+                        return GalleryFilterChip(
+                          label: project.name,
+                          isActive: _selectedProjectId == project.id,
+                          color: _parseColor(project.color, context),
+                          onTap: () => setState(() => _selectedProjectId = project.id),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+
+            // ── 일괄 삭제 바 ──
+            if (_selectMode && _selectedIds.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: Material(
+                    color: context.danger,
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => _bulkDelete(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(LucideIcons.trash2, size: 18, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${l.commonDelete} (${_selectedIds.length})',
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // ── 사진 목록 ──
+            Expanded(
+              child: _searchResults != null
+                  ? _searchResults!.isEmpty
+                      ? GalleryEmpty(l: l)
+                      : GalleryLoaded(photos: _searchResults!, l: l, selectMode: _selectMode, selectedIds: _selectedIds, onSelectionChanged: () => setState(() {}))
+                  : photosAsync.when(
+                      loading: () => const GalleryLoading(),
+                      error: (e, _) => GalleryError(
+                        l: l,
+                        onRetry: () => ref.invalidate(photosByProjectProvider(_selectedProjectId)),
+                      ),
+                      data: (photos) {
+                        if (photos.isEmpty) return GalleryEmpty(l: l);
+                        return GalleryLoaded(photos: photos, l: l, selectMode: _selectMode, selectedIds: _selectedIds, onSelectionChanged: () => setState(() {}));
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _bulkDelete(BuildContext context) async {
+    final l = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.commonDelete),
+        content: Text('${_selectedIds.length}${l.galleryPhotos(_selectedIds.length)}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.commonCancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: ctx.danger),
+            child: Text(l.commonDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    HapticFeedback.mediumImpact();
+    final db = ref.read(dbProvider);
+    // 대원칙 4: 파일-DB 동기 — 파일과 DB를 함께 삭제
+    for (final id in _selectedIds) {
+      final photo = await db.getPhotoById(id);
+      if (photo != null) {
+        try {
+          final file = File(photo.filePath);
+          if (await file.exists()) await file.delete();
+          if (photo.thumbnailPath != null) {
+            final thumb = File(photo.thumbnailPath!);
+            if (await thumb.exists()) await thumb.delete();
+          }
+        } catch (_) {
+          // 파일 삭제 실패 — DB 삭제는 계속 진행
+        }
+      }
+      await db.deletePhoto(id);
+    }
+    if (mounted) {
+      setState(() {
+        _selectedIds.clear();
+        _selectMode = false;
+      });
+    }
+  }
+
+  Color _parseColor(String? hex, BuildContext context) => context.parseHexColor(hex);
+}

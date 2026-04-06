@@ -1,0 +1,1284 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'generated/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('ja'),
+    Locale('ko'),
+  ];
+
+  /// No description provided for @commonSave.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get commonSave;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In ko, this message translates to:
+  /// **'취소'**
+  String get commonCancel;
+
+  /// No description provided for @commonError.
+  ///
+  /// In ko, this message translates to:
+  /// **'오류가 발생했습니다'**
+  String get commonError;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도'**
+  String get commonRetry;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제'**
+  String get commonDelete;
+
+  /// No description provided for @commonEdit.
+  ///
+  /// In ko, this message translates to:
+  /// **'편집'**
+  String get commonEdit;
+
+  /// No description provided for @commonAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get commonAll;
+
+  /// No description provided for @commonShare.
+  ///
+  /// In ko, this message translates to:
+  /// **'공유'**
+  String get commonShare;
+
+  /// No description provided for @commonSearch.
+  ///
+  /// In ko, this message translates to:
+  /// **'검색'**
+  String get commonSearch;
+
+  /// No description provided for @homeTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'Exacta'**
+  String get homeTitle;
+
+  /// No description provided for @homeThisWeek.
+  ///
+  /// In ko, this message translates to:
+  /// **'이번 주'**
+  String get homeThisWeek;
+
+  /// No description provided for @homeTotalShots.
+  ///
+  /// In ko, this message translates to:
+  /// **'총 촬영'**
+  String get homeTotalShots;
+
+  /// No description provided for @homeProjects.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트'**
+  String get homeProjects;
+
+  /// No description provided for @homeSecureShots.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안 촬영'**
+  String get homeSecureShots;
+
+  /// No description provided for @homeQuickActions.
+  ///
+  /// In ko, this message translates to:
+  /// **'빠른 실행'**
+  String get homeQuickActions;
+
+  /// No description provided for @homeActiveProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행중 프로젝트'**
+  String get homeActiveProject;
+
+  /// No description provided for @homeContinueShooting.
+  ///
+  /// In ko, this message translates to:
+  /// **'이어서 촬영'**
+  String get homeContinueShooting;
+
+  /// No description provided for @cameraConstruction.
+  ///
+  /// In ko, this message translates to:
+  /// **'시공 기록'**
+  String get cameraConstruction;
+
+  /// No description provided for @cameraSecure.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안 촬영'**
+  String get cameraSecure;
+
+  /// No description provided for @cameraConstructionDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS + 주소 + 시간'**
+  String get cameraConstructionDesc;
+
+  /// No description provided for @cameraSecureDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 완전차단'**
+  String get cameraSecureDesc;
+
+  /// No description provided for @cameraTimelapse.
+  ///
+  /// In ko, this message translates to:
+  /// **'타임랩스'**
+  String get cameraTimelapse;
+
+  /// No description provided for @cameraSecureBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'SECURE · EXIF STRIPPED'**
+  String get cameraSecureBadge;
+
+  /// No description provided for @cameraRecording.
+  ///
+  /// In ko, this message translates to:
+  /// **'녹화 중'**
+  String get cameraRecording;
+
+  /// No description provided for @cameraRecordingDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'영상이 저장되었습니다'**
+  String get cameraRecordingDone;
+
+  /// No description provided for @cameraModePhoto.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진'**
+  String get cameraModePhoto;
+
+  /// No description provided for @cameraModeVideo.
+  ///
+  /// In ko, this message translates to:
+  /// **'영상'**
+  String get cameraModeVideo;
+
+  /// No description provided for @cameraModeTimelapse.
+  ///
+  /// In ko, this message translates to:
+  /// **'타임랩스'**
+  String get cameraModeTimelapse;
+
+  /// No description provided for @cameraTimelapseRunning.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영 중 · {count}장'**
+  String cameraTimelapseRunning(int count);
+
+  /// No description provided for @cameraTimelapseInterval.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영 간격'**
+  String get cameraTimelapseInterval;
+
+  /// No description provided for @cameraTimelapseDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'타임랩스 완료 · {count}장 저장'**
+  String cameraTimelapseDone(int count);
+
+  /// No description provided for @cameraInterval1s.
+  ///
+  /// In ko, this message translates to:
+  /// **'1초'**
+  String get cameraInterval1s;
+
+  /// No description provided for @cameraInterval3s.
+  ///
+  /// In ko, this message translates to:
+  /// **'3초'**
+  String get cameraInterval3s;
+
+  /// No description provided for @cameraInterval5s.
+  ///
+  /// In ko, this message translates to:
+  /// **'5초'**
+  String get cameraInterval5s;
+
+  /// No description provided for @cameraInterval10s.
+  ///
+  /// In ko, this message translates to:
+  /// **'10초'**
+  String get cameraInterval10s;
+
+  /// No description provided for @cameraInterval30s.
+  ///
+  /// In ko, this message translates to:
+  /// **'30초'**
+  String get cameraInterval30s;
+
+  /// No description provided for @cameraInterval1m.
+  ///
+  /// In ko, this message translates to:
+  /// **'1분'**
+  String get cameraInterval1m;
+
+  /// No description provided for @cameraInterval5m.
+  ///
+  /// In ko, this message translates to:
+  /// **'5분'**
+  String get cameraInterval5m;
+
+  /// No description provided for @cameraInterval10m.
+  ///
+  /// In ko, this message translates to:
+  /// **'10분'**
+  String get cameraInterval10m;
+
+  /// No description provided for @cameraInterval30m.
+  ///
+  /// In ko, this message translates to:
+  /// **'30분'**
+  String get cameraInterval30m;
+
+  /// No description provided for @cameraIntervalShooting.
+  ///
+  /// In ko, this message translates to:
+  /// **'인터벌 촬영 중 · {count}장'**
+  String cameraIntervalShooting(int count);
+
+  /// No description provided for @cameraIntervalDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'인터벌 촬영 완료 · {count}장'**
+  String cameraIntervalDone(int count);
+
+  /// No description provided for @cameraModeInterval.
+  ///
+  /// In ko, this message translates to:
+  /// **'인터벌'**
+  String get cameraModeInterval;
+
+  /// No description provided for @stampEditTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 편집'**
+  String get stampEditTitle;
+
+  /// No description provided for @stampMemoPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영 메모를 입력하세요...'**
+  String get stampMemoPlaceholder;
+
+  /// No description provided for @stampProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트'**
+  String get stampProject;
+
+  /// No description provided for @stampDisplayItems.
+  ///
+  /// In ko, this message translates to:
+  /// **'표시 항목'**
+  String get stampDisplayItems;
+
+  /// No description provided for @stampTagsPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그를 입력하세요 (쉼표로 구분)'**
+  String get stampTagsPlaceholder;
+
+  /// No description provided for @stampTags.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그'**
+  String get stampTags;
+
+  /// No description provided for @stampOverlays.
+  ///
+  /// In ko, this message translates to:
+  /// **'오버레이'**
+  String get stampOverlays;
+
+  /// No description provided for @stampTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'시간'**
+  String get stampTime;
+
+  /// No description provided for @stampDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'날짜'**
+  String get stampDate;
+
+  /// No description provided for @stampAddress.
+  ///
+  /// In ko, this message translates to:
+  /// **'주소'**
+  String get stampAddress;
+
+  /// No description provided for @stampGps.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS 좌표'**
+  String get stampGps;
+
+  /// No description provided for @stampCompass.
+  ///
+  /// In ko, this message translates to:
+  /// **'나침반'**
+  String get stampCompass;
+
+  /// No description provided for @stampAltitude.
+  ///
+  /// In ko, this message translates to:
+  /// **'해발'**
+  String get stampAltitude;
+
+  /// No description provided for @stampSpeed.
+  ///
+  /// In ko, this message translates to:
+  /// **'속도'**
+  String get stampSpeed;
+
+  /// No description provided for @stampLogo.
+  ///
+  /// In ko, this message translates to:
+  /// **'로고'**
+  String get stampLogo;
+
+  /// No description provided for @stampLogoSelect.
+  ///
+  /// In ko, this message translates to:
+  /// **'로고 이미지 선택'**
+  String get stampLogoSelect;
+
+  /// No description provided for @stampSignature.
+  ///
+  /// In ko, this message translates to:
+  /// **'손글씨 서명'**
+  String get stampSignature;
+
+  /// No description provided for @stampSignatureDraw.
+  ///
+  /// In ko, this message translates to:
+  /// **'서명 그리기'**
+  String get stampSignatureDraw;
+
+  /// No description provided for @galleryTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'갤러리'**
+  String get galleryTitle;
+
+  /// No description provided for @galleryToday.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘'**
+  String get galleryToday;
+
+  /// No description provided for @galleryYesterday.
+  ///
+  /// In ko, this message translates to:
+  /// **'어제'**
+  String get galleryYesterday;
+
+  /// No description provided for @galleryNoProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트 없음'**
+  String get galleryNoProject;
+
+  /// No description provided for @galleryPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장'**
+  String galleryPhotos(int count);
+
+  /// No description provided for @projectsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트'**
+  String get projectsTitle;
+
+  /// No description provided for @projectsSearch.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트 검색...'**
+  String get projectsSearch;
+
+  /// No description provided for @projectsActive.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행중'**
+  String get projectsActive;
+
+  /// No description provided for @projectsDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료'**
+  String get projectsDone;
+
+  /// No description provided for @projectsNew.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 프로젝트'**
+  String get projectsNew;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsTimestamp.
+  ///
+  /// In ko, this message translates to:
+  /// **'타임스탬프'**
+  String get settingsTimestamp;
+
+  /// No description provided for @settingsDateFormat.
+  ///
+  /// In ko, this message translates to:
+  /// **'날짜 포맷'**
+  String get settingsDateFormat;
+
+  /// No description provided for @settingsFont.
+  ///
+  /// In ko, this message translates to:
+  /// **'폰트'**
+  String get settingsFont;
+
+  /// No description provided for @settingsStampColor.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 색상'**
+  String get settingsStampColor;
+
+  /// No description provided for @settingsStampPosition.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 위치'**
+  String get settingsStampPosition;
+
+  /// No description provided for @settingsCamera.
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라'**
+  String get settingsCamera;
+
+  /// No description provided for @settingsResolution.
+  ///
+  /// In ko, this message translates to:
+  /// **'해상도'**
+  String get settingsResolution;
+
+  /// No description provided for @settingsShutterSound.
+  ///
+  /// In ko, this message translates to:
+  /// **'셔터음 끄기'**
+  String get settingsShutterSound;
+
+  /// No description provided for @settingsBatterySaver.
+  ///
+  /// In ko, this message translates to:
+  /// **'배터리 세이버'**
+  String get settingsBatterySaver;
+
+  /// No description provided for @settingsStorage.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장'**
+  String get settingsStorage;
+
+  /// No description provided for @settingsShowInGallery.
+  ///
+  /// In ko, this message translates to:
+  /// **'순정 갤러리에 표시'**
+  String get settingsShowInGallery;
+
+  /// No description provided for @settingsSecureAlwaysHidden.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안 촬영분 항상 숨김'**
+  String get settingsSecureAlwaysHidden;
+
+  /// No description provided for @settingsForced.
+  ///
+  /// In ko, this message translates to:
+  /// **'강제'**
+  String get settingsForced;
+
+  /// No description provided for @settingsSecurity.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안'**
+  String get settingsSecurity;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In ko, this message translates to:
+  /// **'테마'**
+  String get settingsTheme;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In ko, this message translates to:
+  /// **'언어'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsExifStrip.
+  ///
+  /// In ko, this message translates to:
+  /// **'EXIF 위치 제거'**
+  String get settingsExifStrip;
+
+  /// No description provided for @settingsSecureShareLimit.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안모드 공유제한'**
+  String get settingsSecureShareLimit;
+
+  /// No description provided for @exportTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'내보내기'**
+  String get exportTitle;
+
+  /// No description provided for @exportSelectPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 선택'**
+  String get exportSelectPhotos;
+
+  /// No description provided for @exportShareSelected.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택 공유'**
+  String get exportShareSelected;
+
+  /// No description provided for @exportZipDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'ZIP 파일이 저장되었습니다'**
+  String get exportZipDone;
+
+  /// No description provided for @exportNoPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'내보낼 사진이 없습니다'**
+  String get exportNoPhotos;
+
+  /// No description provided for @exportSelectedCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장 선택'**
+  String exportSelectedCount(int count);
+
+  /// No description provided for @projectsDeleteConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}을(를) 삭제하시겠습니까?'**
+  String projectsDeleteConfirm(String name);
+
+  /// No description provided for @projectsStatusChanged.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트 상태가 변경되었습니다'**
+  String get projectsStatusChanged;
+
+  /// No description provided for @commonDeleteSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제되었습니다'**
+  String get commonDeleteSuccess;
+
+  /// No description provided for @emptyGallery.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 촬영한 사진이 없습니다'**
+  String get emptyGallery;
+
+  /// No description provided for @emptyGalleryAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 사진을 촬영해보세요'**
+  String get emptyGalleryAction;
+
+  /// No description provided for @emptyProjects.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트가 없습니다'**
+  String get emptyProjects;
+
+  /// No description provided for @emptyProjectsAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 프로젝트를 만들어보세요'**
+  String get emptyProjectsAction;
+
+  /// No description provided for @errorCameraPermission.
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라 권한이 필요합니다'**
+  String get errorCameraPermission;
+
+  /// No description provided for @errorSaveFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 저장에 실패했습니다'**
+  String get errorSaveFailed;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In ko, this message translates to:
+  /// **'앱 정보'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In ko, this message translates to:
+  /// **'버전'**
+  String get settingsVersion;
+
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In ko, this message translates to:
+  /// **'개인정보 처리방침'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsTerms.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용약관'**
+  String get settingsTerms;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'개인정보 처리방침'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'Exacta는 사용자의 개인정보를 수집하지 않습니다.\n\n모든 사진과 데이터는 기기 내부에만 저장되며, 외부 서버로 전송되지 않습니다.\n\n위치 정보는 스탬프 번인 목적으로만 사용되며, 보안 모드 사용 시 위치 정보가 완전히 제거됩니다.\n\n카메라 및 저장소 권한은 촬영과 사진 저장에만 사용됩니다.'**
+  String get privacyBody;
+
+  /// No description provided for @termsTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용약관'**
+  String get termsTitle;
+
+  /// No description provided for @termsBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'Exacta를 이용해 주셔서 감사합니다.\n\n1. 본 앱은 현장 촬영 기록용으로 제공됩니다.\n2. 촬영된 사진의 관리 책임은 사용자에게 있습니다.\n3. 앱 사용 중 발생한 데이터 손실에 대해 개발자는 책임지지 않습니다.\n4. 본 앱은 무료이며 광고를 포함하지 않습니다.'**
+  String get termsBody;
+
+  /// No description provided for @navHome.
+  ///
+  /// In ko, this message translates to:
+  /// **'홈'**
+  String get navHome;
+
+  /// No description provided for @navGallery.
+  ///
+  /// In ko, this message translates to:
+  /// **'갤러리'**
+  String get navGallery;
+
+  /// No description provided for @navCamera.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영'**
+  String get navCamera;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In ko, this message translates to:
+  /// **'시스템'**
+  String get themeSystem;
+
+  /// No description provided for @undoDelete.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제 취소'**
+  String get undoDelete;
+
+  /// No description provided for @photoDeleted.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진이 삭제되었습니다'**
+  String get photoDeleted;
+
+  /// No description provided for @onboarding1TitleFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'현장 촬영, 정확하게'**
+  String get onboarding1TitleFull;
+
+  /// No description provided for @onboarding1DescFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS · 주소 · 시간 · 날씨를 사진에 자동 기록합니다'**
+  String get onboarding1DescFull;
+
+  /// No description provided for @onboarding2TitleFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트별 관리'**
+  String get onboarding2TitleFull;
+
+  /// No description provided for @onboarding2DescFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'현장별로 사진을 분류하고 PDF 리포트로 내보내세요'**
+  String get onboarding2DescFull;
+
+  /// No description provided for @onboarding3TitleFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안 촬영 모드'**
+  String get onboarding3TitleFull;
+
+  /// No description provided for @onboarding3DescFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치정보 완전 차단 · EXIF 제거 · 위변조 방지 NTP 시간'**
+  String get onboarding3DescFull;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In ko, this message translates to:
+  /// **'라이트'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In ko, this message translates to:
+  /// **'다크'**
+  String get themeDark;
+
+  /// No description provided for @navProjects.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트'**
+  String get navProjects;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get navSettings;
+
+  /// No description provided for @commonUndo.
+  ///
+  /// In ko, this message translates to:
+  /// **'실행 취소'**
+  String get commonUndo;
+
+  /// No description provided for @projectNameHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 프로젝트 이름'**
+  String get projectNameHint;
+
+  /// No description provided for @projectsMarkDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'완료 처리'**
+  String get projectsMarkDone;
+
+  /// No description provided for @projectsMarkActive.
+  ///
+  /// In ko, this message translates to:
+  /// **'진행중으로'**
+  String get projectsMarkActive;
+
+  /// No description provided for @projectsMovedToDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} → 완료 탭으로 이동'**
+  String projectsMovedToDone(String name);
+
+  /// No description provided for @projectsMovedToActive.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name} → 진행중 탭으로 이동'**
+  String projectsMovedToActive(String name);
+
+  /// No description provided for @projectsDeleteWithCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}\n연결된 사진 {count}장'**
+  String projectsDeleteWithCount(String name, int count);
+
+  /// No description provided for @projectsDeleteKeepPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트만 삭제 (사진 유지)'**
+  String get projectsDeleteKeepPhotos;
+
+  /// No description provided for @projectsDeleteWithPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진도 함께 삭제'**
+  String get projectsDeleteWithPhotos;
+
+  /// No description provided for @projectsPhotoCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 {count}장'**
+  String projectsPhotoCount(int count);
+
+  /// No description provided for @galleryNoProjectFilter.
+  ///
+  /// In ko, this message translates to:
+  /// **'미지정'**
+  String get galleryNoProjectFilter;
+
+  /// No description provided for @photoDetailInfo.
+  ///
+  /// In ko, this message translates to:
+  /// **'정보'**
+  String get photoDetailInfo;
+
+  /// No description provided for @photoDetailProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트'**
+  String get photoDetailProject;
+
+  /// No description provided for @photoDetailNoProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트 없음'**
+  String get photoDetailNoProject;
+
+  /// No description provided for @photoDetailChangeProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트 변경'**
+  String get photoDetailChangeProject;
+
+  /// No description provided for @photoDetailTimestamp.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영 시각'**
+  String get photoDetailTimestamp;
+
+  /// No description provided for @photoDetailAddress.
+  ///
+  /// In ko, this message translates to:
+  /// **'주소'**
+  String get photoDetailAddress;
+
+  /// No description provided for @photoDetailGps.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS'**
+  String get photoDetailGps;
+
+  /// No description provided for @photoDetailMemo.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모'**
+  String get photoDetailMemo;
+
+  /// No description provided for @photoDetailTags.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그'**
+  String get photoDetailTags;
+
+  /// No description provided for @photoDetailCode.
+  ///
+  /// In ko, this message translates to:
+  /// **'코드'**
+  String get photoDetailCode;
+
+  /// No description provided for @photoProjectChanged.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트가 변경되었습니다'**
+  String get photoProjectChanged;
+
+  /// No description provided for @ntpSynced.
+  ///
+  /// In ko, this message translates to:
+  /// **'NTP 동기화됨'**
+  String get ntpSynced;
+
+  /// No description provided for @ntpNotSynced.
+  ///
+  /// In ko, this message translates to:
+  /// **'NTP 미동기화 · 기기 시간 사용'**
+  String get ntpNotSynced;
+
+  /// No description provided for @pdfReportGenerated.
+  ///
+  /// In ko, this message translates to:
+  /// **'PDF 리포트가 생성되었습니다'**
+  String get pdfReportGenerated;
+
+  /// No description provided for @pdfPhotosCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}장의 사진'**
+  String pdfPhotosCount(int count);
+
+  /// No description provided for @pdfGeneratedBy.
+  ///
+  /// In ko, this message translates to:
+  /// **'Exacta로 생성됨'**
+  String get pdfGeneratedBy;
+
+  /// No description provided for @pdfImageNotAvailable.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미지 없음'**
+  String get pdfImageNotAvailable;
+
+  /// No description provided for @pdfWeatherLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'날씨'**
+  String get pdfWeatherLabel;
+
+  /// No description provided for @photoDetailChangeConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 사진의 프로젝트를 \'{name}\'(으)로 변경하시겠습니까?'**
+  String photoDetailChangeConfirm(String name);
+
+  /// No description provided for @photoDetailClearProjectConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 사진을 \'프로젝트 없음\'으로 변경하시겠습니까?'**
+  String get photoDetailClearProjectConfirm;
+
+  /// No description provided for @settingsReset.
+  ///
+  /// In ko, this message translates to:
+  /// **'기본값 복원'**
+  String get settingsReset;
+
+  /// No description provided for @settingsResetConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 설정을 기본값으로 복원하시겠습니까?'**
+  String get settingsResetConfirm;
+
+  /// No description provided for @settingsResetDone.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정이 복원되었습니다'**
+  String get settingsResetDone;
+
+  /// No description provided for @projectNameTooShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름은 1자 이상 입력해주세요'**
+  String get projectNameTooShort;
+
+  /// No description provided for @projectNameTooLong.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름은 50자 이하로 입력해주세요'**
+  String get projectNameTooLong;
+
+  /// No description provided for @projectNameDuplicate.
+  ///
+  /// In ko, this message translates to:
+  /// **'같은 이름의 프로젝트가 이미 있습니다'**
+  String get projectNameDuplicate;
+
+  /// No description provided for @memoTooLong.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모는 {max}자 이하로 입력해주세요'**
+  String memoTooLong(int max);
+
+  /// No description provided for @tagsTooMany.
+  ///
+  /// In ko, this message translates to:
+  /// **'태그는 최대 {max}개까지 입력 가능합니다'**
+  String tagsTooMany(int max);
+
+  /// No description provided for @saveError.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장 중 오류가 발생했습니다'**
+  String get saveError;
+
+  /// No description provided for @updateError.
+  ///
+  /// In ko, this message translates to:
+  /// **'수정 중 오류가 발생했습니다'**
+  String get updateError;
+
+  /// No description provided for @deleteError.
+  ///
+  /// In ko, this message translates to:
+  /// **'삭제 중 오류가 발생했습니다'**
+  String get deleteError;
+
+  /// No description provided for @cameraBusy.
+  ///
+  /// In ko, this message translates to:
+  /// **'카메라가 준비되지 않았습니다'**
+  String get cameraBusy;
+
+  /// No description provided for @permissionPartial.
+  ///
+  /// In ko, this message translates to:
+  /// **'일부 권한이 거부되었습니다'**
+  String get permissionPartial;
+
+  /// No description provided for @flashNotSupported.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 기기에서 플래시를 사용할 수 없습니다'**
+  String get flashNotSupported;
+
+  /// No description provided for @photoDetailWeather.
+  ///
+  /// In ko, this message translates to:
+  /// **'날씨'**
+  String get photoDetailWeather;
+
+  /// No description provided for @homeTodayPhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'오늘 {count}장'**
+  String homeTodayPhotos(int count);
+
+  /// No description provided for @homeTodaySecure.
+  ///
+  /// In ko, this message translates to:
+  /// **'보안 {count}장'**
+  String homeTodaySecure(int count);
+
+  /// No description provided for @homeTodayProjects.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 프로젝트'**
+  String homeTodayProjects(int count);
+
+  /// No description provided for @homeLastPhoto.
+  ///
+  /// In ko, this message translates to:
+  /// **'마지막 촬영'**
+  String get homeLastPhoto;
+
+  /// No description provided for @homeNoPhotosYet.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 촬영한 사진이 없습니다'**
+  String get homeNoPhotosYet;
+
+  /// No description provided for @homeRecentProjects.
+  ///
+  /// In ko, this message translates to:
+  /// **'바로 촬영'**
+  String get homeRecentProjects;
+
+  /// No description provided for @storageUsed.
+  ///
+  /// In ko, this message translates to:
+  /// **'저장 공간'**
+  String get storageUsed;
+
+  /// No description provided for @storagePhotos.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 {count}장'**
+  String storagePhotos(int count);
+
+  /// No description provided for @storageCalculating.
+  ///
+  /// In ko, this message translates to:
+  /// **'계산 중...'**
+  String get storageCalculating;
+
+  /// No description provided for @settingsStampLayout.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 레이아웃'**
+  String get settingsStampLayout;
+
+  /// No description provided for @stampLayoutBar.
+  ///
+  /// In ko, this message translates to:
+  /// **'풀 바'**
+  String get stampLayoutBar;
+
+  /// No description provided for @stampLayoutCard.
+  ///
+  /// In ko, this message translates to:
+  /// **'카드'**
+  String get stampLayoutCard;
+
+  /// No description provided for @localeSystem.
+  ///
+  /// In ko, this message translates to:
+  /// **'시스템'**
+  String get localeSystem;
+
+  /// No description provided for @localeKorean.
+  ///
+  /// In ko, this message translates to:
+  /// **'한국어'**
+  String get localeKorean;
+
+  /// No description provided for @localeEnglish.
+  ///
+  /// In ko, this message translates to:
+  /// **'English'**
+  String get localeEnglish;
+
+  /// No description provided for @localeJapanese.
+  ///
+  /// In ko, this message translates to:
+  /// **'日本語'**
+  String get localeJapanese;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'ja', 'ko'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'ja':
+      return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}

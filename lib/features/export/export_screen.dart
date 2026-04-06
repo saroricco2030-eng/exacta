@@ -1,0 +1,478 @@
+/// Export screen - select photos, share, ZIP, or PDF report
+import 'dart:io';
+
+import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+import 'package:share_plus/share_plus.dart';
+
+import 'package:exacta/core/extensions/build_context_ext.dart';
+
+import 'package:exacta/data/database.dart';
+import 'package:exacta/data/providers.dart';
+import 'package:exacta/services/pdf_report_service.dart';
+
+class ExportScreen extends ConsumerStatefulWidget {
+  const ExportScreen({super.key, this.projectId});
+  final int? projectId;
+
+  @override
+  ConsumerState<ExportScreen> createState() => _ExportScreenState();
+}
+
+class _ExportScreenState extends ConsumerState<ExportScreen> {
+  final Set<int> _selectedIds = {};
+  bool _isExporting = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final photosAsync = ref.watch(photosByProjectProvider(widget.projectId));
+
+    return Scaffold(
+      backgroundColor: context.bg,
+      appBar: AppBar(
+        backgroundColor: context.bg,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(LucideIcons.arrowLeft, color: context.text1),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          l.exportTitle,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: context.text1,
+          ),
+        ),
+        actions: [
+          if (_selectedIds.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton(
+                onPressed: () {
+                  setState(() => _selectedIds.clear());
+                },
+                child: Text(
+                  l.commonCancel,
+                  style: TextStyle(color: context.text2),
+                ),
+              ),
+            ),
+        ],
+      ),
+      body: photosAsync.when(
+        loading: () => Center(
+          child: CircularProgressIndicator(
+            color: context.accent, strokeWidth: 2,
+          ),
+        ),
+        error: (e, _) => Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.triangleAlert,
+                  size: 48, color: context.danger),
+              const SizedBox(height: 16),
+              Text(l.commonError,
+                  style: TextStyle(color: context.text2)),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 56,
+                child: OutlinedButton.icon(
+                  onPressed: () => ref.invalidate(
+                      photosByProjectProvider(widget.projectId)),
+                  icon: const Icon(LucideIcons.refreshCw, size: 18),
+                  label: Text(l.commonRetry),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: context.accent,
+                    side: BorderSide(color: context.accent),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 32),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        data: (photos) {
+          final nonVideo = photos.where((p) => !p.isVideo).toList();
+          if (nonVideo.isEmpty) {
+            return Center(
+              child: Text(l.exportNoPhotos,
+                  style: TextStyle(color: context.text2)),
+            );
+          }
+
+          return Column(
+            children: [
+              // 선택 카운터
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 8),
+                child: Row(
+                  children: [
+                    Text(
+                      _selectedIds.isEmpty
+                          ? l.exportSelectPhotos
+                          : l.exportSelectedCount(_selectedIds.length),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: context.text2,
+                      ),
+                    ),
+                    const Spacer(),
+                    // 전체 선택
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          if (_selectedIds.length == nonVideo.length) {
+                            _selectedIds.clear();
+                          } else {
+                            _selectedIds.addAll(
+                                nonVideo.map((p) => p.id));
+                          }
+                        });
+                      },
+                      child: Text(
+                        l.commonAll,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: context.accent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 사진 그리드
+              Expanded(
+                child: GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                  ),
+                  itemCount: nonVideo.length,
+                  itemBuilder: (context, index) {
+                    final photo = nonVideo[index];
+                    final isSelected = _selectedIds.contains(photo.id);
+                    return Semantics(
+                      button: true,
+                      label: 'Photo ${index + 1}',
+                      selected: isSelected,
+                      child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          if (isSelected) {
+                            _selectedIds.remove(photo.id);
+                          } else if (_selectedIds.length < 50) {
+                            _selectedIds.add(photo.id);
+                          }
+                        });
+                      },
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              File(photo.filePath),
+                              fit: BoxFit.cover,
+                              cacheWidth: 300,
+                              cacheHeight: 300,
+                              errorBuilder: (ctx, e, st) => Container(
+                                color: ctx.surfaceHi,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 4,
+                            right: 4,
+                            child: Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? context.accent
+                                    : context.surface
+                                        .withValues(alpha: 0.7),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? context.accent
+                                      : context.text3,
+                                  width: 2,
+                                ),
+                              ),
+                              child: isSelected
+                                  ? Icon(LucideIcons.check,
+                                      size: 14,
+                                      color: context.onAccent)
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    );
+                  },
+                ),
+              ),
+
+              // 하단 액션
+              if (_selectedIds.isNotEmpty)
+                Container(
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 16,
+                    bottom:
+                        MediaQuery.paddingOf(context).bottom + 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.surface,
+                    border: Border(
+                      top: BorderSide(color: context.border),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      // 공유
+                      Expanded(
+                        child: SizedBox(
+                          height: 56,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: context.btnGradient,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: _isExporting
+                                    ? null
+                                    : () => _shareSelected(nonVideo),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(LucideIcons.share2,
+                                          size: 18,
+                                          color:
+                                              context.onAccent),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l.exportShareSelected,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color:
+                                              context.onAccent,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // ZIP
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: Material(
+                          color: context.accentDim,
+                          borderRadius: BorderRadius.circular(16),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: _isExporting
+                                ? null
+                                : () => _exportZip(nonVideo),
+                            child: _isExporting
+                                ? Center(
+                                    child: SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: context.accent,
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(LucideIcons.fileArchive,
+                                    color: context.accent,
+                                    size: 22),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // PDF
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: Material(
+                          color: context.accentDim,
+                          borderRadius: BorderRadius.circular(16),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: _isExporting
+                                ? null
+                                : () => _exportPdf(nonVideo),
+                            child: Icon(LucideIcons.fileText,
+                                color: context.accent,
+                                size: 22),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _shareSelected(List<Photo> allPhotos) async {
+    final selected =
+        allPhotos.where((p) => _selectedIds.contains(p.id)).toList();
+    if (selected.isEmpty) return;
+
+    final files = <XFile>[];
+    for (final photo in selected) {
+      if (await File(photo.filePath).exists()) {
+        files.add(XFile(photo.filePath));
+      }
+    }
+
+    if (files.isNotEmpty) {
+      await Share.shareXFiles(files);
+    }
+  }
+
+  Future<void> _exportZip(List<Photo> allPhotos) async {
+    final l = context.l10n;
+    final selected =
+        allPhotos.where((p) => _selectedIds.contains(p.id)).toList();
+    if (selected.isEmpty) return;
+
+    setState(() => _isExporting = true);
+
+    try {
+      // 파일 바이트 읽기 (I/O는 메인 스레드에서 — Dart는 비동기 I/O)
+      final entries = <_ZipEntry>[];
+      for (final photo in selected) {
+        final file = File(photo.filePath);
+        if (!await file.exists()) continue;
+        final bytes = await file.readAsBytes();
+        entries.add(_ZipEntry(name: p.basename(photo.filePath), bytes: bytes));
+      }
+
+      // ZIP 인코딩은 CPU 바운드 → compute()로 백그라운드 isolate에서 실행
+      final zipBytes = await compute(_encodeZipIsolate, entries);
+
+      final tempDir = await getTemporaryDirectory();
+      final now = DateTime.now();
+      final zipName =
+          'exacta_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.zip';
+      final zipPath = p.join(tempDir.path, zipName);
+      await File(zipPath).writeAsBytes(zipBytes);
+
+      await Share.shareXFiles([XFile(zipPath)]);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l.exportZipDone),
+            backgroundColor: context.accent,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l.commonError),
+            backgroundColor: context.danger,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  Future<void> _exportPdf(List<Photo> allPhotos) async {
+    final l = context.l10n;
+    final selected =
+        allPhotos.where((p) => _selectedIds.contains(p.id)).toList();
+    if (selected.isEmpty) return;
+
+    setState(() => _isExporting = true);
+
+    try {
+      final pdfPath = await PdfReportService.generate(
+        photos: selected,
+        projectName: '${l.homeTitle} Report',
+        locale: Localizations.localeOf(context).languageCode,
+      );
+      await Share.shareXFiles([XFile(pdfPath)]);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l.pdfReportGenerated),
+            backgroundColor: context.accent,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l.commonError),
+            backgroundColor: context.danger,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+}
+
+class _ZipEntry {
+  final String name;
+  final Uint8List bytes;
+  const _ZipEntry({required this.name, required this.bytes});
+}
+
+Uint8List _encodeZipIsolate(List<_ZipEntry> entries) {
+  final archive = Archive();
+  for (final entry in entries) {
+    archive.addFile(ArchiveFile(entry.name, entry.bytes.length, entry.bytes));
+  }
+  return Uint8List.fromList(ZipEncoder().encode(archive));
+}
