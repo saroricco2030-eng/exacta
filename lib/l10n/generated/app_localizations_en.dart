@@ -755,4 +755,43 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get evidencePackVerifyStep4 =>
       '4. Chain hashes can be re-computed via SHA-256(fileHash | prevChain | timestamp | lat | lng).';
+
+  @override
+  String get stampPresetSection => 'Stamp Preset';
+
+  @override
+  String get stampPresetFull => 'Full';
+
+  @override
+  String get stampPresetConstruction => 'Construction';
+
+  @override
+  String get stampPresetInspection => 'Inspection';
+
+  @override
+  String get stampPresetDelivery => 'Delivery';
+
+  @override
+  String get stampPresetRealEstate => 'Real Estate';
+
+  @override
+  String get stampPresetOutdoor => 'Outdoor';
+
+  @override
+  String get stampPresetNavigation => 'Navigation';
+
+  @override
+  String get stampPresetLocation => 'Location';
+
+  @override
+  String get stampPresetMinimal => 'Minimal';
+
+  @override
+  String get stampPresetTimeOnly => 'Time Only';
+
+  @override
+  String get stampPresetGpsOnly => 'GPS Only';
+
+  @override
+  String get stampPresetClean => 'Clean';
 }

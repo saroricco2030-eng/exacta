@@ -749,4 +749,43 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get evidencePackVerifyStep4 =>
       '4. チェーンハッシュはSHA-256(ファイルハッシュ | 前のチェーン | タイムスタンプ | 緯度 | 経度)式で再計算可能。';
+
+  @override
+  String get stampPresetSection => 'スタンププリセット';
+
+  @override
+  String get stampPresetFull => 'フル';
+
+  @override
+  String get stampPresetConstruction => '施工';
+
+  @override
+  String get stampPresetInspection => '点検';
+
+  @override
+  String get stampPresetDelivery => '配送';
+
+  @override
+  String get stampPresetRealEstate => '不動産';
+
+  @override
+  String get stampPresetOutdoor => '屋外';
+
+  @override
+  String get stampPresetNavigation => 'ナビ';
+
+  @override
+  String get stampPresetLocation => '位置';
+
+  @override
+  String get stampPresetMinimal => 'ミニマル';
+
+  @override
+  String get stampPresetTimeOnly => '時刻のみ';
+
+  @override
+  String get stampPresetGpsOnly => 'GPSのみ';
+
+  @override
+  String get stampPresetClean => 'シンプル';
 }

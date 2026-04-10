@@ -749,4 +749,43 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get evidencePackVerifyStep4 =>
       '4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.';
+
+  @override
+  String get stampPresetSection => '스탬프 프리셋';
+
+  @override
+  String get stampPresetFull => '전체';
+
+  @override
+  String get stampPresetConstruction => '시공';
+
+  @override
+  String get stampPresetInspection => '점검';
+
+  @override
+  String get stampPresetDelivery => '배송';
+
+  @override
+  String get stampPresetRealEstate => '부동산';
+
+  @override
+  String get stampPresetOutdoor => '야외';
+
+  @override
+  String get stampPresetNavigation => '내비게이션';
+
+  @override
+  String get stampPresetLocation => '위치';
+
+  @override
+  String get stampPresetMinimal => '미니멀';
+
+  @override
+  String get stampPresetTimeOnly => '시간만';
+
+  @override
+  String get stampPresetGpsOnly => 'GPS만';
+
+  @override
+  String get stampPresetClean => '깔끔';
 }

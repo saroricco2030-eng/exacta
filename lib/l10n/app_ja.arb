@@ -304,5 +304,19 @@
   "evidencePackVerifyStep1": "1. 各写真ファイルを別途保存する。",
   "evidencePackVerifyStep2": "2. 標準SHA-256ツールでファイルのハッシュを計算する (Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256)。",
   "evidencePackVerifyStep3": "3. 計算されたハッシュが本書の「ファイルSHA-256」値と一致するか確認する。",
-  "evidencePackVerifyStep4": "4. チェーンハッシュはSHA-256(ファイルハッシュ | 前のチェーン | タイムスタンプ | 緯度 | 経度)式で再計算可能。"
+  "evidencePackVerifyStep4": "4. チェーンハッシュはSHA-256(ファイルハッシュ | 前のチェーン | タイムスタンプ | 緯度 | 経度)式で再計算可能。",
+
+  "stampPresetSection": "スタンププリセット",
+  "stampPresetFull": "フル",
+  "stampPresetConstruction": "施工",
+  "stampPresetInspection": "点検",
+  "stampPresetDelivery": "配送",
+  "stampPresetRealEstate": "不動産",
+  "stampPresetOutdoor": "屋外",
+  "stampPresetNavigation": "ナビ",
+  "stampPresetLocation": "位置",
+  "stampPresetMinimal": "ミニマル",
+  "stampPresetTimeOnly": "時刻のみ",
+  "stampPresetGpsOnly": "GPSのみ",
+  "stampPresetClean": "シンプル"
 }

@@ -304,5 +304,19 @@
   "evidencePackVerifyStep1": "1. Save each photo file separately.",
   "evidencePackVerifyStep2": "2. Compute SHA-256 with a standard tool (Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256).",
   "evidencePackVerifyStep3": "3. Confirm that the computed hash matches the \"File SHA-256\" value in this document.",
-  "evidencePackVerifyStep4": "4. Chain hashes can be re-computed via SHA-256(fileHash | prevChain | timestamp | lat | lng)."
+  "evidencePackVerifyStep4": "4. Chain hashes can be re-computed via SHA-256(fileHash | prevChain | timestamp | lat | lng).",
+
+  "stampPresetSection": "Stamp Preset",
+  "stampPresetFull": "Full",
+  "stampPresetConstruction": "Construction",
+  "stampPresetInspection": "Inspection",
+  "stampPresetDelivery": "Delivery",
+  "stampPresetRealEstate": "Real Estate",
+  "stampPresetOutdoor": "Outdoor",
+  "stampPresetNavigation": "Navigation",
+  "stampPresetLocation": "Location",
+  "stampPresetMinimal": "Minimal",
+  "stampPresetTimeOnly": "Time Only",
+  "stampPresetGpsOnly": "GPS Only",
+  "stampPresetClean": "Clean"
 }

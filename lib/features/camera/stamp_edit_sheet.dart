@@ -115,20 +115,42 @@ class _StampEditSheetState extends State<StampEditSheet> {
     HapticFeedback.mediumImpact();
   }
 
+  // 프리셋 id는 arb 키 서픽스 (stampPresetFull, stampPresetConstruction, ...).
+  // 라벨은 build 시점에 context.l10n으로 현지화됨.
   static final _presets = [
-    _StampPreset('Full',        LucideIcons.layers,      time: true,  date: true,  address: true,  gps: true,  compass: true,  altitude: true,  speed: true),
-    _StampPreset('Construction',LucideIcons.hardHat,     time: true,  date: true,  address: true,  gps: true,  compass: false, altitude: false, speed: false),
-    _StampPreset('Inspection',  LucideIcons.clipboardCheck, time: true, date: true, address: true,  gps: true,  compass: true,  altitude: true,  speed: false),
-    _StampPreset('Delivery',    LucideIcons.truck,       time: true,  date: true,  address: true,  gps: true,  compass: false, altitude: false, speed: true),
-    _StampPreset('Real Estate', LucideIcons.house,       time: true,  date: true,  address: true,  gps: true,  compass: true,  altitude: true,  speed: false),
-    _StampPreset('Outdoor',     LucideIcons.mountain,    time: true,  date: true,  address: false, gps: true,  compass: true,  altitude: true,  speed: true),
-    _StampPreset('Navigation',  LucideIcons.compass,     time: true,  date: false, address: true,  gps: true,  compass: true,  altitude: false, speed: true),
-    _StampPreset('Location',    LucideIcons.mapPin,      time: true,  date: true,  address: true,  gps: true,  compass: false, altitude: false, speed: false),
-    _StampPreset('Minimal',     LucideIcons.minus,       time: true,  date: true,  address: false, gps: false, compass: false, altitude: false, speed: false),
-    _StampPreset('Time Only',   LucideIcons.clock,       time: true,  date: false, address: false, gps: false, compass: false, altitude: false, speed: false),
-    _StampPreset('GPS Only',    LucideIcons.satellite,   time: false, date: false, address: false, gps: true,  compass: false, altitude: false, speed: false),
-    _StampPreset('Clean',       LucideIcons.sparkles,    time: true,  date: true,  address: false, gps: false, compass: false, altitude: false, speed: false),
+    _StampPreset('full',        LucideIcons.layers,         time: true,  date: true,  address: true,  gps: true,  compass: true,  altitude: true,  speed: true),
+    _StampPreset('construction',LucideIcons.hardHat,        time: true,  date: true,  address: true,  gps: true,  compass: false, altitude: false, speed: false),
+    _StampPreset('inspection',  LucideIcons.clipboardCheck, time: true,  date: true,  address: true,  gps: true,  compass: true,  altitude: true,  speed: false),
+    _StampPreset('delivery',    LucideIcons.truck,          time: true,  date: true,  address: true,  gps: true,  compass: false, altitude: false, speed: true),
+    _StampPreset('realEstate',  LucideIcons.house,          time: true,  date: true,  address: true,  gps: true,  compass: true,  altitude: true,  speed: false),
+    _StampPreset('outdoor',     LucideIcons.mountain,       time: true,  date: true,  address: false, gps: true,  compass: true,  altitude: true,  speed: true),
+    _StampPreset('navigation',  LucideIcons.compass,        time: true,  date: false, address: true,  gps: true,  compass: true,  altitude: false, speed: true),
+    _StampPreset('location',    LucideIcons.mapPin,         time: true,  date: true,  address: true,  gps: true,  compass: false, altitude: false, speed: false),
+    _StampPreset('minimal',     LucideIcons.minus,          time: true,  date: true,  address: false, gps: false, compass: false, altitude: false, speed: false),
+    _StampPreset('timeOnly',    LucideIcons.clock,          time: true,  date: false, address: false, gps: false, compass: false, altitude: false, speed: false),
+    _StampPreset('gpsOnly',     LucideIcons.satellite,      time: false, date: false, address: false, gps: true,  compass: false, altitude: false, speed: false),
+    _StampPreset('clean',       LucideIcons.sparkles,       time: true,  date: true,  address: false, gps: false, compass: false, altitude: false, speed: false),
   ];
+
+  /// 프리셋 id를 현지화된 라벨로 매핑
+  String _presetLabel(String id) {
+    final l = context.l10n;
+    return switch (id) {
+      'full'         => l.stampPresetFull,
+      'construction' => l.stampPresetConstruction,
+      'inspection'   => l.stampPresetInspection,
+      'delivery'     => l.stampPresetDelivery,
+      'realEstate'   => l.stampPresetRealEstate,
+      'outdoor'      => l.stampPresetOutdoor,
+      'navigation'   => l.stampPresetNavigation,
+      'location'     => l.stampPresetLocation,
+      'minimal'      => l.stampPresetMinimal,
+      'timeOnly'     => l.stampPresetTimeOnly,
+      'gpsOnly'      => l.stampPresetGpsOnly,
+      'clean'        => l.stampPresetClean,
+      _              => id,
+    };
+  }
 
   void _toggle(String field) {
     setState(() {
@@ -413,7 +435,7 @@ class _StampEditSheetState extends State<StampEditSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
-              'Stamp Preset',
+              l.stampPresetSection,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -431,7 +453,11 @@ class _StampEditSheetState extends State<StampEditSheet> {
               separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (_, i) {
                 final p = _presets[i];
-                return _PresetChip(label: p.name, icon: p.icon, onTap: () => _applyPreset(p));
+                return _PresetChip(
+                  label: _presetLabel(p.id),
+                  icon: p.icon,
+                  onTap: () => _applyPreset(p),
+                );
               },
             ),
           ),
@@ -542,10 +568,10 @@ class _StampEditSheetState extends State<StampEditSheet> {
 }
 
 class _StampPreset {
-  final String name;
+  final String id;
   final IconData icon;
   final bool time, date, address, gps, compass, altitude, speed;
-  const _StampPreset(this.name, this.icon, {
+  const _StampPreset(this.id, this.icon, {
     required this.time, required this.date, required this.address,
     required this.gps, required this.compass, required this.altitude, required this.speed,
   });

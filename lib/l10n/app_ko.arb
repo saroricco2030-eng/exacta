@@ -304,5 +304,19 @@
   "evidencePackVerifyStep1": "1. 각 사진 파일을 별도 저장한다.",
   "evidencePackVerifyStep2": "2. 표준 SHA-256 도구로 파일의 해시를 계산한다 (예: Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256).",
   "evidencePackVerifyStep3": "3. 계산된 해시가 본 문서의 \"파일 SHA-256\" 값과 일치하는지 확인한다.",
-  "evidencePackVerifyStep4": "4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다."
+  "evidencePackVerifyStep4": "4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.",
+
+  "stampPresetSection": "스탬프 프리셋",
+  "stampPresetFull": "전체",
+  "stampPresetConstruction": "시공",
+  "stampPresetInspection": "점검",
+  "stampPresetDelivery": "배송",
+  "stampPresetRealEstate": "부동산",
+  "stampPresetOutdoor": "야외",
+  "stampPresetNavigation": "내비게이션",
+  "stampPresetLocation": "위치",
+  "stampPresetMinimal": "미니멀",
+  "stampPresetTimeOnly": "시간만",
+  "stampPresetGpsOnly": "GPS만",
+  "stampPresetClean": "깔끔"
 }

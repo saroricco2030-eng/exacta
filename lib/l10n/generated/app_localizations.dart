@@ -1491,6 +1491,84 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.'**
   String get evidencePackVerifyStep4;
+
+  /// No description provided for @stampPresetSection.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 프리셋'**
+  String get stampPresetSection;
+
+  /// No description provided for @stampPresetFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체'**
+  String get stampPresetFull;
+
+  /// No description provided for @stampPresetConstruction.
+  ///
+  /// In ko, this message translates to:
+  /// **'시공'**
+  String get stampPresetConstruction;
+
+  /// No description provided for @stampPresetInspection.
+  ///
+  /// In ko, this message translates to:
+  /// **'점검'**
+  String get stampPresetInspection;
+
+  /// No description provided for @stampPresetDelivery.
+  ///
+  /// In ko, this message translates to:
+  /// **'배송'**
+  String get stampPresetDelivery;
+
+  /// No description provided for @stampPresetRealEstate.
+  ///
+  /// In ko, this message translates to:
+  /// **'부동산'**
+  String get stampPresetRealEstate;
+
+  /// No description provided for @stampPresetOutdoor.
+  ///
+  /// In ko, this message translates to:
+  /// **'야외'**
+  String get stampPresetOutdoor;
+
+  /// No description provided for @stampPresetNavigation.
+  ///
+  /// In ko, this message translates to:
+  /// **'내비게이션'**
+  String get stampPresetNavigation;
+
+  /// No description provided for @stampPresetLocation.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치'**
+  String get stampPresetLocation;
+
+  /// No description provided for @stampPresetMinimal.
+  ///
+  /// In ko, this message translates to:
+  /// **'미니멀'**
+  String get stampPresetMinimal;
+
+  /// No description provided for @stampPresetTimeOnly.
+  ///
+  /// In ko, this message translates to:
+  /// **'시간만'**
+  String get stampPresetTimeOnly;
+
+  /// No description provided for @stampPresetGpsOnly.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS만'**
+  String get stampPresetGpsOnly;
+
+  /// No description provided for @stampPresetClean.
+  ///
+  /// In ko, this message translates to:
+  /// **'깔끔'**
+  String get stampPresetClean;
 }
 
 class _AppLocalizationsDelegate
