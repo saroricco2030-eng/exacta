@@ -779,6 +779,15 @@ class AppLocalizationsJa extends AppLocalizations {
       '4. チェーンハッシュはSHA-256(ファイルハッシュ | 前のチェーン | タイムスタンプ | 緯度 | 経度)式で再計算可能。';
 
   @override
+  String get cameraMemoAdd => 'メモを追加';
+
+  @override
+  String get cameraMemoEdit => 'メモを編集';
+
+  @override
+  String get cameraMemoPlaceholder => '現場の状況、特記事項、作業者名など...';
+
+  @override
   String get stampPresetSection => 'スタンププリセット';
 
   @override

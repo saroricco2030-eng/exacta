@@ -309,12 +309,13 @@ class StampBurnService {
       final rightColWidth = rightEnd - rightStart;
 
       // memo painter: 우측 컬럼 폭에 맞춰 재생성 (이전 memo painter가 있으면 dispose)
+      // 스탬프 기본 컬러(흰색)와 대비되는 블루로 한눈에 부각.
       if (!isSecure && memo != null && memo.isNotEmpty && rightColWidth > 60 * scale) {
         painters.memo?.dispose();
         painters.memo = _tp(memo,
             fontSize: 22 * scale,
             fontWeight: FontWeight.w700,
-            color: stampColor.withValues(alpha: alpha(0.95)),
+            color: const Color(0xFF4FC3F7),
             maxWidth: rightColWidth,
             maxLines: 4,
             shadows: ts,

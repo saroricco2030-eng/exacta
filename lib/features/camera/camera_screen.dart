@@ -13,6 +13,7 @@ import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/features/camera/stamp_overlay.dart';
 import 'package:exacta/features/camera/stamp_edit_sheet.dart';
+import 'package:exacta/features/camera/quick_memo_sheet.dart';
 import 'package:exacta/features/camera/widgets/camera_top_bar.dart';
 import 'package:exacta/features/camera/widgets/camera_bottom_controls.dart';
 import 'package:exacta/features/camera/controllers/location_service.dart';
@@ -850,6 +851,18 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     );
   }
 
+  /// 빠른 메모 편집 — StampEditSheet 대신 경량 단일 TextField 시트
+  Future<void> _openQuickMemo() async {
+    HapticFeedback.lightImpact();
+    final result = await showQuickMemoSheet(
+      context: context,
+      initialMemo: _memo,
+    );
+    if (result != null && mounted) {
+      setState(() => _memo = result);
+    }
+  }
+
   void _openStampEditor() {
     showModalBottomSheet(
       context: context,
@@ -1017,6 +1030,17 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
               ),
             ),
 
+            // ── 퀵 메모 칩 — 스탬프 오버레이 바로 위, 오른쪽 치우침 ──
+            if (_preset != CameraPreset.secure)
+              Positioned(
+                right: 16,
+                bottom: 360,
+                child: _QuickMemoChip(
+                  memo: _memo,
+                  onTap: _openQuickMemo,
+                ),
+              ),
+
             // ── 셔터 플래시 오버레이 ──
             if (_showShutterFlash)
               Positioned.fill(
@@ -1054,6 +1078,85 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── 퀵 메모 칩 — 현재 memo 상태 표시 + 탭하면 경량 시트 오픈 ────
+class _QuickMemoChip extends StatelessWidget {
+  const _QuickMemoChip({required this.memo, required this.onTap});
+  final String memo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final isEmpty = memo.isEmpty;
+    // 블루 컬러는 스탬프의 memo 렌더 컬러와 동일해서 시각적 연결
+    const memoBlue = Color(0xFF4FC3F7);
+
+    return Semantics(
+      button: true,
+      label: isEmpty ? l.cameraMemoAdd : l.cameraMemoEdit,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            constraints: const BoxConstraints(
+              minHeight: 40,
+              maxWidth: 220,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            decoration: BoxDecoration(
+              color: isEmpty
+                  ? Colors.black.withValues(alpha: 0.55)
+                  : memoBlue.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isEmpty
+                    ? Colors.white.withValues(alpha: 0.35)
+                    : memoBlue.withValues(alpha: 0.7),
+                width: 1,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x66000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isEmpty ? LucideIcons.plus : LucideIcons.pencil,
+                  size: 14,
+                  color: isEmpty ? Colors.white : memoBlue,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    isEmpty ? l.cameraMemoAdd : memo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: isEmpty ? FontWeight.w500 : FontWeight.w700,
+                      color: isEmpty ? Colors.white : memoBlue,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

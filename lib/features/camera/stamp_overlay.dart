@@ -248,7 +248,8 @@ class StampOverlay extends StatelessWidget {
                 letterSpacing: 0.4, shadows: sh)),
           ),
         ),
-      // memo — 우측 컬럼 영역의 위치정보 아래 빈 공간에 크게.
+      // memo — 우측 컬럼 영역의 위치정보 아래 빈 공간에 큰 블루 하이라이트.
+      //   스탬프 기본 컬러(흰색)와 대비되어 한눈에 들어오도록 의도적으로 블루.
       //   crossAxisAlignment: stretch 이므로 full column width로 자동 랩핑.
       if (hasMemo)
         Padding(
@@ -260,7 +261,7 @@ class StampOverlay extends StatelessWidget {
             softWrap: true,
             textAlign: TextAlign.right,
             style: _ts(22, FontWeight.w700,
-                c.withValues(alpha: a(0.95)), shadows: sh).copyWith(height: 1.15),
+                const Color(0xFF4FC3F7), shadows: sh).copyWith(height: 1.15),
           ),
         ),
     ];

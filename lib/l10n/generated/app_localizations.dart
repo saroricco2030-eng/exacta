@@ -1540,6 +1540,24 @@ abstract class AppLocalizations {
   /// **'4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.'**
   String get evidencePackVerifyStep4;
 
+  /// No description provided for @cameraMemoAdd.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 추가'**
+  String get cameraMemoAdd;
+
+  /// No description provided for @cameraMemoEdit.
+  ///
+  /// In ko, this message translates to:
+  /// **'메모 편집'**
+  String get cameraMemoEdit;
+
+  /// No description provided for @cameraMemoPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'현장 상황, 특이사항, 작업자 이름 등...'**
+  String get cameraMemoPlaceholder;
+
   /// No description provided for @stampPresetSection.
   ///
   /// In ko, this message translates to:
