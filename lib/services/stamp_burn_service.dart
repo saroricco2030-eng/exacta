@@ -126,13 +126,16 @@ class StampBurnService {
           shadows: ts);
     }
 
-    // Row 1: 주소 + GPS (15sp / 12sp)
+    // Row 1: 주소 + GPS
+    // text 모드는 우측 열 간결성을 위해 주소를 첫 토큰(도시)만 사용 + 작은 폰트
     if (!isSecure) {
       if (showAddress && address != null && address.isNotEmpty) {
-        painters.address = _tp(address,
-            fontSize: 15 * scale, fontWeight: FontWeight.w500,
-            color: stampColor.withValues(alpha: alpha(0.8)),
-            maxWidth: imgW * 0.45,
+        final displayAddr = isTextMode ? _firstToken(address) : address;
+        painters.address = _tp(displayAddr,
+            fontSize: (isTextMode ? 13 : 15) * scale,
+            fontWeight: isTextMode ? FontWeight.w600 : FontWeight.w500,
+            color: stampColor.withValues(alpha: alpha(0.85)),
+            maxWidth: imgW * (isTextMode ? 0.5 : 0.45),
             shadows: ts);
       }
       if (showGps && latitude != null && longitude != null) {
@@ -143,7 +146,9 @@ class StampBurnService {
         final gps =
             '${lat.abs().toStringAsFixed(4)}°$latDir  ${lng.abs().toStringAsFixed(4)}°$lngDir';
         painters.gps = _tp(gps,
-            fontSize: 12 * scale, color: stampColor.withValues(alpha: alpha(0.55)),
+            fontSize: (isTextMode ? 11 : 12) * scale,
+            fontWeight: isTextMode ? FontWeight.w500 : FontWeight.w400,
+            color: stampColor.withValues(alpha: alpha(isTextMode ? 0.7 : 0.55)),
             letterSpacing: 0.3, shadows: ts);
       }
     }
@@ -248,127 +253,258 @@ class StampBurnService {
       } catch (e) { debugPrint('Error: $e'); }
     }
 
-    // ── 바 높이 계산 ──
-    double barHeight = padding * 2; // top + bottom padding
-
-    // 좌측 블록: 시간 + 날짜 (세로 배치)
-    double leftBlockHeight = 0;
-    if (painters.timeHhMm != null) {
-      leftBlockHeight += painters.timeHhMm!.height;
-    }
-    if (painters.date != null) {
-      leftBlockHeight += (painters.timeHhMm != null ? 2 * scale : 0) + painters.date!.height;
-    }
-
-    // 우측 블록: 주소 + GPS + 메모 (세로 배치)
-    double rightBlockHeight = 0;
-    if (painters.address != null) {
-      rightBlockHeight += painters.address!.height;
-    }
-    if (painters.gps != null) {
-      rightBlockHeight += (painters.address != null ? 2 * scale : 0) + painters.gps!.height;
-    }
-    if (!isSecure && painters.memo != null) {
-      rightBlockHeight += 6 * scale + painters.memo!.height;
-    }
-
-    final row1Height = leftBlockHeight > rightBlockHeight ? leftBlockHeight : rightBlockHeight;
-    barHeight += row1Height;
-
-    // 오버레이 행 (나침반/해발/속도)
-    if (painters.overlay != null) {
-      barHeight += 6 * scale + painters.overlay!.height;
-    }
-
-    // 날씨 + 코드 행
-    if (painters.weather != null || painters.code != null) {
-      barHeight += 4 * scale;
-      barHeight += (painters.weather?.height ?? painters.code?.height ?? 0);
-    }
-
-    // 보안 뱃지
-    if (painters.secureBadge != null) {
-      barHeight += painters.secureBadge!.height + 8 * scale;
-    }
-
-    // 보안 프로젝트 (메모는 우측에 포함됨)
     final hasRow2 = isSecure && (painters.secureProject != null || painters.secureId != null);
-    if (hasRow2) {
-      barHeight += 6 * scale;
-      barHeight += (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
-    }
 
-    // 로고/서명
-    if (logoImage != null || sigImage != null) {
-      barHeight += 8 * scale;
-      final logoH = logoImage?.height.toDouble() ?? 0;
-      final sigH = sigImage?.height.toDouble() ?? 0;
-      barHeight += logoH > sigH ? logoH : sigH;
-    }
-
-    // 위변조 배지 (맨 마지막 라인)
-    if (painters.tamperBadge != null) {
-      barHeight += 4 * scale + painters.tamperBadge!.height;
-    }
-
-    // ── 바 그리기 ──
-    final barTop = isTop ? 0.0 : imgH - barHeight;
-    // 'text' 모드: 배경 사각형 스킵 → 사진이 전부 보임.
-    //             가독성은 텍스트 shadow로 확보.
-    if (!isTextMode) {
-      final bgPaint = Paint()..color = _bgColor;
-      canvas.drawRect(
-        Rect.fromLTWH(0, barTop, imgW, barHeight),
-        bgPaint,
-      );
-    }
-
-    double y = barTop + padding;
-
-    // 보안 뱃지 (상단)
-    if (painters.secureBadge != null) {
-      painters.secureBadge!.paint(canvas, Offset(padding, y));
-      y += painters.secureBadge!.height + 8 * scale;
-    }
-
-    // ── 좌측: 시간 + 날짜 (세로) ──
-    final row1Y = y;
-    double leftY = row1Y;
-
-    if (painters.timeHhMm != null) {
-      painters.timeHhMm!.paint(canvas, Offset(padding, leftY));
-
-      if (painters.timeSs != null) {
-        final baselineY = leftY + painters.timeHhMm!.height * 0.82;
-        final ssY = baselineY - painters.timeSs!.height * 0.82;
-        painters.timeSs!.paint(canvas, Offset(padding + painters.timeHhMm!.width, ssY));
+    if (isTextMode) {
+      // ════════════════════════════════════════════════════════
+      // TEXT MODE: 2열 (시간·날짜 | 도시·좌표·ID) + 구분선 + 중앙 배지
+      // ════════════════════════════════════════════════════════
+      double leftH = 0;
+      if (painters.timeHhMm != null) leftH += painters.timeHhMm!.height;
+      if (painters.date != null) {
+        leftH += (painters.timeHhMm != null ? 2 * scale : 0) + painters.date!.height;
       }
-      leftY += painters.timeHhMm!.height + 2 * scale;
-    }
 
-    if (painters.date != null) {
-      painters.date!.paint(canvas, Offset(padding, leftY));
-    }
+      double rightH = 0;
+      if (painters.address != null) rightH += painters.address!.height;
+      if (painters.gps != null) {
+        rightH += (painters.address != null ? 2 * scale : 0) + painters.gps!.height;
+      }
+      if (painters.code != null) {
+        rightH += (rightH > 0 ? 2 * scale : 0) + painters.code!.height;
+      }
 
-    // ── 우측: 메모(상단) → 주소+GPS(하단) ──
-    {
+      final row1H = leftH > rightH ? leftH : rightH;
+      double barHeight = padding * 2 + row1H;
+
+      if (painters.secureBadge != null) {
+        barHeight += painters.secureBadge!.height + 6 * scale;
+      }
+      if (!isSecure && painters.memo != null) {
+        barHeight += 6 * scale + painters.memo!.height;
+      }
+      if (painters.overlay != null) {
+        barHeight += 4 * scale + painters.overlay!.height;
+      }
+      if (logoImage != null || sigImage != null) {
+        barHeight += 6 * scale;
+        final logoH = logoImage?.height.toDouble() ?? 0;
+        final sigH = sigImage?.height.toDouble() ?? 0;
+        barHeight += logoH > sigH ? logoH : sigH;
+      }
+      if (hasRow2) {
+        barHeight += 6 * scale +
+            (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
+      }
+      // 구분선 간격 + 라인 + 배지
+      barHeight += 8 * scale + 1 + 6 * scale;
+      if (painters.tamperBadge != null) {
+        barHeight += painters.tamperBadge!.height;
+      }
+
+      final barTop = isTop ? 0.0 : imgH - barHeight;
+      // text 모드: 배경 사각형 생략 — 사진이 전부 보임
+
+      double y = barTop + padding;
+
+      if (painters.secureBadge != null) {
+        painters.secureBadge!.paint(canvas, Offset(padding, y));
+        y += painters.secureBadge!.height + 6 * scale;
+      }
+
+      final row1Y = y;
+
+      // ── 좌측: 시간 + 날짜 ──
+      double leftY = row1Y;
+      if (painters.timeHhMm != null) {
+        painters.timeHhMm!.paint(canvas, Offset(padding, leftY));
+        if (painters.timeSs != null) {
+          final baselineY = leftY + painters.timeHhMm!.height * 0.82;
+          final ssY = baselineY - painters.timeSs!.height * 0.82;
+          painters.timeSs!.paint(canvas,
+              Offset(padding + painters.timeHhMm!.width, ssY));
+        }
+        leftY += painters.timeHhMm!.height + 2 * scale;
+      }
+      if (painters.date != null) {
+        painters.date!.paint(canvas, Offset(padding, leftY));
+      }
+
+      // ── 우측: •city + 좌표 + ID (우측 정렬) ──
+      double rightY = row1Y;
+      final rightEdge = imgW - padding;
+
+      if (painters.address != null) {
+        final addrX = rightEdge - painters.address!.width;
+        final dotPaint = Paint()
+          ..color = stampColor.withValues(alpha: alpha(0.75));
+        canvas.drawCircle(
+          Offset(addrX - 6 * scale, rightY + painters.address!.height / 2),
+          2 * scale,
+          dotPaint,
+        );
+        painters.address!.paint(canvas, Offset(addrX, rightY));
+        rightY += painters.address!.height + 2 * scale;
+      }
+      if (painters.gps != null) {
+        final gpsX = rightEdge - painters.gps!.width;
+        painters.gps!.paint(canvas, Offset(gpsX, rightY));
+        rightY += painters.gps!.height + 2 * scale;
+      }
+      if (painters.code != null) {
+        final codeX = rightEdge - painters.code!.width;
+        painters.code!.paint(canvas, Offset(codeX, rightY));
+      }
+
+      y = row1Y + row1H;
+
+      // 메모 (있을 때만 전폭)
+      if (!isSecure && painters.memo != null) {
+        y += 6 * scale;
+        painters.memo!.paint(canvas, Offset(padding, y));
+        y += painters.memo!.height;
+      }
+
+      // 오버레이 (나침반/해발/속도)
+      if (painters.overlay != null) {
+        y += 4 * scale;
+        painters.overlay!.paint(canvas, Offset(padding, y));
+        y += painters.overlay!.height;
+      }
+
+      // 로고/서명
+      if (logoImage != null || sigImage != null) {
+        y += 6 * scale;
+        double logoX = padding;
+        if (logoImage != null) {
+          canvas.drawImage(logoImage, Offset(logoX, y), Paint());
+          logoX += logoImage.width + 12 * scale;
+        }
+        if (sigImage != null) {
+          canvas.drawImage(sigImage, Offset(logoX, y),
+              Paint()..filterQuality = FilterQuality.high);
+        }
+        final logoH = logoImage?.height.toDouble() ?? 0;
+        final sigH = sigImage?.height.toDouble() ?? 0;
+        y += logoH > sigH ? logoH : sigH;
+      }
+
+      // 보안 프로젝트/시퀀스
+      if (hasRow2) {
+        y += 6 * scale;
+        if (painters.secureProject != null) {
+          painters.secureProject!.paint(canvas, Offset(padding, y));
+        }
+        if (painters.secureId != null) {
+          final idX = imgW - padding - painters.secureId!.width;
+          painters.secureId!.paint(canvas, Offset(idX, y));
+        }
+        y += (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
+      }
+
+      // ── 구분선 ──
+      y += 8 * scale;
+      final divLinePaint = Paint()
+        ..color = stampColor.withValues(alpha: alpha(0.35))
+        ..strokeWidth = 1;
+      canvas.drawLine(
+        Offset(padding, y + 0.5),
+        Offset(imgW - padding, y + 0.5),
+        divLinePaint,
+      );
+      y += 1 + 6 * scale;
+
+      // ── 중앙 Exacta 배지 ──
+      if (painters.tamperBadge != null) {
+        final badgeX = (imgW - painters.tamperBadge!.width) / 2;
+        painters.tamperBadge!.paint(canvas, Offset(badgeX, y));
+      }
+    } else {
+      // ════════════════════════════════════════════════════════
+      // LEGACY MODE: bar/card — 풀와이드 배경 바 + 기존 레이아웃
+      // ════════════════════════════════════════════════════════
+      double barHeight = padding * 2;
+
+      double leftBlockHeight = 0;
+      if (painters.timeHhMm != null) leftBlockHeight += painters.timeHhMm!.height;
+      if (painters.date != null) {
+        leftBlockHeight += (painters.timeHhMm != null ? 2 * scale : 0) + painters.date!.height;
+      }
+
+      double rightBlockHeight = 0;
+      if (painters.address != null) rightBlockHeight += painters.address!.height;
+      if (painters.gps != null) {
+        rightBlockHeight += (painters.address != null ? 2 * scale : 0) + painters.gps!.height;
+      }
+      if (!isSecure && painters.memo != null) {
+        rightBlockHeight += 6 * scale + painters.memo!.height;
+      }
+
+      final row1Height = leftBlockHeight > rightBlockHeight ? leftBlockHeight : rightBlockHeight;
+      barHeight += row1Height;
+
+      if (painters.overlay != null) {
+        barHeight += 6 * scale + painters.overlay!.height;
+      }
+      if (painters.weather != null || painters.code != null) {
+        barHeight += 4 * scale;
+        barHeight += (painters.weather?.height ?? painters.code?.height ?? 0);
+      }
+      if (painters.secureBadge != null) {
+        barHeight += painters.secureBadge!.height + 8 * scale;
+      }
+      if (hasRow2) {
+        barHeight += 6 * scale;
+        barHeight += (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
+      }
+      if (logoImage != null || sigImage != null) {
+        barHeight += 8 * scale;
+        final logoH = logoImage?.height.toDouble() ?? 0;
+        final sigH = sigImage?.height.toDouble() ?? 0;
+        barHeight += logoH > sigH ? logoH : sigH;
+      }
+      if (painters.tamperBadge != null) {
+        barHeight += 4 * scale + painters.tamperBadge!.height;
+      }
+
+      final barTop = isTop ? 0.0 : imgH - barHeight;
+      final bgPaint = Paint()..color = _bgColor;
+      canvas.drawRect(Rect.fromLTWH(0, barTop, imgW, barHeight), bgPaint);
+
+      double y = barTop + padding;
+
+      if (painters.secureBadge != null) {
+        painters.secureBadge!.paint(canvas, Offset(padding, y));
+        y += painters.secureBadge!.height + 8 * scale;
+      }
+
+      final row1Y = y;
+      double leftY = row1Y;
+      if (painters.timeHhMm != null) {
+        painters.timeHhMm!.paint(canvas, Offset(padding, leftY));
+        if (painters.timeSs != null) {
+          final baselineY = leftY + painters.timeHhMm!.height * 0.82;
+          final ssY = baselineY - painters.timeSs!.height * 0.82;
+          painters.timeSs!.paint(canvas, Offset(padding + painters.timeHhMm!.width, ssY));
+        }
+        leftY += painters.timeHhMm!.height + 2 * scale;
+      }
+      if (painters.date != null) {
+        painters.date!.paint(canvas, Offset(padding, leftY));
+      }
+
       final rightPadding = padding;
       double rightY = row1Y;
-
-      // 메모 — 우상단 (크게, 잘 보이게)
       if (!isSecure && painters.memo != null) {
         final memoX = imgW - rightPadding - painters.memo!.width;
         painters.memo!.paint(canvas, Offset(memoX > padding ? memoX : padding, rightY));
         rightY += painters.memo!.height + 8 * scale;
       }
-
-      // 주소 + GPS — 우하단 (작게)
-      // 하단 정렬: row1Height 끝에서 위치 블록 높이만큼 위로
-      final locBlockHeight = (painters.address != null ? painters.address!.height + 2 * scale : 0)
-          + (painters.gps != null ? painters.gps!.height : 0);
+      final locBlockHeight =
+          (painters.address != null ? painters.address!.height + 2 * scale : 0) +
+              (painters.gps != null ? painters.gps!.height : 0);
       double locY = row1Y + row1Height - locBlockHeight;
-      if (locY < rightY) locY = rightY; // 메모와 겹치지 않게
-
+      if (locY < rightY) locY = rightY;
       if (painters.address != null) {
         final addrX = imgW - rightPadding - painters.address!.width;
         final dotPaint = Paint()..color = stampColor.withValues(alpha: 0.4);
@@ -380,72 +516,59 @@ class StampBurnService {
         painters.address!.paint(canvas, Offset(addrX, locY));
         locY += painters.address!.height + 2 * scale;
       }
-
       if (painters.gps != null) {
         final gpsX = imgW - rightPadding - painters.gps!.width;
         painters.gps!.paint(canvas, Offset(gpsX, locY));
       }
-    }
 
-    y += row1Height;
+      y += row1Height;
 
-    // ── 오버레이 (나침반/해발/속도) ──
-    if (painters.overlay != null) {
-      y += 6 * scale;
-      painters.overlay!.paint(canvas, Offset(padding, y));
-      y += painters.overlay!.height;
-    }
-
-    // ── 날씨 + 사진 코드 ──
-    if (painters.weather != null || painters.code != null) {
-      y += 4 * scale;
-      if (painters.weather != null) {
-        painters.weather!.paint(canvas, Offset(padding, y));
+      if (painters.overlay != null) {
+        y += 6 * scale;
+        painters.overlay!.paint(canvas, Offset(padding, y));
+        y += painters.overlay!.height;
       }
-      if (painters.code != null) {
-        final codeX = imgW - padding - painters.code!.width;
-        painters.code!.paint(canvas, Offset(codeX, y));
+      if (painters.weather != null || painters.code != null) {
+        y += 4 * scale;
+        if (painters.weather != null) {
+          painters.weather!.paint(canvas, Offset(padding, y));
+        }
+        if (painters.code != null) {
+          final codeX = imgW - padding - painters.code!.width;
+          painters.code!.paint(canvas, Offset(codeX, y));
+        }
+        y += (painters.weather?.height ?? painters.code?.height ?? 0);
       }
-      y += (painters.weather?.height ?? painters.code?.height ?? 0);
-    }
-
-    // ── 보안 프로젝트 ──
-    if (hasRow2) {
-      y += 6 * scale;
-      if (painters.secureProject != null) {
-        painters.secureProject!.paint(canvas, Offset(padding + 16 * scale, y));
+      if (hasRow2) {
+        y += 6 * scale;
+        if (painters.secureProject != null) {
+          painters.secureProject!.paint(canvas, Offset(padding + 16 * scale, y));
+        }
+        if (painters.secureId != null) {
+          final idX = imgW - padding - painters.secureId!.width;
+          painters.secureId!.paint(canvas, Offset(idX, y));
+        }
+        y += (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
       }
-      if (painters.secureId != null) {
-        final idX = imgW - padding - painters.secureId!.width;
-        painters.secureId!.paint(canvas, Offset(idX, y));
+      if (logoImage != null || sigImage != null) {
+        y += 8 * scale;
+        double logoX = padding;
+        if (logoImage != null) {
+          canvas.drawImage(logoImage, Offset(logoX, y), Paint());
+          logoX += logoImage.width + 12 * scale;
+        }
+        if (sigImage != null) {
+          canvas.drawImage(sigImage, Offset(logoX, y),
+              Paint()..filterQuality = FilterQuality.high);
+        }
+        final logoH = logoImage?.height.toDouble() ?? 0;
+        final sigH = sigImage?.height.toDouble() ?? 0;
+        y += (logoH > sigH ? logoH : sigH);
       }
-      y += (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
-    }
-
-    // ── 로고 + 서명 (수평 배치) ──
-    if (logoImage != null || sigImage != null) {
-      y += 8 * scale;
-      double logoX = padding;
-      if (logoImage != null) {
-        canvas.drawImage(logoImage, Offset(logoX, y), Paint());
-        logoX += logoImage.width + 12 * scale;
+      if (painters.tamperBadge != null) {
+        y += 4 * scale;
+        painters.tamperBadge!.paint(canvas, Offset(padding, y));
       }
-      if (sigImage != null) {
-        canvas.drawImage(
-          sigImage,
-          Offset(logoX, y),
-          Paint()..filterQuality = FilterQuality.high,
-        );
-      }
-      final logoH = logoImage?.height.toDouble() ?? 0;
-      final sigH = sigImage?.height.toDouble() ?? 0;
-      y += (logoH > sigH ? logoH : sigH);
-    }
-
-    // ── 위변조 불가 배지 (최하단 라인) ──
-    if (painters.tamperBadge != null) {
-      y += 4 * scale;
-      painters.tamperBadge!.paint(canvas, Offset(padding, y));
     }
 
     // ── 모든 painter dispose ──
@@ -524,6 +647,15 @@ class StampBurnService {
       'DD-MM-YYYY' => '$d-$mo-$y',
       _ => '$y.$mo.$d',
     };
+  }
+
+  /// 주소에서 첫 의미있는 토큰 추출 (도시 수준 간결화)
+  /// "목포시 용당동 123-45" → "목포시"
+  String _firstToken(String address) {
+    final first = address
+        .split(RegExp(r'[,\s]'))
+        .firstWhere((t) => t.trim().isNotEmpty, orElse: () => '');
+    return first.isEmpty ? address : first;
   }
 
   Color? _parseColor(String hex) {

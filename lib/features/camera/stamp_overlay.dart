@@ -130,8 +130,9 @@ class StampOverlay extends StatelessWidget {
   }
 
   // ════════════════════════════════════════════════════════════
-  // TEXT 레이아웃 — 배경 없이 좌하단에 그림자 텍스트만
-  // (Timemark 스타일: 사진 전체가 다 보임)
+  // TEXT 레이아웃 — 2열 (좌: 시간/날짜, 우: 도시/좌표/ID)
+  //                 + 구분선
+  //                 + 중앙 Exacta 배지
   // ════════════════════════════════════════════════════════════
   Widget _buildTextOnly(BuildContext context) {
     // text 모드는 반투명 텍스트가 읽기 어려우므로 알파값 강화
@@ -139,98 +140,157 @@ class StampOverlay extends StatelessWidget {
     final c = _color;
     final sh = _textShadows;
 
+    // 주소를 첫 토큰만 뽑아서 "도시" 수준으로 간결화
+    String cityLine() {
+      if (address.isEmpty) return '';
+      final first = address.split(RegExp(r'[,\s]')).firstWhere(
+          (t) => t.trim().isNotEmpty, orElse: () => '');
+      return first.isEmpty ? address : first;
+    }
+
+    final leftChildren = <Widget>[
+      if (showTime)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(_hhmm, style: _ts(32, FontWeight.w700, c, shadows: sh)),
+            Text(_ss, style: _ts(17, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
+          ],
+        ),
+      if (showDate)
+        Padding(
+          padding: EdgeInsets.only(top: showTime ? 2 : 0),
+          child: Text('$_dateStr ${_weekday(context)}',
+            style: _ts(14, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
+        ),
+    ];
+
+    final rightChildren = <Widget>[
+      // 도시 (• city)
+      if (!_isSecure && showAddress && address.isNotEmpty)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6, height: 6,
+              decoration: BoxDecoration(
+                color: c.withValues(alpha: a(0.75)),
+                shape: BoxShape.circle,
+                boxShadow: sh.map((s) => BoxShadow(
+                  offset: s.offset, blurRadius: s.blurRadius, color: s.color,
+                )).toList(),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(cityLine(),
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.85)), shadows: sh)),
+            ),
+          ],
+        ),
+      // 좌표
+      if (!_isSecure && showGps && _gps.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(_gps,
+            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.7)),
+              letterSpacing: 0.3, shadows: sh)),
+        ),
+      // 증거 ID
+      if (photoCode != null && photoCode!.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(photoCode!,
+            style: _ts(9, FontWeight.w500, c.withValues(alpha: a(0.55)),
+              letterSpacing: 0.4, shadows: sh)),
+        ),
+    ];
+
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
           if (_isSecure) _secureBadge(c),
 
-          // 시간
-          if (showTime)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(_hhmm, style: _ts(32, FontWeight.w700, c, shadows: sh)),
-                Text(_ss, style: _ts(17, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
-              ],
-            ),
+          // 2열 Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: leftChildren,
+              ),
+              const Spacer(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: rightChildren,
+              ),
+            ],
+          ),
 
-          // 날짜
-          if (showDate)
+          // 메모 (있을 때만 2열 아래 전폭)
+          if (memo.isNotEmpty)
             Padding(
-              padding: EdgeInsets.only(top: showTime ? 2 : 0),
-              child: Text('$_dateStr ${_weekday(context)}',
-                style: _ts(14, FontWeight.w600, c.withValues(alpha: a(0.85)), shadows: sh)),
-            ),
-
-          // 프로젝트
-          if (projectName != null && projectName!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(projectName!, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.85)), shadows: sh)),
-            ),
-
-          // 주소
-          if (!_isSecure && showAddress && address.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(address, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: _ts(12, FontWeight.w500, c.withValues(alpha: a(0.8)), shadows: sh)),
-            ),
-
-          // GPS
-          if (!_isSecure && showGps && _gps.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(_gps,
-                style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)),
-                  letterSpacing: 0.3, shadows: sh)),
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(memo, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
             ),
 
           // 오버레이 (나침반/해발/속도)
           if (!_isSecure && (showCompass || showAltitude || showSpeed))
             Padding(
-              padding: const EdgeInsets.only(top: 3),
+              padding: const EdgeInsets.only(top: 4),
               child: Wrap(
-                spacing: 8,
+                spacing: 10,
                 children: [
                   if (showCompass && compassHeading != null)
                     Text('${compassHeading!.toStringAsFixed(0)}°',
-                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
                   if (showAltitude && altitude != null)
                     Text('${altitude!.toStringAsFixed(1)}m',
-                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
                   if (showSpeed && speed != null)
                     Text('${(speed! * 3.6).toStringAsFixed(1)}km/h',
-                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
                 ],
               ),
             ),
 
-          // 메모
-          if (memo.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(memo, maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
-            ),
-
-          // 날씨
-          if (!_isSecure && weatherText != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(weatherText!,
-                style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
-            ),
-
+          // 로고/서명
           _logoSignature(c),
           if (_isSecure) _secureFooter(c),
-          _tamperBadge(c, isTextMode: true),
+
+          // ── 구분선 ──
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 6),
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                color: c.withValues(alpha: a(0.35)),
+                boxShadow: sh.map((s) => BoxShadow(
+                  offset: s.offset, blurRadius: s.blurRadius, color: s.color,
+                )).toList(),
+              ),
+            ),
+          ),
+
+          // ── 중앙 Exacta 배지 ──
+          if (tamperBadgeText.isNotEmpty)
+            Text(
+              tamperBadgeText,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: _ts(10, FontWeight.w600, c.withValues(alpha: a(0.7)),
+                letterSpacing: 0.3, shadows: sh),
+            ),
         ],
       ),
     );
