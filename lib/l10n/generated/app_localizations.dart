@@ -142,6 +142,30 @@ abstract class AppLocalizations {
   /// **'전체'**
   String get commonAll;
 
+  /// No description provided for @commonSelectAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 선택'**
+  String get commonSelectAll;
+
+  /// No description provided for @commonDeselectAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 해제'**
+  String get commonDeselectAll;
+
+  /// No description provided for @galleryDeleteConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 삭제'**
+  String get galleryDeleteConfirmTitle;
+
+  /// No description provided for @galleryDeleteConfirmMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택한 {count}장을 삭제합니다. 복구할 수 없습니다.'**
+  String galleryDeleteConfirmMessage(int count);
+
   /// No description provided for @commonShare.
   ///
   /// In ko, this message translates to:

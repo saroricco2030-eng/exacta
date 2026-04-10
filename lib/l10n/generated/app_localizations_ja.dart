@@ -30,6 +30,20 @@ class AppLocalizationsJa extends AppLocalizations {
   String get commonAll => 'すべて';
 
   @override
+  String get commonSelectAll => '全て選択';
+
+  @override
+  String get commonDeselectAll => '選択解除';
+
+  @override
+  String get galleryDeleteConfirmTitle => '写真を削除';
+
+  @override
+  String galleryDeleteConfirmMessage(int count) {
+    return '選択した$count枚を削除します。元に戻せません。';
+  }
+
+  @override
   String get commonShare => '共有';
 
   @override

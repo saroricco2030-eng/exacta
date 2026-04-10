@@ -79,6 +79,34 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const Spacer(),
+                  // 전체 선택 / 해제 버튼 (선택 모드일 때만)
+                  if (_selectMode && !_showSearch)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Semantics(
+                        button: true,
+                        label: l.commonSelectAll,
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            _toggleSelectAll(photosAsync.valueOrNull);
+                          },
+                          child: Container(
+                            width: 44, height: 44,
+                            decoration: BoxDecoration(
+                              color: context.surfaceHi,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              LucideIcons.copyCheck,
+                              size: 20,
+                              color: context.text2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
                   // 선택 모드 토글
                   if (!_showSearch)
                     Padding(
@@ -248,7 +276,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
               child: _searchResults != null
                   ? _searchResults!.isEmpty
                       ? GalleryEmpty(l: l)
-                      : GalleryLoaded(photos: _searchResults!, l: l, selectMode: _selectMode, selectedIds: _selectedIds, onSelectionChanged: () => setState(() {}))
+                      : GalleryLoaded(
+                          photos: _searchResults!,
+                          l: l,
+                          selectMode: _selectMode,
+                          selectedIds: _selectedIds,
+                          onSelectionChanged: () => setState(() {}),
+                          onEnterSelectMode: _enterSelectMode,
+                        )
                   : photosAsync.when(
                       loading: () => const GalleryLoading(),
                       error: (e, _) => GalleryError(
@@ -257,7 +292,14 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       ),
                       data: (photos) {
                         if (photos.isEmpty) return GalleryEmpty(l: l);
-                        return GalleryLoaded(photos: photos, l: l, selectMode: _selectMode, selectedIds: _selectedIds, onSelectionChanged: () => setState(() {}));
+                        return GalleryLoaded(
+                          photos: photos,
+                          l: l,
+                          selectMode: _selectMode,
+                          selectedIds: _selectedIds,
+                          onSelectionChanged: () => setState(() {}),
+                          onEnterSelectMode: _enterSelectMode,
+                        );
                       },
                     ),
             ),
@@ -267,19 +309,66 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     );
   }
 
+  /// 사진 위에서 long-press → 선택 모드 진입 + 첫 ID 자동 선택
+  void _enterSelectMode(int firstSelectedId) {
+    setState(() {
+      _selectMode = true;
+      _selectedIds
+        ..clear()
+        ..add(firstSelectedId);
+    });
+  }
+
+  /// 전체 선택 / 해제 토글 — 현재 화면에 보이는 사진 전체 대상
+  void _toggleSelectAll(List<Photo>? photos) {
+    if (photos == null || photos.isEmpty) return;
+    setState(() {
+      final allIds = photos.map((p) => p.id).toSet();
+      // 이미 전체가 선택된 상태면 해제
+      if (_selectedIds.containsAll(allIds) && _selectedIds.length == allIds.length) {
+        _selectedIds.clear();
+      } else {
+        _selectedIds
+          ..clear()
+          ..addAll(allIds);
+      }
+    });
+  }
+
   Future<void> _bulkDelete(BuildContext context) async {
     final l = context.l10n;
+    final count = _selectedIds.length;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l.commonDelete),
-        content: Text('${_selectedIds.length}${l.galleryPhotos(_selectedIds.length)}'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(LucideIcons.triangleAlert, size: 20, color: ctx.danger),
+            const SizedBox(width: 8),
+            Expanded(child: Text(l.galleryDeleteConfirmTitle)),
+          ],
+        ),
+        content: Text(
+          l.galleryDeleteConfirmMessage(count),
+          style: const TextStyle(height: 1.5),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.commonCancel)),
           TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l.commonCancel),
+          ),
+          FilledButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: ctx.danger),
-            child: Text(l.commonDelete),
+            icon: const Icon(LucideIcons.trash2, size: 16),
+            label: Text(l.commonDelete),
+            style: FilledButton.styleFrom(
+              backgroundColor: ctx.danger,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ],
       ),

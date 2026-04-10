@@ -7,6 +7,11 @@
   "commonDelete": "삭제",
   "commonEdit": "편집",
   "commonAll": "전체",
+  "commonSelectAll": "전체 선택",
+  "commonDeselectAll": "전체 해제",
+  "galleryDeleteConfirmTitle": "사진 삭제",
+  "galleryDeleteConfirmMessage": "선택한 {count}장을 삭제합니다. 복구할 수 없습니다.",
+  "@galleryDeleteConfirmMessage": { "placeholders": { "count": { "type": "int" } } },
   "commonShare": "공유",
   "commonSearch": "검색",
 

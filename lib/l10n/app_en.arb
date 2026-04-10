@@ -7,6 +7,11 @@
   "commonDelete": "Delete",
   "commonEdit": "Edit",
   "commonAll": "All",
+  "commonSelectAll": "Select All",
+  "commonDeselectAll": "Deselect All",
+  "galleryDeleteConfirmTitle": "Delete Photos",
+  "galleryDeleteConfirmMessage": "Delete {count} selected photo(s)? This cannot be undone.",
+  "@galleryDeleteConfirmMessage": { "placeholders": { "count": { "type": "int" } } },
   "commonShare": "Share",
   "commonSearch": "Search",
 

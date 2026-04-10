@@ -30,6 +30,20 @@ class AppLocalizationsKo extends AppLocalizations {
   String get commonAll => '전체';
 
   @override
+  String get commonSelectAll => '전체 선택';
+
+  @override
+  String get commonDeselectAll => '전체 해제';
+
+  @override
+  String get galleryDeleteConfirmTitle => '사진 삭제';
+
+  @override
+  String galleryDeleteConfirmMessage(int count) {
+    return '선택한 $count장을 삭제합니다. 복구할 수 없습니다.';
+  }
+
+  @override
   String get commonShare => '공유';
 
   @override

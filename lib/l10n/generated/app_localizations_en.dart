@@ -30,6 +30,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonAll => 'All';
 
   @override
+  String get commonSelectAll => 'Select All';
+
+  @override
+  String get commonDeselectAll => 'Deselect All';
+
+  @override
+  String get galleryDeleteConfirmTitle => 'Delete Photos';
+
+  @override
+  String galleryDeleteConfirmMessage(int count) {
+    return 'Delete $count selected photo(s)? This cannot be undone.';
+  }
+
+  @override
   String get commonShare => 'Share';
 
   @override

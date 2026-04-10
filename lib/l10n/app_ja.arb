@@ -7,6 +7,11 @@
   "commonDelete": "削除",
   "commonEdit": "編集",
   "commonAll": "すべて",
+  "commonSelectAll": "全て選択",
+  "commonDeselectAll": "選択解除",
+  "galleryDeleteConfirmTitle": "写真を削除",
+  "galleryDeleteConfirmMessage": "選択した{count}枚を削除します。元に戻せません。",
+  "@galleryDeleteConfirmMessage": { "placeholders": { "count": { "type": "int" } } },
   "commonShare": "共有",
   "commonSearch": "検索",
 
