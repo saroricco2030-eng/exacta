@@ -316,10 +316,6 @@
   "evidencePackVerifyStep3": "3. 계산된 해시가 본 문서의 \"파일 SHA-256\" 값과 일치하는지 확인한다.",
   "evidencePackVerifyStep4": "4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.",
 
-  "cameraMemoAdd": "메모 추가",
-  "cameraMemoEdit": "메모 편집",
-  "cameraMemoPlaceholder": "현장 상황, 특이사항, 작업자 이름 등...",
-
   "stampPresetSection": "스탬프 프리셋",
   "stampPresetFull": "전체",
   "stampPresetConstruction": "시공",

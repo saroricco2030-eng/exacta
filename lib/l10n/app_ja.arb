@@ -316,10 +316,6 @@
   "evidencePackVerifyStep3": "3. 計算されたハッシュが本書の「ファイルSHA-256」値と一致するか確認する。",
   "evidencePackVerifyStep4": "4. チェーンハッシュはSHA-256(ファイルハッシュ | 前のチェーン | タイムスタンプ | 緯度 | 経度)式で再計算可能。",
 
-  "cameraMemoAdd": "メモを追加",
-  "cameraMemoEdit": "メモを編集",
-  "cameraMemoPlaceholder": "現場の状況、特記事項、作業者名など...",
-
   "stampPresetSection": "スタンププリセット",
   "stampPresetFull": "フル",
   "stampPresetConstruction": "施工",

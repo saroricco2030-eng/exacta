@@ -787,16 +787,6 @@ class AppLocalizationsEn extends AppLocalizations {
       '4. Chain hashes can be re-computed via SHA-256(fileHash | prevChain | timestamp | lat | lng).';
 
   @override
-  String get cameraMemoAdd => 'Add memo';
-
-  @override
-  String get cameraMemoEdit => 'Edit memo';
-
-  @override
-  String get cameraMemoPlaceholder =>
-      'Site notes, observations, worker name...';
-
-  @override
   String get stampPresetSection => 'Stamp Preset';
 
   @override

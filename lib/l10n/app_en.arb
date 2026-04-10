@@ -316,10 +316,6 @@
   "evidencePackVerifyStep3": "3. Confirm that the computed hash matches the \"File SHA-256\" value in this document.",
   "evidencePackVerifyStep4": "4. Chain hashes can be re-computed via SHA-256(fileHash | prevChain | timestamp | lat | lng).",
 
-  "cameraMemoAdd": "Add memo",
-  "cameraMemoEdit": "Edit memo",
-  "cameraMemoPlaceholder": "Site notes, observations, worker name...",
-
   "stampPresetSection": "Stamp Preset",
   "stampPresetFull": "Full",
   "stampPresetConstruction": "Construction",
