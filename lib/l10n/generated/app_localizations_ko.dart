@@ -625,6 +625,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localeJapanese => '日本語';
 
   @override
+  String get stampTamperBadge => '✓ Exacta · 위변조 불가 (NTP · GPS 번인 · SHA-256)';
+
+  @override
   String get tamperProofTitle => '수정 불가 사진';
 
   @override

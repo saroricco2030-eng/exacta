@@ -52,6 +52,7 @@ class StampBurnService {
     String stampColorHex = '#FFFFFF',
     String stampPosition = 'bottom',
     String stampLayout = 'text', // 'bar' | 'card' | 'text' (기본 'text' = 배경 없이 그림자)
+    String tamperBadgeText = '✓ Exacta · Tamper-Proof', // 어느 갤러리로 봐도 보이는 무결성 배지
     String? projectName,
     String? weatherText,
     String? photoCode,
@@ -190,6 +191,16 @@ class StampBurnService {
           letterSpacing: 0.5, shadows: ts);
     }
 
+    // 위변조 불가 배지 — 어떤 갤러리로 봐도 보이도록 픽셀에 번인.
+    if (tamperBadgeText.isNotEmpty) {
+      painters.tamperBadge = _tp(tamperBadgeText,
+          fontSize: 9 * scale,
+          fontWeight: FontWeight.w600,
+          color: stampColor.withValues(alpha: alpha(0.45)),
+          letterSpacing: 0.3,
+          shadows: ts);
+    }
+
     // 보안 뱃지 (11sp)
     if (isSecure) {
       painters.secureBadge = _tp(secureBadgeText,
@@ -293,6 +304,11 @@ class StampBurnService {
       final logoH = logoImage?.height.toDouble() ?? 0;
       final sigH = sigImage?.height.toDouble() ?? 0;
       barHeight += logoH > sigH ? logoH : sigH;
+    }
+
+    // 위변조 배지 (맨 마지막 라인)
+    if (painters.tamperBadge != null) {
+      barHeight += 4 * scale + painters.tamperBadge!.height;
     }
 
     // ── 바 그리기 ──
@@ -421,6 +437,15 @@ class StampBurnService {
           Paint()..filterQuality = FilterQuality.high,
         );
       }
+      final logoH = logoImage?.height.toDouble() ?? 0;
+      final sigH = sigImage?.height.toDouble() ?? 0;
+      y += (logoH > sigH ? logoH : sigH);
+    }
+
+    // ── 위변조 불가 배지 (최하단 라인) ──
+    if (painters.tamperBadge != null) {
+      y += 4 * scale;
+      painters.tamperBadge!.paint(canvas, Offset(padding, y));
     }
 
     // ── 모든 painter dispose ──
@@ -545,6 +570,7 @@ class _StampPainters {
   TextPainter? secureId;
   TextPainter? weather;
   TextPainter? code;
+  TextPainter? tamperBadge;
 
   void disposeAll() {
     timeHhMm?.dispose();
@@ -559,6 +585,7 @@ class _StampPainters {
     secureId?.dispose();
     weather?.dispose();
     code?.dispose();
+    tamperBadge?.dispose();
   }
 }
 

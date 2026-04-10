@@ -1252,6 +1252,12 @@ abstract class AppLocalizations {
   /// **'日本語'**
   String get localeJapanese;
 
+  /// No description provided for @stampTamperBadge.
+  ///
+  /// In ko, this message translates to:
+  /// **'✓ Exacta · 위변조 불가 (NTP · GPS 번인 · SHA-256)'**
+  String get stampTamperBadge;
+
   /// No description provided for @tamperProofTitle.
   ///
   /// In ko, this message translates to:

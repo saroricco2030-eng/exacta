@@ -264,6 +264,8 @@
   "localeEnglish": "English",
   "localeJapanese": "日本語",
 
+  "stampTamperBadge": "✓ Exacta · Tamper-Proof (NTP · Pixel GPS · SHA-256)",
+
   "tamperProofTitle": "Tamper-Proof Photo",
   "tamperProofIntro": "This photo cannot be forged for the following technical reasons",
   "tamperProofNtp": "Capture time is corrected by an Internet standard (NTP) time server. Changing the device clock does not affect the recorded time.",

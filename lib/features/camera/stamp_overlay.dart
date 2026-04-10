@@ -36,6 +36,7 @@ class StampOverlay extends StatelessWidget {
     this.altitude,
     this.speed,
     this.secureBadgeText = 'SECURE · EXIF STRIPPED',
+    this.tamperBadgeText = '',
     this.projectName,
     this.weatherText,
     this.photoCode,
@@ -48,7 +49,7 @@ class StampOverlay extends StatelessWidget {
   final String address;
   final double? latitude, longitude, compassHeading, altitude, speed;
   final String? logoPath, signaturePath, projectName, weatherText, photoCode;
-  final String secureBadgeText, memo, dateFormat;
+  final String secureBadgeText, tamperBadgeText, memo, dateFormat;
   final String? stampColorHex;
   final String stampPosition;
   final String stampLayout;
@@ -229,6 +230,7 @@ class StampOverlay extends StatelessWidget {
 
           _logoSignature(c),
           if (_isSecure) _secureFooter(c),
+          _tamperBadge(c, isTextMode: true),
         ],
       ),
     );
@@ -359,6 +361,9 @@ class StampOverlay extends StatelessWidget {
 
             // 보안 모드 하단
             if (_isSecure) _secureFooter(c),
+
+            // 위변조 불가 배지
+            _tamperBadge(c),
           ],
         ),
       ),
@@ -476,6 +481,7 @@ class StampOverlay extends StatelessWidget {
 
           _logoSignature(c),
           if (_isSecure) _secureFooter(c),
+          _tamperBadge(c),
         ],
       ),
     );
@@ -521,6 +527,24 @@ class StampOverlay extends StatelessWidget {
             opacity: const AlwaysStoppedAnimation(0.6),
             errorBuilder: (_, _, _) => const SizedBox.shrink()),
       ]),
+    );
+  }
+
+  /// 위변조 불가 배지 — 3가지 layout 모두 맨 아래에 같은 한 줄
+  Widget _tamperBadge(Color c, {bool isTextMode = false}) {
+    if (tamperBadgeText.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Text(
+        tamperBadgeText,
+        style: _ts(
+          9,
+          FontWeight.w600,
+          c.withValues(alpha: 0.55),
+          letterSpacing: 0.3,
+          shadows: isTextMode ? _textShadows : null,
+        ),
+      ),
     );
   }
 

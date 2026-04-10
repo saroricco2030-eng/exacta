@@ -264,6 +264,8 @@
   "localeEnglish": "English",
   "localeJapanese": "日本語",
 
+  "stampTamperBadge": "✓ Exacta · 위변조 불가 (NTP · GPS 번인 · SHA-256)",
+
   "tamperProofTitle": "수정 불가 사진",
   "tamperProofIntro": "이 사진은 다음 기술적 이유로 위조가 불가능합니다",
   "tamperProofNtp": "촬영 시각이 인터넷 표준 시간(NTP) 서버로 보정되어 기록됩니다. 기기 시계를 바꿔도 실제 시각이 그대로 남습니다.",

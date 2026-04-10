@@ -438,6 +438,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       final captureStampColor = _stampConfig?.stampColor ?? '#FFFFFF';
       final captureStampPosition = _stampConfig?.stampPosition ?? 'bottom';
       final captureStampLayout = _stampConfig?.stampLayout ?? 'text';
+      final captureTamperBadge = context.l10n.stampTamperBadge;
       final captureShowInGallery = _stampConfig?.showInNativeGallery ?? true;
       final captureLogoPath = _stampConfig?.logoPath;
       final captureSignaturePath = _stampConfig?.signaturePath;
@@ -473,6 +474,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
         stampColor: captureStampColor,
         stampPosition: captureStampPosition,
         stampLayout: captureStampLayout,
+        tamperBadgeText: captureTamperBadge,
         showInNativeGallery: captureShowInGallery,
         logoPath: captureLogoPath,
         signaturePath: captureSignaturePath,
@@ -716,6 +718,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
         stampColor: _stampConfig?.stampColor ?? '#FFFFFF',
         stampPosition: _stampConfig?.stampPosition ?? 'bottom',
         stampLayout: _stampConfig?.stampLayout ?? 'text',
+        tamperBadgeText: context.l10n.stampTamperBadge,
         showInNativeGallery: _stampConfig?.showInNativeGallery ?? true,
         logoPath: _stampConfig?.logoPath,
         signaturePath: _stampConfig?.signaturePath,
@@ -1002,6 +1005,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                     logoPath: _stampConfig?.logoPath,
                     signaturePath: _stampConfig?.signaturePath,
                     secureBadgeText: l.cameraSecureBadge,
+                    tamperBadgeText: l.stampTamperBadge,
                     projectName: _selectedProjectName,
                     weatherText: _locationService.weather != null
                         ? '${_locationService.weather!.temperature.toStringAsFixed(0)}° ${WeatherService.weatherDesc(_locationService.weather!.weatherCode, Localizations.localeOf(context).languageCode)}'

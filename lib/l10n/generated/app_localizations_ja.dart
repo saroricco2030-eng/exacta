@@ -625,6 +625,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localeJapanese => '日本語';
 
   @override
+  String get stampTamperBadge => '✓ Exacta · 改ざん不可 (NTP · GPS焼き込み · SHA-256)';
+
+  @override
   String get tamperProofTitle => '改ざん不可能な写真';
 
   @override
