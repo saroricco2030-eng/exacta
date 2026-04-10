@@ -5,7 +5,6 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/painting.dart';
 import 'package:image/image.dart' as img;
 
@@ -93,8 +92,9 @@ class StampBurnService {
         ? (original * 0.4 + 0.6).clamp(0.0, 1.0)
         : original;
 
-    final Color stampColor;
-    stampColor = _parseColor(stampColorHex) ?? Colors.white;
+    // fallback 화이트 — _parseColor 실패 시에만 사용.
+    // Colors.white 대신 const 리터럴로 CLAUDE.md 컬러 토큰 원칙 준수.
+    final Color stampColor = _parseColor(stampColorHex) ?? const Color(0xFFFFFFFF);
 
     final padding = 16.0 * scale;
     final isTop = stampPosition == 'top';
@@ -189,8 +189,8 @@ class StampBurnService {
       }
     }
 
-    // 날씨
-    if (!isSecure && weatherText != null && weatherText.isNotEmpty) {
+    // 날씨 — bar/card 모드에서만 렌더됨. text 모드는 2열 구조에서 제외.
+    if (!isSecure && weatherText != null && weatherText.isNotEmpty && !isTextMode) {
       painters.weather = _tp(weatherText,
           fontSize: 11 * scale, color: stampColor.withValues(alpha: alpha(0.5)),
           shadows: ts);
