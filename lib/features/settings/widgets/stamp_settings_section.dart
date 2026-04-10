@@ -169,10 +169,11 @@ class StampSettingsSection extends StatelessWidget {
           label: l.settingsStampLayout,
           trailing: DropdownValue(
             value: config.stampLayout,
-            items: const ['card', 'bar'],
+            items: const ['card', 'bar', 'text'],
             itemLabels: {
               'card': l.stampLayoutCard,
               'bar': l.stampLayoutBar,
+              'text': l.stampLayoutText,
             },
             onChanged: (v) => onUpdate(stampLayout: v),
           ),

@@ -1222,6 +1222,12 @@ abstract class AppLocalizations {
   /// **'카드'**
   String get stampLayoutCard;
 
+  /// No description provided for @stampLayoutText.
+  ///
+  /// In ko, this message translates to:
+  /// **'텍스트만'**
+  String get stampLayoutText;
+
   /// No description provided for @localeSystem.
   ///
   /// In ko, this message translates to:

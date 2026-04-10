@@ -19,6 +19,13 @@ class StampBurnService {
   static const _bgColor = Color(0x73000000);
   static const _white30 = Color(0x4DFFFFFF);
 
+  // 'text' 모드 전용 — 배경 없이 텍스트 가독성용 그림자
+  static const _textShadows = [
+    Shadow(offset: Offset(0, 1), blurRadius: 4, color: Color(0xCC000000)),
+    Shadow(offset: Offset(0, 0), blurRadius: 12, color: Color(0x99000000)),
+    Shadow(offset: Offset(1, 1), blurRadius: 2, color: Color(0xB3000000)),
+  ];
+
   Future<Uint8List> burnStamp({
     required String imagePath,
     required DateTime timestamp,
@@ -44,6 +51,7 @@ class StampBurnService {
     List<String> weekdayNames = const ['월', '화', '수', '목', '금', '토', '일'],
     String stampColorHex = '#FFFFFF',
     String stampPosition = 'bottom',
+    String stampLayout = 'bar', // 'bar' | 'card' | 'text' ('text' = 배경 없이 그림자)
     String? projectName,
     String? weatherText,
     String? photoCode,
@@ -76,6 +84,13 @@ class StampBurnService {
     // 3. scale: 375 = 프로토타입 기준 폰 너비
     final scale = imgW / 375.0;
     final isSecure = preset == CameraPreset.secure;
+    // 'text' 모드: 배경 사각형 없이 그림자 가독성으로만 렌더 (사진 전체가 보임)
+    final isTextMode = stampLayout == 'text';
+    final List<Shadow>? ts = isTextMode ? _textShadows : null;
+    // text 모드에서는 반투명 텍스트가 읽기 어려우므로 알파값을 전부 1.0에 가깝게 올림
+    double alpha(double original) => isTextMode
+        ? (original * 0.4 + 0.6).clamp(0.0, 1.0)
+        : original;
 
     final Color stampColor;
     stampColor = _parseColor(stampColorHex) ?? Colors.white;
@@ -93,9 +108,11 @@ class StampBurnService {
       final s = timestamp.second.toString().padLeft(2, '0');
 
       painters.timeHhMm = _tp('$h:$m',
-          fontSize: 34 * scale, fontWeight: FontWeight.w700, color: stampColor);
+          fontSize: 34 * scale, fontWeight: FontWeight.w700, color: stampColor,
+          shadows: ts);
       painters.timeSs = _tp(':$s',
-          fontSize: 18 * scale, color: stampColor.withValues(alpha: 0.6));
+          fontSize: 18 * scale, color: stampColor.withValues(alpha: alpha(0.6)),
+          shadows: ts);
     }
 
     // Row 1: 날짜 + 요일 (16sp)
@@ -104,7 +121,8 @@ class StampBurnService {
       final wd = weekdayNames[timestamp.weekday - 1];
       painters.date = _tp('$dateStr ($wd)',
           fontSize: 16 * scale, fontWeight: FontWeight.w600,
-          color: stampColor.withValues(alpha: 0.85));
+          color: stampColor.withValues(alpha: alpha(0.85)),
+          shadows: ts);
     }
 
     // Row 1: 주소 + GPS (15sp / 12sp)
@@ -112,8 +130,9 @@ class StampBurnService {
       if (showAddress && address != null && address.isNotEmpty) {
         painters.address = _tp(address,
             fontSize: 15 * scale, fontWeight: FontWeight.w500,
-            color: stampColor.withValues(alpha: 0.8),
-            maxWidth: imgW * 0.45);
+            color: stampColor.withValues(alpha: alpha(0.8)),
+            maxWidth: imgW * 0.45,
+            shadows: ts);
       }
       if (showGps && latitude != null && longitude != null) {
         final lat = latitude;
@@ -123,7 +142,8 @@ class StampBurnService {
         final gps =
             '${lat.abs().toStringAsFixed(4)}°$latDir  ${lng.abs().toStringAsFixed(4)}°$lngDir';
         painters.gps = _tp(gps,
-            fontSize: 12 * scale, color: stampColor.withValues(alpha: 0.55), letterSpacing: 0.3);
+            fontSize: 12 * scale, color: stampColor.withValues(alpha: alpha(0.55)),
+            letterSpacing: 0.3, shadows: ts);
       }
     }
 
@@ -131,9 +151,10 @@ class StampBurnService {
     if (!isSecure && memo != null && memo.isNotEmpty) {
       painters.memo = _tp(memo,
           fontSize: 14 * scale, fontWeight: FontWeight.w600,
-          color: stampColor.withValues(alpha: 0.9),
+          color: stampColor.withValues(alpha: alpha(0.9)),
           maxWidth: imgW * 0.5,
-          maxLines: 3);
+          maxLines: 3,
+          shadows: ts);
     }
 
     // 오버레이: 나침반 / 해발 / 속도 (12sp)
@@ -150,34 +171,38 @@ class StampBurnService {
       }
       if (overlayParts.isNotEmpty) {
         painters.overlay = _tp(overlayParts.join('  '),
-            fontSize: 12 * scale, color: stampColor.withValues(alpha: 0.55), letterSpacing: 0.3);
+            fontSize: 12 * scale, color: stampColor.withValues(alpha: alpha(0.55)),
+            letterSpacing: 0.3, shadows: ts);
       }
     }
 
     // 날씨
     if (!isSecure && weatherText != null && weatherText.isNotEmpty) {
       painters.weather = _tp(weatherText,
-          fontSize: 11 * scale, color: stampColor.withValues(alpha: 0.5));
+          fontSize: 11 * scale, color: stampColor.withValues(alpha: alpha(0.5)),
+          shadows: ts);
     }
 
     // 고유 사진 코드
     if (photoCode != null && photoCode.isNotEmpty) {
       painters.code = _tp(photoCode,
-          fontSize: 9 * scale, color: stampColor.withValues(alpha: 0.3), letterSpacing: 0.5);
+          fontSize: 9 * scale, color: stampColor.withValues(alpha: alpha(0.3)),
+          letterSpacing: 0.5, shadows: ts);
     }
 
     // 보안 뱃지 (11sp)
     if (isSecure) {
       painters.secureBadge = _tp(secureBadgeText,
           fontSize: 11 * scale, fontWeight: FontWeight.w700,
-          color: stampColor, letterSpacing: 0.8);
+          color: stampColor, letterSpacing: 0.8, shadows: ts);
       if (projectName != null && projectName.isNotEmpty) {
         painters.secureProject = _tp(projectName,
-            fontSize: 14 * scale, color: stampColor.withValues(alpha: 0.7));
+            fontSize: 14 * scale, color: stampColor.withValues(alpha: alpha(0.7)),
+            shadows: ts);
       }
       final seq = '#${timestamp.hour.toString().padLeft(2, '0')}${timestamp.minute.toString().padLeft(2, '0')}';
       painters.secureId = _tp(seq,
-          fontSize: 11 * scale, color: _white30);
+          fontSize: 11 * scale, color: _white30, shadows: ts);
     }
 
     // 로고 — codec dispose 포함
@@ -272,11 +297,15 @@ class StampBurnService {
 
     // ── 바 그리기 ──
     final barTop = isTop ? 0.0 : imgH - barHeight;
-    final bgPaint = Paint()..color = _bgColor;
-    canvas.drawRect(
-      Rect.fromLTWH(0, barTop, imgW, barHeight),
-      bgPaint,
-    );
+    // 'text' 모드: 배경 사각형 스킵 → 사진이 전부 보임.
+    //             가독성은 텍스트 shadow로 확보.
+    if (!isTextMode) {
+      final bgPaint = Paint()..color = _bgColor;
+      canvas.drawRect(
+        Rect.fromLTWH(0, barTop, imgW, barHeight),
+        bgPaint,
+      );
+    }
 
     double y = barTop + padding;
 
@@ -439,6 +468,7 @@ class StampBurnService {
     FontStyle fontStyle = FontStyle.normal,
     double? maxWidth,
     int maxLines = 2,
+    List<Shadow>? shadows,
   }) {
     final tp = TextPainter(
       text: TextSpan(
@@ -450,6 +480,7 @@ class StampBurnService {
           color: color,
           letterSpacing: letterSpacing,
           fontStyle: fontStyle,
+          shadows: shadows,
         ),
       ),
       textDirection: TextDirection.ltr,

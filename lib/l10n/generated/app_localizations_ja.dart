@@ -610,6 +610,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get stampLayoutCard => 'カード';
 
   @override
+  String get stampLayoutText => 'テキストのみ';
+
+  @override
   String get localeSystem => 'システム';
 
   @override

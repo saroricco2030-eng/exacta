@@ -610,6 +610,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stampLayoutCard => '카드';
 
   @override
+  String get stampLayoutText => '텍스트만';
+
+  @override
   String get localeSystem => '시스템';
 
   @override

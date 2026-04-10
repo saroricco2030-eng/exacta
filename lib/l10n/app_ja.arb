@@ -257,6 +257,7 @@
   "settingsStampLayout": "スタンプレイアウト",
   "stampLayoutBar": "フルバー",
   "stampLayoutCard": "カード",
+  "stampLayoutText": "テキストのみ",
 
   "localeSystem": "システム",
   "localeKorean": "한국어",

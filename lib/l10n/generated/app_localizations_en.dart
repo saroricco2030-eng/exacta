@@ -614,6 +614,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stampLayoutCard => 'Card';
 
   @override
+  String get stampLayoutText => 'Text only';
+
+  @override
   String get localeSystem => 'System';
 
   @override

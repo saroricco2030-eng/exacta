@@ -69,6 +69,13 @@ class StampOverlay extends StatelessWidget {
     Shadow(offset: Offset(0, 0), blurRadius: 8, color: Color(0x66000000)),
   ];
 
+  /// text 모드 전용 — 배경 없이 가독성 확보용 강화 그림자
+  List<Shadow> get _textShadows => const [
+    Shadow(offset: Offset(0, 1), blurRadius: 4, color: Color(0xCC000000)),
+    Shadow(offset: Offset(0, 0), blurRadius: 12, color: Color(0x99000000)),
+    Shadow(offset: Offset(1, 1), blurRadius: 2, color: Color(0xB3000000)),
+  ];
+
   String get _hhmm => '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   String get _ss => ':${now.second.toString().padLeft(2, '0')}';
 
@@ -112,8 +119,118 @@ class StampOverlay extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: Padding(padding: const EdgeInsets.only(right: 8, bottom: 4), child: _EditBtn(onTap: onEditTap)),
         ),
-        stampLayout == 'card' ? _buildCard(context) : _buildBar(context),
+        switch (stampLayout) {
+          'card' => _buildCard(context),
+          'text' => _buildTextOnly(context),
+          _ => _buildBar(context),
+        },
       ],
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // TEXT 레이아웃 — 배경 없이 좌하단에 그림자 텍스트만
+  // (Timemark 스타일: 사진 전체가 다 보임)
+  // ════════════════════════════════════════════════════════════
+  Widget _buildTextOnly(BuildContext context) {
+    // text 모드는 반투명 텍스트가 읽기 어려우므로 알파값 강화
+    double a(double o) => (o * 0.4 + 0.6).clamp(0.0, 1.0);
+    final c = _color;
+    final sh = _textShadows;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_isSecure) _secureBadge(c),
+
+          // 시간
+          if (showTime)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(_hhmm, style: _ts(32, FontWeight.w700, c, shadows: sh)),
+                Text(_ss, style: _ts(17, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
+              ],
+            ),
+
+          // 날짜
+          if (showDate)
+            Padding(
+              padding: EdgeInsets.only(top: showTime ? 2 : 0),
+              child: Text('$_dateStr ${_weekday(context)}',
+                style: _ts(14, FontWeight.w600, c.withValues(alpha: a(0.85)), shadows: sh)),
+            ),
+
+          // 프로젝트
+          if (projectName != null && projectName!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(projectName!, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.85)), shadows: sh)),
+            ),
+
+          // 주소
+          if (!_isSecure && showAddress && address.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(address, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: _ts(12, FontWeight.w500, c.withValues(alpha: a(0.8)), shadows: sh)),
+            ),
+
+          // GPS
+          if (!_isSecure && showGps && _gps.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(_gps,
+                style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)),
+                  letterSpacing: 0.3, shadows: sh)),
+            ),
+
+          // 오버레이 (나침반/해발/속도)
+          if (!_isSecure && (showCompass || showAltitude || showSpeed))
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  if (showCompass && compassHeading != null)
+                    Text('${compassHeading!.toStringAsFixed(0)}°',
+                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+                  if (showAltitude && altitude != null)
+                    Text('${altitude!.toStringAsFixed(1)}m',
+                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+                  if (showSpeed && speed != null)
+                    Text('${(speed! * 3.6).toStringAsFixed(1)}km/h',
+                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+                ],
+              ),
+            ),
+
+          // 메모
+          if (memo.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(memo, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
+            ),
+
+          // 날씨
+          if (!_isSecure && weatherText != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(weatherText!,
+                style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.55)), shadows: sh)),
+            ),
+
+          _logoSignature(c),
+          if (_isSecure) _secureFooter(c),
+        ],
+      ),
     );
   }
 
