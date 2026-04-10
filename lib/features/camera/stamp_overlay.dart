@@ -165,9 +165,12 @@ class StampOverlay extends StatelessWidget {
     }
     final sensorText = !_isSecure ? sensorLine() : '';
     final hasAddress = !_isSecure && showAddress && address.isNotEmpty;
+    final hasGps = !_isSecure && showGps && _gps.isNotEmpty;
+    final hasCode = photoCode != null && photoCode!.isNotEmpty;
+    final hasLocationTrio = hasAddress || hasGps || hasCode;
     final hasMemo = memo.isNotEmpty;
 
-    // 좌측 컬럼 — 시간/날짜/주소/센서 + memo(있을 때 좌측 전폭 여러 줄)
+    // 좌측 컬럼 — 시간/날짜/주소/센서 (memo는 우측으로 이동)
     final leftChildren = <Widget>[
       if (showTime)
         Row(
@@ -198,52 +201,67 @@ class StampOverlay extends StatelessWidget {
             style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)),
               letterSpacing: 0.2, shadows: sh)),
         ),
-      // memo — 중요 필드. 시간 수준으로 크고 굵게, 좌측 전폭에 여러 줄 전개
-      if (hasMemo)
-        Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(memo, maxLines: 4, overflow: TextOverflow.ellipsis,
-            softWrap: true,
-            style: _ts(24, FontWeight.w700, c.withValues(alpha: a(0.95)),
-              shadows: sh).copyWith(height: 1.15)),
-        ),
     ];
 
-    // 우측 컬럼
+    // 우측 컬럼 — 위치정보 3줄(우측 정렬) + memo(위치정보 아래 빈 공간 전폭)
     final rightChildren = <Widget>[
       if (hasAddress)
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 6, height: 6,
-              decoration: BoxDecoration(
-                color: c.withValues(alpha: a(0.75)),
-                shape: BoxShape.circle,
-                boxShadow: sh.map((s) => BoxShadow(
-                  offset: s.offset, blurRadius: s.blurRadius, color: s.color,
-                )).toList(),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6, height: 6,
+                decoration: BoxDecoration(
+                  color: c.withValues(alpha: a(0.75)),
+                  shape: BoxShape.circle,
+                  boxShadow: sh.map((s) => BoxShadow(
+                    offset: s.offset, blurRadius: s.blurRadius, color: s.color,
+                  )).toList(),
+                ),
               ),
-            ),
-            const SizedBox(width: 5),
-            Text(cityLine(),
-              maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
-          ],
+              const SizedBox(width: 5),
+              Text(cityLine(),
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
+            ],
+          ),
         ),
-      if (!_isSecure && showGps && _gps.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(_gps,
-            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.75)),
-              letterSpacing: 0.3, shadows: sh)),
+      if (hasGps)
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(_gps,
+              style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.75)),
+                letterSpacing: 0.3, shadows: sh)),
+          ),
         ),
-      if (photoCode != null && photoCode!.isNotEmpty)
+      if (hasCode)
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(photoCode!,
+              style: _ts(9, FontWeight.w500, c.withValues(alpha: a(0.55)),
+                letterSpacing: 0.4, shadows: sh)),
+          ),
+        ),
+      // memo — 우측 컬럼 영역의 위치정보 아래 빈 공간에 크게.
+      //   crossAxisAlignment: stretch 이므로 full column width로 자동 랩핑.
+      if (hasMemo)
         Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Text(photoCode!,
-            style: _ts(9, FontWeight.w500, c.withValues(alpha: a(0.55)),
-              letterSpacing: 0.4, shadows: sh)),
+          padding: EdgeInsets.only(top: hasLocationTrio ? 8 : 0),
+          child: Text(
+            memo,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            softWrap: true,
+            textAlign: TextAlign.right,
+            style: _ts(22, FontWeight.w700,
+                c.withValues(alpha: a(0.95)), shadows: sh).copyWith(height: 1.15),
+          ),
         ),
     ];
 
@@ -256,23 +274,23 @@ class StampOverlay extends StatelessWidget {
           if (_isSecure) _secureBadge(c),
 
           // ── 메인 Row ──
-          // 좌측은 Expanded로 폭 최대 사용 → memo가 여러 줄 전개될 공간 확보
-          // 우측은 내용 폭만큼만 (crossAxis.end)
+          // 좌측은 content-size (시간/날짜 자기 폭만)
+          // 우측은 Expanded + stretch → memo가 위치정보 아래 빈 공간을 꽉 채움
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: leftChildren,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: leftChildren,
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: rightChildren,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: rightChildren,
+                ),
               ),
             ],
           ),

@@ -159,16 +159,14 @@ class StampBurnService {
       }
     }
 
-    // 메모 — 중요 필드.
-    // text 모드: 시간(34sp) 수준으로 크게(26sp) + 좌측 컬럼 전폭(60%+)에 여러 줄 전개
-    // bar/card 모드: 기존대로 14sp 작은 우상단
-    if (!isSecure && memo != null && memo.isNotEmpty) {
+    // 메모 — bar/card 모드 전용 painter.
+    // text 모드에서는 우측 컬럼 폭을 먼저 알아야 하므로 layout 단계에서 생성.
+    if (!isSecure && memo != null && memo.isNotEmpty && !isTextMode) {
       painters.memo = _tp(memo,
-          fontSize: (isTextMode ? 26 : 14) * scale,
-          fontWeight: FontWeight.w700,
-          color: stampColor.withValues(alpha: alpha(isTextMode ? 0.95 : 0.9)),
-          maxWidth: imgW * (isTextMode ? 0.62 : 0.5),
-          maxLines: isTextMode ? 4 : 3,
+          fontSize: 14 * scale, fontWeight: FontWeight.w600,
+          color: stampColor.withValues(alpha: alpha(0.9)),
+          maxWidth: imgW * 0.5,
+          maxLines: 3,
           shadows: ts);
     }
 
@@ -274,7 +272,7 @@ class StampBurnService {
       // Row crossAxisAlignment: start — 두 열 높이 불일치 시 상단 정렬
       // ════════════════════════════════════════════════════════
 
-      // 좌측 컬럼 높이 (시간→날짜→주소→센서→memo)
+      // 좌측 컬럼 높이 (시간→날짜→주소→센서). memo는 우측으로 이동.
       double leftH = 0;
       if (painters.timeHhMm != null) {
         leftH += painters.timeHhMm!.height;
@@ -288,11 +286,46 @@ class StampBurnService {
       if (painters.overlay != null) {
         leftH += (leftH > 0 ? 2 * scale : 0) + painters.overlay!.height;
       }
-      if (!isSecure && painters.memo != null) {
-        leftH += (leftH > 0 ? 8 * scale : 0) + painters.memo!.height;
+
+      // 좌측 컬럼 폭 측정 — 우측 컬럼 시작 위치 산정용
+      double leftWidth = 0;
+      if (painters.timeHhMm != null) {
+        final tw = painters.timeHhMm!.width + (painters.timeSs?.width ?? 0);
+        if (tw > leftWidth) leftWidth = tw;
+      }
+      if (painters.date != null && painters.date!.width > leftWidth) {
+        leftWidth = painters.date!.width;
+      }
+      if (painters.address != null && painters.address!.width > leftWidth) {
+        leftWidth = painters.address!.width;
+      }
+      if (painters.overlay != null && painters.overlay!.width > leftWidth) {
+        leftWidth = painters.overlay!.width;
       }
 
-      // 우측 컬럼 높이
+      // 우측 컬럼 경계 (overlay와 동일 패턴: 좌측 content + 12*scale 간격)
+      final rightStart = padding + leftWidth + 12 * scale;
+      final rightEnd = imgW - padding;
+      final rightColWidth = rightEnd - rightStart;
+
+      // memo painter: 우측 컬럼 폭에 맞춰 재생성 (이전 memo painter가 있으면 dispose)
+      if (!isSecure && memo != null && memo.isNotEmpty && rightColWidth > 60 * scale) {
+        painters.memo?.dispose();
+        painters.memo = _tp(memo,
+            fontSize: 22 * scale,
+            fontWeight: FontWeight.w700,
+            color: stampColor.withValues(alpha: alpha(0.95)),
+            maxWidth: rightColWidth,
+            maxLines: 4,
+            shadows: ts,
+            textAlign: TextAlign.right);
+      } else if (rightColWidth <= 60 * scale) {
+        // 공간이 너무 좁으면 memo 생략
+        painters.memo?.dispose();
+        painters.memo = null;
+      }
+
+      // 우측 컬럼 높이 (위치정보 3줄 + memo)
       double rightH = 0;
       if (painters.rightCity != null) {
         rightH += painters.rightCity!.height;
@@ -302,6 +335,9 @@ class StampBurnService {
       }
       if (painters.code != null) {
         rightH += (rightH > 0 ? 2 * scale : 0) + painters.code!.height;
+      }
+      if (!isSecure && painters.memo != null) {
+        rightH += (rightH > 0 ? 8 * scale : 0) + painters.memo!.height;
       }
 
       // 메인 Row 높이 = 좌우 max (start 정렬)
@@ -342,7 +378,7 @@ class StampBurnService {
       // ── 메인 Row 시작 ──
       final rowY = y;
 
-      // 좌측 열: 시간 → 날짜 → 주소 → 센서 → memo(크게)
+      // 좌측 열: 시간 → 날짜 → 주소 → 센서
       double leftY = rowY;
       if (painters.timeHhMm != null) {
         painters.timeHhMm!.paint(canvas, Offset(padding, leftY));
@@ -369,18 +405,12 @@ class StampBurnService {
         painters.overlay!.paint(canvas, Offset(padding, leftY));
         leftY += painters.overlay!.height;
       }
-      if (!isSecure && painters.memo != null) {
-        if (leftY > rowY) leftY += 8 * scale;
-        painters.memo!.paint(canvas, Offset(padding, leftY));
-        leftY += painters.memo!.height;
-      }
 
-      // 우측 열: • 도시 → 좌표 → 증거 ID (우측 정렬)
+      // 우측 열: • 도시 → 좌표 → 증거 ID (우측 정렬) → memo(꽉 채움)
       double rightY = rowY;
-      final rightEdge = imgW - padding;
 
       if (painters.rightCity != null) {
-        final cityX = rightEdge - painters.rightCity!.width;
+        final cityX = rightEnd - painters.rightCity!.width;
         // 작은 원형 bullet
         final dotPaint = Paint()
           ..color = stampColor.withValues(alpha: alpha(0.75));
@@ -394,15 +424,23 @@ class StampBurnService {
       }
       if (painters.gps != null) {
         if (rightY > rowY) rightY += 2 * scale;
-        final gpsX = rightEdge - painters.gps!.width;
+        final gpsX = rightEnd - painters.gps!.width;
         painters.gps!.paint(canvas, Offset(gpsX, rightY));
         rightY += painters.gps!.height;
       }
       if (painters.code != null) {
         if (rightY > rowY) rightY += 2 * scale;
-        final codeX = rightEdge - painters.code!.width;
+        final codeX = rightEnd - painters.code!.width;
         painters.code!.paint(canvas, Offset(codeX, rightY));
         rightY += painters.code!.height;
+      }
+      // memo — 위치정보 3줄 바로 아래, 우측 컬럼 폭 전체에 우측 정렬 렌더
+      //   _tp는 textAlign: right + layout minWidth=maxWidth 세팅이라
+      //   rightStart에 그려도 각 라인이 rightEnd 쪽으로 정렬됨
+      if (!isSecure && painters.memo != null) {
+        if (rightY > rowY) rightY += 8 * scale;
+        painters.memo!.paint(canvas, Offset(rightStart, rightY));
+        rightY += painters.memo!.height;
       }
 
       // 메인 Row 끝: rowH만큼 진행 (start 정렬이므로)
@@ -642,6 +680,7 @@ class StampBurnService {
     double? maxWidth,
     int maxLines = 2,
     List<Shadow>? shadows,
+    TextAlign textAlign = TextAlign.left,
   }) {
     final tp = TextPainter(
       text: TextSpan(
@@ -659,7 +698,11 @@ class StampBurnService {
       textDirection: TextDirection.ltr,
       maxLines: maxLines,
       ellipsis: '…',
-    )..layout(maxWidth: maxWidth ?? double.infinity);
+      textAlign: textAlign,
+    )..layout(
+        minWidth: textAlign == TextAlign.left ? 0 : (maxWidth ?? 0),
+        maxWidth: maxWidth ?? double.infinity,
+      );
     return tp;
   }
 
