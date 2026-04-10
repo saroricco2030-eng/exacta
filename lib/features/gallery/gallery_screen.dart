@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -289,23 +288,28 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
 
     HapticFeedback.mediumImpact();
     final db = ref.read(dbProvider);
+    final ids = _selectedIds.toList();
+
     // 대원칙 4: 파일-DB 동기 — 파일과 DB를 함께 삭제
-    for (final id in _selectedIds) {
-      final photo = await db.getPhotoById(id);
-      if (photo != null) {
-        try {
-          final file = File(photo.filePath);
-          if (await file.exists()) await file.delete();
-          if (photo.thumbnailPath != null) {
-            final thumb = File(photo.thumbnailPath!);
-            if (await thumb.exists()) await thumb.delete();
-          }
-        } catch (_) {
-          // 파일 삭제 실패 — DB 삭제는 계속 진행
+    // 1) ID 목록으로 사진 메타데이터 1쿼리에 일괄 조회
+    // 2) 모든 파일을 병렬 삭제 (Future.wait)
+    // 3) DB는 단일 IN 쿼리로 한 번에 삭제
+    // → N=50 기준 100+ 순차 I/O → 1 쿼리 + 병렬 파일 삭제로 단축
+    final list = await db.getPhotosByIds(ids);
+    await Future.wait(list.map((photo) async {
+      try {
+        final file = File(photo.filePath);
+        if (await file.exists()) await file.delete();
+        if (photo.thumbnailPath != null) {
+          final thumb = File(photo.thumbnailPath!);
+          if (await thumb.exists()) await thumb.delete();
         }
+      } catch (_) {
+        // 파일 삭제 실패 — DB 삭제는 계속 진행
       }
-      await db.deletePhoto(id);
-    }
+    }));
+    await db.deletePhotosByIds(ids);
+
     if (mounted) {
       setState(() {
         _selectedIds.clear();

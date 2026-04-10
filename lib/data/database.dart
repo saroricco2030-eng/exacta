@@ -288,6 +288,18 @@ class AppDatabase extends _$AppDatabase {
   Future<int> deletePhoto(int id) =>
       (delete(photos)..where((t) => t.id.equals(id))).go();
 
+  /// 여러 사진을 ID 목록으로 한 번에 조회 (일괄 삭제 등 배치 작업용)
+  Future<List<Photo>> getPhotosByIds(List<int> ids) {
+    if (ids.isEmpty) return Future.value(const []);
+    return (select(photos)..where((t) => t.id.isIn(ids))).get();
+  }
+
+  /// 여러 사진을 한 번의 SQL DELETE로 삭제 (N개 → 단일 쿼리)
+  Future<int> deletePhotosByIds(List<int> ids) {
+    if (ids.isEmpty) return Future.value(0);
+    return (delete(photos)..where((t) => t.id.isIn(ids))).go();
+  }
+
   // ── 통계 ────────────────────────────────────────────────────
 
   Future<int> getWeeklyPhotoCount() async {
@@ -383,7 +395,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// 특정 월의 일별 촬영 수 (캘린더용)
   Future<Map<int, int>> getDailyPhotoCounts(int year, int month) async {
-    final monthStr = '${year}-${month.toString().padLeft(2, '0')}';
+    final monthStr = '$year-${month.toString().padLeft(2, '0')}';
     final all = await (select(photos)
           ..where((t) => t.timestamp.like('$monthStr%')))
         .get();
