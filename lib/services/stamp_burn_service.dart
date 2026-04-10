@@ -127,16 +127,22 @@ class StampBurnService {
     }
 
     // Row 1: 주소 + GPS
-    // text 모드는 우측 열 간결성을 위해 주소를 첫 토큰(도시)만 사용 + 작은 폰트
+    // text 모드: address = 풀 주소(좌측 컬럼), rightCity = 첫 토큰(우측 컬럼)
     if (!isSecure) {
       if (showAddress && address != null && address.isNotEmpty) {
-        final displayAddr = isTextMode ? _firstToken(address) : address;
-        painters.address = _tp(displayAddr,
-            fontSize: (isTextMode ? 13 : 15) * scale,
-            fontWeight: isTextMode ? FontWeight.w600 : FontWeight.w500,
-            color: stampColor.withValues(alpha: alpha(0.85)),
-            maxWidth: imgW * (isTextMode ? 0.5 : 0.45),
+        painters.address = _tp(address,
+            fontSize: (isTextMode ? 11 : 15) * scale,
+            fontWeight: FontWeight.w500,
+            color: stampColor.withValues(alpha: alpha(isTextMode ? 0.75 : 0.8)),
+            maxWidth: imgW * (isTextMode ? 0.55 : 0.45),
             shadows: ts);
+        if (isTextMode) {
+          painters.rightCity = _tp(_firstToken(address),
+              fontSize: 13 * scale,
+              fontWeight: FontWeight.w600,
+              color: stampColor.withValues(alpha: alpha(0.9)),
+              shadows: ts);
+        }
       }
       if (showGps && latitude != null && longitude != null) {
         final lat = latitude;
@@ -148,7 +154,7 @@ class StampBurnService {
         painters.gps = _tp(gps,
             fontSize: (isTextMode ? 11 : 12) * scale,
             fontWeight: isTextMode ? FontWeight.w500 : FontWeight.w400,
-            color: stampColor.withValues(alpha: alpha(isTextMode ? 0.7 : 0.55)),
+            color: stampColor.withValues(alpha: alpha(isTextMode ? 0.75 : 0.55)),
             letterSpacing: 0.3, shadows: ts);
       }
     }
@@ -257,34 +263,51 @@ class StampBurnService {
 
     if (isTextMode) {
       // ════════════════════════════════════════════════════════
-      // TEXT MODE: 2열 (시간·날짜 | 도시·좌표·ID) + 구분선 + 중앙 배지
+      // TEXT MODE: 2열 구조 — 모든 옵션 켠 경우에도 정렬 안정
+      //   좌측: 시간 → 날짜 → (주소 풀) → (센서 111° 39.8m 0.1km/h)
+      //   우측: • 도시 → 좌표 → 증거 ID
+      //   메인 Row 위: memo(전폭), secureBadge
+      //   메인 Row 아래: logo/sig, 6 scale 간격, 중앙 tamperBadge
+      // Row crossAxisAlignment: start — 두 열 높이 불일치 시 상단 정렬
       // ════════════════════════════════════════════════════════
+
+      // 좌측 컬럼 높이
       double leftH = 0;
-      if (painters.timeHhMm != null) leftH += painters.timeHhMm!.height;
+      if (painters.timeHhMm != null) {
+        leftH += painters.timeHhMm!.height;
+      }
       if (painters.date != null) {
-        leftH += (painters.timeHhMm != null ? 2 * scale : 0) + painters.date!.height;
+        leftH += (leftH > 0 ? 2 * scale : 0) + painters.date!.height;
+      }
+      if (painters.address != null) {
+        leftH += (leftH > 0 ? 3 * scale : 0) + painters.address!.height;
+      }
+      if (painters.overlay != null) {
+        leftH += (leftH > 0 ? 2 * scale : 0) + painters.overlay!.height;
       }
 
+      // 우측 컬럼 높이
       double rightH = 0;
-      if (painters.address != null) rightH += painters.address!.height;
+      if (painters.rightCity != null) {
+        rightH += painters.rightCity!.height;
+      }
       if (painters.gps != null) {
-        rightH += (painters.address != null ? 2 * scale : 0) + painters.gps!.height;
+        rightH += (rightH > 0 ? 2 * scale : 0) + painters.gps!.height;
       }
       if (painters.code != null) {
         rightH += (rightH > 0 ? 2 * scale : 0) + painters.code!.height;
       }
 
-      final row1H = leftH > rightH ? leftH : rightH;
-      double barHeight = padding * 2 + row1H;
+      // 메인 Row 높이 = 좌우 max (start 정렬)
+      final rowH = leftH > rightH ? leftH : rightH;
+
+      double barHeight = padding * 2 + rowH;
 
       if (painters.secureBadge != null) {
         barHeight += painters.secureBadge!.height + 6 * scale;
       }
       if (!isSecure && painters.memo != null) {
-        barHeight += 6 * scale + painters.memo!.height;
-      }
-      if (painters.overlay != null) {
-        barHeight += 4 * scale + painters.overlay!.height;
+        barHeight += painters.memo!.height + 6 * scale;
       }
       if (logoImage != null || sigImage != null) {
         barHeight += 6 * scale;
@@ -296,10 +319,9 @@ class StampBurnService {
         barHeight += 6 * scale +
             (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
       }
-      // 구분선 간격 + 라인 + 배지
-      barHeight += 8 * scale + 1 + 6 * scale;
+      // 메인 Row → 배지 간격
       if (painters.tamperBadge != null) {
-        barHeight += painters.tamperBadge!.height;
+        barHeight += 6 * scale + painters.tamperBadge!.height;
       }
 
       final barTop = isTop ? 0.0 : imgH - barHeight;
@@ -307,15 +329,23 @@ class StampBurnService {
 
       double y = barTop + padding;
 
+      // 보안 뱃지 (상단)
       if (painters.secureBadge != null) {
         painters.secureBadge!.paint(canvas, Offset(padding, y));
         y += painters.secureBadge!.height + 6 * scale;
       }
 
-      final row1Y = y;
+      // 메모 (메인 Row 위쪽 전폭)
+      if (!isSecure && painters.memo != null) {
+        painters.memo!.paint(canvas, Offset(padding, y));
+        y += painters.memo!.height + 6 * scale;
+      }
 
-      // ── 좌측: 시간 + 날짜 ──
-      double leftY = row1Y;
+      // ── 메인 Row 시작 ──
+      final rowY = y;
+
+      // 좌측 열: 시간 → 날짜 → 주소 → 센서
+      double leftY = rowY;
       if (painters.timeHhMm != null) {
         painters.timeHhMm!.paint(canvas, Offset(padding, leftY));
         if (painters.timeSs != null) {
@@ -324,53 +354,56 @@ class StampBurnService {
           painters.timeSs!.paint(canvas,
               Offset(padding + painters.timeHhMm!.width, ssY));
         }
-        leftY += painters.timeHhMm!.height + 2 * scale;
+        leftY += painters.timeHhMm!.height;
       }
       if (painters.date != null) {
+        if (leftY > rowY) leftY += 2 * scale;
         painters.date!.paint(canvas, Offset(padding, leftY));
+        leftY += painters.date!.height;
+      }
+      if (painters.address != null) {
+        if (leftY > rowY) leftY += 3 * scale;
+        painters.address!.paint(canvas, Offset(padding, leftY));
+        leftY += painters.address!.height;
+      }
+      if (painters.overlay != null) {
+        if (leftY > rowY) leftY += 2 * scale;
+        painters.overlay!.paint(canvas, Offset(padding, leftY));
+        leftY += painters.overlay!.height;
       }
 
-      // ── 우측: •city + 좌표 + ID (우측 정렬) ──
-      double rightY = row1Y;
+      // 우측 열: • 도시 → 좌표 → 증거 ID (우측 정렬)
+      double rightY = rowY;
       final rightEdge = imgW - padding;
 
-      if (painters.address != null) {
-        final addrX = rightEdge - painters.address!.width;
+      if (painters.rightCity != null) {
+        final cityX = rightEdge - painters.rightCity!.width;
+        // 작은 원형 bullet
         final dotPaint = Paint()
           ..color = stampColor.withValues(alpha: alpha(0.75));
         canvas.drawCircle(
-          Offset(addrX - 6 * scale, rightY + painters.address!.height / 2),
+          Offset(cityX - 6 * scale, rightY + painters.rightCity!.height / 2),
           2 * scale,
           dotPaint,
         );
-        painters.address!.paint(canvas, Offset(addrX, rightY));
-        rightY += painters.address!.height + 2 * scale;
+        painters.rightCity!.paint(canvas, Offset(cityX, rightY));
+        rightY += painters.rightCity!.height;
       }
       if (painters.gps != null) {
+        if (rightY > rowY) rightY += 2 * scale;
         final gpsX = rightEdge - painters.gps!.width;
         painters.gps!.paint(canvas, Offset(gpsX, rightY));
-        rightY += painters.gps!.height + 2 * scale;
+        rightY += painters.gps!.height;
       }
       if (painters.code != null) {
+        if (rightY > rowY) rightY += 2 * scale;
         final codeX = rightEdge - painters.code!.width;
         painters.code!.paint(canvas, Offset(codeX, rightY));
+        rightY += painters.code!.height;
       }
 
-      y = row1Y + row1H;
-
-      // 메모 (있을 때만 전폭)
-      if (!isSecure && painters.memo != null) {
-        y += 6 * scale;
-        painters.memo!.paint(canvas, Offset(padding, y));
-        y += painters.memo!.height;
-      }
-
-      // 오버레이 (나침반/해발/속도)
-      if (painters.overlay != null) {
-        y += 4 * scale;
-        painters.overlay!.paint(canvas, Offset(padding, y));
-        y += painters.overlay!.height;
-      }
+      // 메인 Row 끝: rowH만큼 진행 (start 정렬이므로)
+      y = rowY + rowH;
 
       // 로고/서명
       if (logoImage != null || sigImage != null) {
@@ -402,20 +435,9 @@ class StampBurnService {
         y += (painters.secureProject?.height ?? painters.secureId?.height ?? 0);
       }
 
-      // ── 구분선 ──
-      y += 8 * scale;
-      final divLinePaint = Paint()
-        ..color = stampColor.withValues(alpha: alpha(0.35))
-        ..strokeWidth = 1;
-      canvas.drawLine(
-        Offset(padding, y + 0.5),
-        Offset(imgW - padding, y + 0.5),
-        divLinePaint,
-      );
-      y += 1 + 6 * scale;
-
-      // ── 중앙 Exacta 배지 ──
+      // ── 중앙 Exacta 배지 (메인 Row 아래 6 scale 간격) ──
       if (painters.tamperBadge != null) {
+        y += 6 * scale;
         final badgeX = (imgW - painters.tamperBadge!.width) / 2;
         painters.tamperBadge!.paint(canvas, Offset(badgeX, y));
       }
@@ -694,6 +716,7 @@ class _StampPainters {
   TextPainter? timeSs;
   TextPainter? date;
   TextPainter? address;
+  TextPainter? rightCity; // text 모드: 우측 컬럼 도시명
   TextPainter? gps;
   TextPainter? memo;
   TextPainter? overlay;
@@ -709,6 +732,7 @@ class _StampPainters {
     timeSs?.dispose();
     date?.dispose();
     address?.dispose();
+    rightCity?.dispose();
     gps?.dispose();
     memo?.dispose();
     overlay?.dispose();

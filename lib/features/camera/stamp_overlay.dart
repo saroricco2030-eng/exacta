@@ -130,17 +130,18 @@ class StampOverlay extends StatelessWidget {
   }
 
   // ════════════════════════════════════════════════════════════
-  // TEXT 레이아웃 — 2열 (좌: 시간/날짜, 우: 도시/좌표/ID)
-  //                 + 구분선
-  //                 + 중앙 Exacta 배지
+  // TEXT 레이아웃 — 2열 + 중앙 배지
+  //   좌측: 시간 → 날짜 → 풀 주소 → 센서(방위°/고도m/속도km/h 인라인 1줄)
+  //   우측: • 도시명 → 좌표 → 증거 ID
+  //   메인 Row 위: memo(전폭), secureBadge
+  //   메인 Row 아래: logo/sig → 6dp → 중앙 tamperBadge
+  // Row crossAxisAlignment: start — 두 열 높이 불일치해도 상단 기준 안정
   // ════════════════════════════════════════════════════════════
   Widget _buildTextOnly(BuildContext context) {
-    // text 모드는 반투명 텍스트가 읽기 어려우므로 알파값 강화
     double a(double o) => (o * 0.4 + 0.6).clamp(0.0, 1.0);
     final c = _color;
     final sh = _textShadows;
 
-    // 주소를 첫 토큰만 뽑아서 "도시" 수준으로 간결화
     String cityLine() {
       if (address.isEmpty) return '';
       final first = address.split(RegExp(r'[,\s]')).firstWhere(
@@ -148,6 +149,24 @@ class StampOverlay extends StatelessWidget {
       return first.isEmpty ? address : first;
     }
 
+    // 센서 인라인 1줄 (방위° / 고도m / 속도km/h)
+    String sensorLine() {
+      final parts = <String>[];
+      if (showCompass && compassHeading != null) {
+        parts.add('${compassHeading!.toStringAsFixed(0)}°');
+      }
+      if (showAltitude && altitude != null) {
+        parts.add('${altitude!.toStringAsFixed(1)}m');
+      }
+      if (showSpeed && speed != null) {
+        parts.add('${(speed! * 3.6).toStringAsFixed(1)}km/h');
+      }
+      return parts.join('  ');
+    }
+    final sensorText = !_isSecure ? sensorLine() : '';
+    final hasAddress = !_isSecure && showAddress && address.isNotEmpty;
+
+    // 좌측 컬럼
     final leftChildren = <Widget>[
       if (showTime)
         Row(
@@ -155,7 +174,7 @@ class StampOverlay extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            Text(_hhmm, style: _ts(32, FontWeight.w700, c, shadows: sh)),
+            Text(_hhmm, style: _ts(30, FontWeight.w700, c, shadows: sh)),
             Text(_ss, style: _ts(17, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
           ],
         ),
@@ -163,13 +182,26 @@ class StampOverlay extends StatelessWidget {
         Padding(
           padding: EdgeInsets.only(top: showTime ? 2 : 0),
           child: Text('$_dateStr ${_weekday(context)}',
-            style: _ts(14, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
+            style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
+        ),
+      if (hasAddress)
+        Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: Text(address, maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.75)), shadows: sh)),
+        ),
+      if (sensorText.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(sensorText, maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)),
+              letterSpacing: 0.2, shadows: sh)),
         ),
     ];
 
+    // 우측 컬럼
     final rightChildren = <Widget>[
-      // 도시 (• city)
-      if (!_isSecure && showAddress && address.isNotEmpty)
+      if (hasAddress)
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -184,22 +216,18 @@ class StampOverlay extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 5),
-            Flexible(
-              child: Text(cityLine(),
-                maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.85)), shadows: sh)),
-            ),
+            Text(cityLine(),
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
           ],
         ),
-      // 좌표
       if (!_isSecure && showGps && _gps.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 2),
           child: Text(_gps,
-            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.7)),
+            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.75)),
               letterSpacing: 0.3, shadows: sh)),
         ),
-      // 증거 ID
       if (photoCode != null && photoCode!.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 2),
@@ -217,16 +245,26 @@ class StampOverlay extends StatelessWidget {
         children: [
           if (_isSecure) _secureBadge(c),
 
-          // 2열 Row
+          // 메모 (메인 Row 위 전폭)
+          if (memo.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Text(memo, maxLines: 2, overflow: TextOverflow.ellipsis,
+                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
+            ),
+
+          // ── 메인 Row ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: leftChildren,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: leftChildren,
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
@@ -235,53 +273,13 @@ class StampOverlay extends StatelessWidget {
             ],
           ),
 
-          // 메모 (있을 때만 2열 아래 전폭)
-          if (memo.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(memo, maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
-            ),
-
-          // 오버레이 (나침반/해발/속도)
-          if (!_isSecure && (showCompass || showAltitude || showSpeed))
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Wrap(
-                spacing: 10,
-                children: [
-                  if (showCompass && compassHeading != null)
-                    Text('${compassHeading!.toStringAsFixed(0)}°',
-                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
-                  if (showAltitude && altitude != null)
-                    Text('${altitude!.toStringAsFixed(1)}m',
-                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
-                  if (showSpeed && speed != null)
-                    Text('${(speed! * 3.6).toStringAsFixed(1)}km/h',
-                      style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)), shadows: sh)),
-                ],
-              ),
-            ),
-
-          // 로고/서명
+          // 로고/서명 (메인 Row 아래 전폭)
           _logoSignature(c),
           if (_isSecure) _secureFooter(c),
 
-          // ── 구분선 ──
-          Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 6),
-            child: Container(
-              height: 1,
-              decoration: BoxDecoration(
-                color: c.withValues(alpha: a(0.35)),
-                boxShadow: sh.map((s) => BoxShadow(
-                  offset: s.offset, blurRadius: s.blurRadius, color: s.color,
-                )).toList(),
-              ),
-            ),
-          ),
+          const SizedBox(height: 6),
 
-          // ── 중앙 Exacta 배지 ──
+          // ── 중앙 검증 텍스트 ──
           if (tamperBadgeText.isNotEmpty)
             Text(
               tamperBadgeText,
