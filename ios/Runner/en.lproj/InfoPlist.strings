@@ -1,0 +1,13 @@
+/* Exacta — iOS permission strings (English) */
+
+"CFBundleDisplayName" = "Exacta";
+
+"NSCameraUsageDescription" = "Exacta uses the camera to capture photos and videos with burned-in timestamp, GPS, and tamper-proof metadata for field work records.";
+
+"NSMicrophoneUsageDescription" = "Exacta needs microphone access to record audio when capturing videos of site conditions.";
+
+"NSLocationWhenInUseUsageDescription" = "Exacta records GPS coordinates and addresses in photo stamps to create tamper-proof evidence of when and where each photo was taken. Location is never used when Secure mode is enabled.";
+
+"NSPhotoLibraryUsageDescription" = "Exacta needs photo library access to let you pick a logo image for your stamps and to share exported photos.";
+
+"NSPhotoLibraryAddUsageDescription" = "Exacta saves your captured photos to the system photo library so they appear alongside your other photos.";

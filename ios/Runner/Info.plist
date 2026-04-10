@@ -13,7 +13,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>exacta</string>
+		<string>Exacta</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -22,6 +22,12 @@
 		<string>????</string>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>ko</string>
+			<string>en</string>
+			<string>ja</string>
+		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
@@ -31,15 +37,11 @@
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
-			<string>UIInterfaceOrientationLandscapeLeft</string>
-			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
 			<string>UIInterfaceOrientationPortraitUpsideDown</string>
-			<string>UIInterfaceOrientationLandscapeLeft</string>
-			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
@@ -49,5 +51,19 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+
+		<!-- ── 권한 사유 문구 (영문 기본값 — 로컬라이즈는 *.lproj/InfoPlist.strings) ── -->
+		<key>NSCameraUsageDescription</key>
+		<string>Exacta uses the camera to capture photos and videos with burned-in timestamp, GPS, and tamper-proof metadata for field work records.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Exacta needs microphone access to record audio when capturing videos of site conditions.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Exacta records GPS coordinates and addresses in photo stamps to create tamper-proof evidence of when and where each photo was taken. Location is never used when Secure mode is enabled.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Exacta needs photo library access to let you pick a logo image for your stamps and to share exported photos.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Exacta saves your captured photos to the system photo library so they appear alongside your other photos.</string>
+
+		<!-- iOS 17+ 프라이버시 매니페스트 지원 파일: PrivacyInfo.xcprivacy -->
 	</dict>
 </plist>

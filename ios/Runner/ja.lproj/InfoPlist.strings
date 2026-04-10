@@ -1,0 +1,13 @@
+/* Exacta — iOS 権限メッセージ (日本語) */
+
+"CFBundleDisplayName" = "Exacta";
+
+"NSCameraUsageDescription" = "Exactaは、タイムスタンプ・GPS・改ざん防止メタデータがピクセルに焼き込まれた写真や動画を撮影するためにカメラを使用します。";
+
+"NSMicrophoneUsageDescription" = "Exactaは現場の動画撮影時に音声を録音するためマイクを使用します。";
+
+"NSLocationWhenInUseUsageDescription" = "Exactaは撮影時刻と場所の改ざん不可能な証拠を残すため、GPS座標と住所を写真スタンプに記録します。セキュア撮影モードでは位置情報を一切使用しません。";
+
+"NSPhotoLibraryUsageDescription" = "Exactaはスタンプ用のロゴ画像を選択したり、エクスポートした写真を共有するため写真ライブラリにアクセスします。";
+
+"NSPhotoLibraryAddUsageDescription" = "Exactaは撮影した写真をシステムのフォトライブラリに保存し、他の写真と一緒に表示できるようにします。";

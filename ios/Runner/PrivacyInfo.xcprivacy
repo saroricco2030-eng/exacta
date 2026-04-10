@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- ════════════════════════════════════════════════════════
+         Exacta Privacy Manifest (iOS 17+)
+         Apple Privacy Manifest 필수 선언:
+         https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
+         ════════════════════════════════════════════════════════ -->
+
+    <!-- 1. 제3자 추적 사용 여부 (IDFA 등) — 없음 -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <!-- 2. 수집하는 데이터 — 완전 로컬 앱이므로 없음 -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+
+    <!-- 3. 사용 중인 필수 API 카테고리 (Required Reason APIs) -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <!-- 파일 타임스탬프 — 저장 공간 계산을 위해 file.stat() 사용 -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- C617.1: 앱 자체 파일의 타임스탬프 접근 (저장 공간 계산 목적) -->
+                <string>C617.1</string>
+            </array>
+        </dict>
+
+        <!-- 디스크 공간 — 저장 공간 표시를 위해 -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryDiskSpace</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- E174.1: 사용자에게 표시하기 위한 디스크 공간 조회 -->
+                <string>E174.1</string>
+            </array>
+        </dict>
+
+        <!-- UserDefaults — shared_preferences 플러그인이 사용 -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- CA92.1: 앱 자체 설정 읽기/쓰기 -->
+                <string>CA92.1</string>
+            </array>
+        </dict>
+
+        <!-- 시스템 부팅 시간 — NTP 라이브러리가 사용 -->
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategorySystemBootTime</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <!-- 35F9.1: 사용자 표시 또는 앱 내부 타이밍 측정 목적 -->
+                <string>35F9.1</string>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

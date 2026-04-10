@@ -1,0 +1,64 @@
+Exacta is a tamper-proof photo recording tool built for field engineers, construction inspectors, real-estate agents, insurance adjusters, and logistics workers.
+
+Time, GPS, and address are burned directly into the photo pixels at capture time. Every photo is mathematically linked to the next via a SHA-256 hash chain. Tampering with even a single byte is detected instantly.
+
+━━━━━━━━━━━━━━━━━
+■ Key Features
+━━━━━━━━━━━━━━━━━
+
+▸ Pixel-Burned Stamps
+Time, date, address, GPS coordinates, altitude, compass heading, and speed are composited directly into the image pixels. EXIF metadata removal cannot erase them.
+
+▸ NTP Time Sync
+Capture time is synchronized with internet standard time servers. Manipulating the device clock has no effect on the recorded time.
+
+▸ SHA-256 Hash Chain (Tamper Detection)
+Each photo is mathematically linked to the previous one. Tampering with a single photo breaks the chain for all subsequent photos and is detected immediately.
+
+▸ Secure Capture Mode
+Completely blocks GPS and address recording, and strips EXIF location data. Safe for sensitive sites (military, medical, legal, etc.).
+
+▸ Project-Based Organization
+Create projects and auto-classify photos. Bulk share by project, color labels, active/done state management.
+
+▸ Legal Evidence Pack PDF Export
+Enter case name and author → automatically generates a PDF with cover page, all photos, hashes, and external verification instructions. Ready for court, insurance, or dispute submission.
+
+▸ Field-Friendly UI
+Bold text, large shutter button (66dp), 56dp touch targets for gloved hands. Designed for outdoor direct sunlight and one-handed operation.
+
+▸ Fully Offline
+No server communication. No ads. No accounts. Photos are stored only on your device.
+
+▸ Multilingual
+한국어 / English / 日本語
+
+━━━━━━━━━━━━━━━━━
+■ Recommended For
+━━━━━━━━━━━━━━━━━
+
+• HVAC, plumbing, electrical, and construction technicians
+• Real-estate agents and property inspectors
+• Insurance loss adjusters and accident investigators
+• Delivery and logistics handover documentation
+• Medical and dental before/after photos
+• Legal evidence photography
+• Government and institutional site supervisors
+
+━━━━━━━━━━━━━━━━━
+■ Permissions
+━━━━━━━━━━━━━━━━━
+
+• Camera: Capture photos and videos
+• Microphone: Record audio for videos (optional)
+• Location: Burn GPS and address into stamps (never used in Secure mode)
+• Photo Library: Pick logo image; save captures to system gallery
+
+━━━━━━━━━━━━━━━━━
+■ Data Protection
+━━━━━━━━━━━━━━━━━
+
+Exacta does not transmit a single byte of user data externally.
+All photos, metadata, and hash chains are stored only on your device. Data leaves the device only when you explicitly tap the share button.
+
+Privacy Policy: https://github.com/saroricco2030-eng/exacta/blob/main/docs/privacy_policy_en.md

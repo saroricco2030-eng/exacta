@@ -1,0 +1,1 @@
+field camera,timestamp camera,gps photo,tamper proof,construction photo,inspection,SHA256,hash chain,NTP time,evidence camera,offline camera,HVAC,property inspection,insurance adjuster,legal evidence,site documentation,project photo,burn-in stamp,location stamp,jobsite

@@ -1,0 +1,1 @@
+Field camera with time, GPS, and SHA-256 hash chain burned into every pixel.
