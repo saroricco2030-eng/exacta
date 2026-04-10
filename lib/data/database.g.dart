@@ -1804,7 +1804,7 @@ class $StampConfigsTable extends StampConfigs
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultValue: const Constant('card'),
+    defaultValue: const Constant('text'),
   );
   @override
   List<GeneratedColumn> get $columns => [

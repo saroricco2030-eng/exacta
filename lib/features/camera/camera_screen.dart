@@ -437,7 +437,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       final captureDateFormat = _stampConfig?.dateFormat ?? 'YYYY.MM.DD';
       final captureStampColor = _stampConfig?.stampColor ?? '#FFFFFF';
       final captureStampPosition = _stampConfig?.stampPosition ?? 'bottom';
-      final captureStampLayout = _stampConfig?.stampLayout ?? 'bar';
+      final captureStampLayout = _stampConfig?.stampLayout ?? 'text';
       final captureShowInGallery = _stampConfig?.showInNativeGallery ?? true;
       final captureLogoPath = _stampConfig?.logoPath;
       final captureSignaturePath = _stampConfig?.signaturePath;
@@ -715,7 +715,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
         dateFormat: _stampConfig?.dateFormat ?? 'YYYY.MM.DD',
         stampColor: _stampConfig?.stampColor ?? '#FFFFFF',
         stampPosition: _stampConfig?.stampPosition ?? 'bottom',
-        stampLayout: _stampConfig?.stampLayout ?? 'bar',
+        stampLayout: _stampConfig?.stampLayout ?? 'text',
         showInNativeGallery: _stampConfig?.showInNativeGallery ?? true,
         logoPath: _stampConfig?.logoPath,
         signaturePath: _stampConfig?.signaturePath,
@@ -992,7 +992,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                     dateFormat: _stampConfig?.dateFormat ?? 'YYYY.MM.DD',
                     stampColorHex: _stampConfig?.stampColor,
                     stampPosition: _stampConfig?.stampPosition ?? 'bottom',
-                    stampLayout: _stampConfig?.stampLayout ?? 'card',
+                    stampLayout: _stampConfig?.stampLayout ?? 'text',
                     showCompass: _showCompass && _preset != CameraPreset.secure,
                     showAltitude: _showAltitude && _preset != CameraPreset.secure,
                     showSpeed: _showSpeed && _preset != CameraPreset.secure,

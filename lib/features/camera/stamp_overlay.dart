@@ -26,7 +26,7 @@ class StampOverlay extends StatelessWidget {
     this.dateFormat = 'YYYY.MM.DD',
     this.stampColorHex,
     this.stampPosition = 'bottom',
-    this.stampLayout = 'card',
+    this.stampLayout = 'text',
     this.showCompass = false,
     this.showAltitude = false,
     this.showSpeed = false,

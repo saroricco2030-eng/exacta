@@ -51,7 +51,7 @@ class StampBurnService {
     List<String> weekdayNames = const ['월', '화', '수', '목', '금', '토', '일'],
     String stampColorHex = '#FFFFFF',
     String stampPosition = 'bottom',
-    String stampLayout = 'bar', // 'bar' | 'card' | 'text' ('text' = 배경 없이 그림자)
+    String stampLayout = 'text', // 'bar' | 'card' | 'text' (기본 'text' = 배경 없이 그림자)
     String? projectName,
     String? weatherText,
     String? photoCode,

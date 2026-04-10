@@ -40,7 +40,7 @@ class PhotoSaveService {
     String dateFormat = 'YYYY.MM.DD',
     String stampColor = '#FFFFFF',
     String stampPosition = 'bottom',
-    String stampLayout = 'bar',
+    String stampLayout = 'text',
     String? logoPath,
     String? signaturePath,
     String? projectName,

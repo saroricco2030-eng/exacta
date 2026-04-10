@@ -63,7 +63,7 @@ class StampConfigs extends Table {
   TextColumn get signaturePath => text().nullable()();
   TextColumn get themeMode => text().withDefault(const Constant('system'))(); // 'system' | 'light' | 'dark'
   TextColumn get locale => text().withDefault(const Constant('system'))(); // 'system' | 'ko' | 'en' | 'ja'
-  TextColumn get stampLayout => text().withDefault(const Constant('card'))(); // 'bar' | 'card'
+  TextColumn get stampLayout => text().withDefault(const Constant('text'))(); // 'bar' | 'card' | 'text'
 
   @override
   Set<Column> get primaryKey => {id};
@@ -79,7 +79,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase get instance => _instance ??= AppDatabase._();
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -135,6 +135,13 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(photos, photos.prevHash);
             await m.addColumn(photos, photos.chainHash);
             await m.addColumn(photos, photos.ntpSynced);
+          }
+          if (from < 11) {
+            // 기본 스탬프 레이아웃을 'text'로 변경
+            // (카드/풀바 → 배경 없는 텍스트만 = Timemark 스타일)
+            await customStatement(
+              "UPDATE stamp_configs SET stamp_layout = 'text' WHERE stamp_layout = 'card' OR stamp_layout = 'bar'",
+            );
           }
         },
       );
