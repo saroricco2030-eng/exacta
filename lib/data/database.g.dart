@@ -678,6 +678,54 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _photoHashMeta = const VerificationMeta(
+    'photoHash',
+  );
+  @override
+  late final GeneratedColumn<String> photoHash = GeneratedColumn<String>(
+    'photo_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _prevHashMeta = const VerificationMeta(
+    'prevHash',
+  );
+  @override
+  late final GeneratedColumn<String> prevHash = GeneratedColumn<String>(
+    'prev_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _chainHashMeta = const VerificationMeta(
+    'chainHash',
+  );
+  @override
+  late final GeneratedColumn<String> chainHash = GeneratedColumn<String>(
+    'chain_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ntpSyncedMeta = const VerificationMeta(
+    'ntpSynced',
+  );
+  @override
+  late final GeneratedColumn<bool> ntpSynced = GeneratedColumn<bool>(
+    'ntp_synced',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("ntp_synced" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -706,6 +754,10 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
     isVideo,
     photoCode,
     weatherInfo,
+    photoHash,
+    prevHash,
+    chainHash,
+    ntpSynced,
     createdAt,
   ];
   @override
@@ -819,6 +871,30 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
         ),
       );
     }
+    if (data.containsKey('photo_hash')) {
+      context.handle(
+        _photoHashMeta,
+        photoHash.isAcceptableOrUnknown(data['photo_hash']!, _photoHashMeta),
+      );
+    }
+    if (data.containsKey('prev_hash')) {
+      context.handle(
+        _prevHashMeta,
+        prevHash.isAcceptableOrUnknown(data['prev_hash']!, _prevHashMeta),
+      );
+    }
+    if (data.containsKey('chain_hash')) {
+      context.handle(
+        _chainHashMeta,
+        chainHash.isAcceptableOrUnknown(data['chain_hash']!, _chainHashMeta),
+      );
+    }
+    if (data.containsKey('ntp_synced')) {
+      context.handle(
+        _ntpSyncedMeta,
+        ntpSynced.isAcceptableOrUnknown(data['ntp_synced']!, _ntpSyncedMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -896,6 +972,22 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
         DriftSqlType.string,
         data['${effectivePrefix}weather_info'],
       ),
+      photoHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_hash'],
+      ),
+      prevHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prev_hash'],
+      ),
+      chainHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chain_hash'],
+      ),
+      ntpSynced: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}ntp_synced'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -925,6 +1017,10 @@ class Photo extends DataClass implements Insertable<Photo> {
   final bool isVideo;
   final String? photoCode;
   final String? weatherInfo;
+  final String? photoHash;
+  final String? prevHash;
+  final String? chainHash;
+  final bool ntpSynced;
   final String createdAt;
   const Photo({
     required this.id,
@@ -942,6 +1038,10 @@ class Photo extends DataClass implements Insertable<Photo> {
     required this.isVideo,
     this.photoCode,
     this.weatherInfo,
+    this.photoHash,
+    this.prevHash,
+    this.chainHash,
+    required this.ntpSynced,
     required this.createdAt,
   });
   @override
@@ -980,6 +1080,16 @@ class Photo extends DataClass implements Insertable<Photo> {
     if (!nullToAbsent || weatherInfo != null) {
       map['weather_info'] = Variable<String>(weatherInfo);
     }
+    if (!nullToAbsent || photoHash != null) {
+      map['photo_hash'] = Variable<String>(photoHash);
+    }
+    if (!nullToAbsent || prevHash != null) {
+      map['prev_hash'] = Variable<String>(prevHash);
+    }
+    if (!nullToAbsent || chainHash != null) {
+      map['chain_hash'] = Variable<String>(chainHash);
+    }
+    map['ntp_synced'] = Variable<bool>(ntpSynced);
     map['created_at'] = Variable<String>(createdAt);
     return map;
   }
@@ -1015,6 +1125,16 @@ class Photo extends DataClass implements Insertable<Photo> {
       weatherInfo: weatherInfo == null && nullToAbsent
           ? const Value.absent()
           : Value(weatherInfo),
+      photoHash: photoHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoHash),
+      prevHash: prevHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(prevHash),
+      chainHash: chainHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chainHash),
+      ntpSynced: Value(ntpSynced),
       createdAt: Value(createdAt),
     );
   }
@@ -1040,6 +1160,10 @@ class Photo extends DataClass implements Insertable<Photo> {
       isVideo: serializer.fromJson<bool>(json['isVideo']),
       photoCode: serializer.fromJson<String?>(json['photoCode']),
       weatherInfo: serializer.fromJson<String?>(json['weatherInfo']),
+      photoHash: serializer.fromJson<String?>(json['photoHash']),
+      prevHash: serializer.fromJson<String?>(json['prevHash']),
+      chainHash: serializer.fromJson<String?>(json['chainHash']),
+      ntpSynced: serializer.fromJson<bool>(json['ntpSynced']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -1062,6 +1186,10 @@ class Photo extends DataClass implements Insertable<Photo> {
       'isVideo': serializer.toJson<bool>(isVideo),
       'photoCode': serializer.toJson<String?>(photoCode),
       'weatherInfo': serializer.toJson<String?>(weatherInfo),
+      'photoHash': serializer.toJson<String?>(photoHash),
+      'prevHash': serializer.toJson<String?>(prevHash),
+      'chainHash': serializer.toJson<String?>(chainHash),
+      'ntpSynced': serializer.toJson<bool>(ntpSynced),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -1082,6 +1210,10 @@ class Photo extends DataClass implements Insertable<Photo> {
     bool? isVideo,
     Value<String?> photoCode = const Value.absent(),
     Value<String?> weatherInfo = const Value.absent(),
+    Value<String?> photoHash = const Value.absent(),
+    Value<String?> prevHash = const Value.absent(),
+    Value<String?> chainHash = const Value.absent(),
+    bool? ntpSynced,
     String? createdAt,
   }) => Photo(
     id: id ?? this.id,
@@ -1101,6 +1233,10 @@ class Photo extends DataClass implements Insertable<Photo> {
     isVideo: isVideo ?? this.isVideo,
     photoCode: photoCode.present ? photoCode.value : this.photoCode,
     weatherInfo: weatherInfo.present ? weatherInfo.value : this.weatherInfo,
+    photoHash: photoHash.present ? photoHash.value : this.photoHash,
+    prevHash: prevHash.present ? prevHash.value : this.prevHash,
+    chainHash: chainHash.present ? chainHash.value : this.chainHash,
+    ntpSynced: ntpSynced ?? this.ntpSynced,
     createdAt: createdAt ?? this.createdAt,
   );
   Photo copyWithCompanion(PhotosCompanion data) {
@@ -1126,6 +1262,10 @@ class Photo extends DataClass implements Insertable<Photo> {
       weatherInfo: data.weatherInfo.present
           ? data.weatherInfo.value
           : this.weatherInfo,
+      photoHash: data.photoHash.present ? data.photoHash.value : this.photoHash,
+      prevHash: data.prevHash.present ? data.prevHash.value : this.prevHash,
+      chainHash: data.chainHash.present ? data.chainHash.value : this.chainHash,
+      ntpSynced: data.ntpSynced.present ? data.ntpSynced.value : this.ntpSynced,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1148,6 +1288,10 @@ class Photo extends DataClass implements Insertable<Photo> {
           ..write('isVideo: $isVideo, ')
           ..write('photoCode: $photoCode, ')
           ..write('weatherInfo: $weatherInfo, ')
+          ..write('photoHash: $photoHash, ')
+          ..write('prevHash: $prevHash, ')
+          ..write('chainHash: $chainHash, ')
+          ..write('ntpSynced: $ntpSynced, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1170,6 +1314,10 @@ class Photo extends DataClass implements Insertable<Photo> {
     isVideo,
     photoCode,
     weatherInfo,
+    photoHash,
+    prevHash,
+    chainHash,
+    ntpSynced,
     createdAt,
   );
   @override
@@ -1191,6 +1339,10 @@ class Photo extends DataClass implements Insertable<Photo> {
           other.isVideo == this.isVideo &&
           other.photoCode == this.photoCode &&
           other.weatherInfo == this.weatherInfo &&
+          other.photoHash == this.photoHash &&
+          other.prevHash == this.prevHash &&
+          other.chainHash == this.chainHash &&
+          other.ntpSynced == this.ntpSynced &&
           other.createdAt == this.createdAt);
 }
 
@@ -1210,6 +1362,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
   final Value<bool> isVideo;
   final Value<String?> photoCode;
   final Value<String?> weatherInfo;
+  final Value<String?> photoHash;
+  final Value<String?> prevHash;
+  final Value<String?> chainHash;
+  final Value<bool> ntpSynced;
   final Value<String> createdAt;
   const PhotosCompanion({
     this.id = const Value.absent(),
@@ -1227,6 +1383,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     this.isVideo = const Value.absent(),
     this.photoCode = const Value.absent(),
     this.weatherInfo = const Value.absent(),
+    this.photoHash = const Value.absent(),
+    this.prevHash = const Value.absent(),
+    this.chainHash = const Value.absent(),
+    this.ntpSynced = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   PhotosCompanion.insert({
@@ -1245,6 +1405,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     this.isVideo = const Value.absent(),
     this.photoCode = const Value.absent(),
     this.weatherInfo = const Value.absent(),
+    this.photoHash = const Value.absent(),
+    this.prevHash = const Value.absent(),
+    this.chainHash = const Value.absent(),
+    this.ntpSynced = const Value.absent(),
     required String createdAt,
   }) : filePath = Value(filePath),
        presetType = Value(presetType),
@@ -1266,6 +1430,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     Expression<bool>? isVideo,
     Expression<String>? photoCode,
     Expression<String>? weatherInfo,
+    Expression<String>? photoHash,
+    Expression<String>? prevHash,
+    Expression<String>? chainHash,
+    Expression<bool>? ntpSynced,
     Expression<String>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -1284,6 +1452,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
       if (isVideo != null) 'is_video': isVideo,
       if (photoCode != null) 'photo_code': photoCode,
       if (weatherInfo != null) 'weather_info': weatherInfo,
+      if (photoHash != null) 'photo_hash': photoHash,
+      if (prevHash != null) 'prev_hash': prevHash,
+      if (chainHash != null) 'chain_hash': chainHash,
+      if (ntpSynced != null) 'ntp_synced': ntpSynced,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -1304,6 +1476,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     Value<bool>? isVideo,
     Value<String?>? photoCode,
     Value<String?>? weatherInfo,
+    Value<String?>? photoHash,
+    Value<String?>? prevHash,
+    Value<String?>? chainHash,
+    Value<bool>? ntpSynced,
     Value<String>? createdAt,
   }) {
     return PhotosCompanion(
@@ -1322,6 +1498,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
       isVideo: isVideo ?? this.isVideo,
       photoCode: photoCode ?? this.photoCode,
       weatherInfo: weatherInfo ?? this.weatherInfo,
+      photoHash: photoHash ?? this.photoHash,
+      prevHash: prevHash ?? this.prevHash,
+      chainHash: chainHash ?? this.chainHash,
+      ntpSynced: ntpSynced ?? this.ntpSynced,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -1374,6 +1554,18 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     if (weatherInfo.present) {
       map['weather_info'] = Variable<String>(weatherInfo.value);
     }
+    if (photoHash.present) {
+      map['photo_hash'] = Variable<String>(photoHash.value);
+    }
+    if (prevHash.present) {
+      map['prev_hash'] = Variable<String>(prevHash.value);
+    }
+    if (chainHash.present) {
+      map['chain_hash'] = Variable<String>(chainHash.value);
+    }
+    if (ntpSynced.present) {
+      map['ntp_synced'] = Variable<bool>(ntpSynced.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -1398,6 +1590,10 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
           ..write('isVideo: $isVideo, ')
           ..write('photoCode: $photoCode, ')
           ..write('weatherInfo: $weatherInfo, ')
+          ..write('photoHash: $photoHash, ')
+          ..write('prevHash: $prevHash, ')
+          ..write('chainHash: $chainHash, ')
+          ..write('ntpSynced: $ntpSynced, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -2703,6 +2899,10 @@ typedef $$PhotosTableCreateCompanionBuilder =
       Value<bool> isVideo,
       Value<String?> photoCode,
       Value<String?> weatherInfo,
+      Value<String?> photoHash,
+      Value<String?> prevHash,
+      Value<String?> chainHash,
+      Value<bool> ntpSynced,
       required String createdAt,
     });
 typedef $$PhotosTableUpdateCompanionBuilder =
@@ -2722,6 +2922,10 @@ typedef $$PhotosTableUpdateCompanionBuilder =
       Value<bool> isVideo,
       Value<String?> photoCode,
       Value<String?> weatherInfo,
+      Value<String?> photoHash,
+      Value<String?> prevHash,
+      Value<String?> chainHash,
+      Value<bool> ntpSynced,
       Value<String> createdAt,
     });
 
@@ -2823,6 +3027,26 @@ class $$PhotosTableFilterComposer
 
   ColumnFilters<String> get weatherInfo => $composableBuilder(
     column: $table.weatherInfo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoHash => $composableBuilder(
+    column: $table.photoHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get prevHash => $composableBuilder(
+    column: $table.prevHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chainHash => $composableBuilder(
+    column: $table.chainHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ntpSynced => $composableBuilder(
+    column: $table.ntpSynced,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2934,6 +3158,26 @@ class $$PhotosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get photoHash => $composableBuilder(
+    column: $table.photoHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get prevHash => $composableBuilder(
+    column: $table.prevHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chainHash => $composableBuilder(
+    column: $table.chainHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ntpSynced => $composableBuilder(
+    column: $table.ntpSynced,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -3020,6 +3264,18 @@ class $$PhotosTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get photoHash =>
+      $composableBuilder(column: $table.photoHash, builder: (column) => column);
+
+  GeneratedColumn<String> get prevHash =>
+      $composableBuilder(column: $table.prevHash, builder: (column) => column);
+
+  GeneratedColumn<String> get chainHash =>
+      $composableBuilder(column: $table.chainHash, builder: (column) => column);
+
+  GeneratedColumn<bool> get ntpSynced =>
+      $composableBuilder(column: $table.ntpSynced, builder: (column) => column);
+
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -3090,6 +3346,10 @@ class $$PhotosTableTableManager
                 Value<bool> isVideo = const Value.absent(),
                 Value<String?> photoCode = const Value.absent(),
                 Value<String?> weatherInfo = const Value.absent(),
+                Value<String?> photoHash = const Value.absent(),
+                Value<String?> prevHash = const Value.absent(),
+                Value<String?> chainHash = const Value.absent(),
+                Value<bool> ntpSynced = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => PhotosCompanion(
                 id: id,
@@ -3107,6 +3367,10 @@ class $$PhotosTableTableManager
                 isVideo: isVideo,
                 photoCode: photoCode,
                 weatherInfo: weatherInfo,
+                photoHash: photoHash,
+                prevHash: prevHash,
+                chainHash: chainHash,
+                ntpSynced: ntpSynced,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -3126,6 +3390,10 @@ class $$PhotosTableTableManager
                 Value<bool> isVideo = const Value.absent(),
                 Value<String?> photoCode = const Value.absent(),
                 Value<String?> weatherInfo = const Value.absent(),
+                Value<String?> photoHash = const Value.absent(),
+                Value<String?> prevHash = const Value.absent(),
+                Value<String?> chainHash = const Value.absent(),
+                Value<bool> ntpSynced = const Value.absent(),
                 required String createdAt,
               }) => PhotosCompanion.insert(
                 id: id,
@@ -3143,6 +3411,10 @@ class $$PhotosTableTableManager
                 isVideo: isVideo,
                 photoCode: photoCode,
                 weatherInfo: weatherInfo,
+                photoHash: photoHash,
+                prevHash: prevHash,
+                chainHash: chainHash,
+                ntpSynced: ntpSynced,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

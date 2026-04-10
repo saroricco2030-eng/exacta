@@ -1245,6 +1245,252 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'日本語'**
   String get localeJapanese;
+
+  /// No description provided for @evidenceSectionTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'법적 증거'**
+  String get evidenceSectionTitle;
+
+  /// No description provided for @evidenceHashLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일 해시'**
+  String get evidenceHashLabel;
+
+  /// No description provided for @evidenceChainLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'체인 해시'**
+  String get evidenceChainLabel;
+
+  /// No description provided for @evidencePrevLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'직전 체인'**
+  String get evidencePrevLabel;
+
+  /// No description provided for @evidenceGenesis.
+  ///
+  /// In ko, this message translates to:
+  /// **'최초 블록'**
+  String get evidenceGenesis;
+
+  /// No description provided for @evidenceNtpSynced.
+  ///
+  /// In ko, this message translates to:
+  /// **'NTP 동기화됨'**
+  String get evidenceNtpSynced;
+
+  /// No description provided for @evidenceNtpLocal.
+  ///
+  /// In ko, this message translates to:
+  /// **'로컬 시계'**
+  String get evidenceNtpLocal;
+
+  /// No description provided for @evidenceVerifyButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일 무결성 검증'**
+  String get evidenceVerifyButton;
+
+  /// No description provided for @evidenceVerifying.
+  ///
+  /// In ko, this message translates to:
+  /// **'검증 중...'**
+  String get evidenceVerifying;
+
+  /// No description provided for @evidenceVerifyOk.
+  ///
+  /// In ko, this message translates to:
+  /// **'검증 완료 — 파일이 변조되지 않음'**
+  String get evidenceVerifyOk;
+
+  /// No description provided for @evidenceVerifyFail.
+  ///
+  /// In ko, this message translates to:
+  /// **'경고: 파일 해시 불일치 — 변조 또는 손상'**
+  String get evidenceVerifyFail;
+
+  /// No description provided for @evidenceNoHash.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 사진은 증거 해시가 없습니다'**
+  String get evidenceNoHash;
+
+  /// No description provided for @evidenceExportTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'증거 팩 PDF'**
+  String get evidenceExportTitle;
+
+  /// No description provided for @evidenceExportDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'법적 제출용 — 해시 체인 + 메타데이터 포함'**
+  String get evidenceExportDesc;
+
+  /// No description provided for @evidenceCaseNameLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'사건명 / 건명'**
+  String get evidenceCaseNameLabel;
+
+  /// No description provided for @evidenceCaseNamePlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 2026-03 누수 분쟁'**
+  String get evidenceCaseNamePlaceholder;
+
+  /// No description provided for @evidenceAuthorLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'작성자'**
+  String get evidenceAuthorLabel;
+
+  /// No description provided for @evidenceAuthorPlaceholder.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 김현장'**
+  String get evidenceAuthorPlaceholder;
+
+  /// No description provided for @evidenceGenerate.
+  ///
+  /// In ko, this message translates to:
+  /// **'증거 팩 생성'**
+  String get evidenceGenerate;
+
+  /// No description provided for @evidencePackGenerated.
+  ///
+  /// In ko, this message translates to:
+  /// **'증거 팩이 생성되었습니다'**
+  String get evidencePackGenerated;
+
+  /// No description provided for @evidencePackCover.
+  ///
+  /// In ko, this message translates to:
+  /// **'법적 증거 팩'**
+  String get evidencePackCover;
+
+  /// No description provided for @evidencePackCaseName.
+  ///
+  /// In ko, this message translates to:
+  /// **'사건명'**
+  String get evidencePackCaseName;
+
+  /// No description provided for @evidencePackAuthor.
+  ///
+  /// In ko, this message translates to:
+  /// **'작성자'**
+  String get evidencePackAuthor;
+
+  /// No description provided for @evidencePackGeneratedAt.
+  ///
+  /// In ko, this message translates to:
+  /// **'작성 일시'**
+  String get evidencePackGeneratedAt;
+
+  /// No description provided for @evidencePackPhotoCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 수'**
+  String get evidencePackPhotoCount;
+
+  /// No description provided for @evidencePackHashAlgo.
+  ///
+  /// In ko, this message translates to:
+  /// **'해시 알고리즘'**
+  String get evidencePackHashAlgo;
+
+  /// No description provided for @evidencePackNtpNote.
+  ///
+  /// In ko, this message translates to:
+  /// **'모든 타임스탬프는 NTP 서버로 보정되었으며, 각 사진은 SHA-256 해시 체인으로 연결되어 있습니다. 사진 1장을 조작하면 이후 모든 사진의 체인 해시가 무효가 됩니다.'**
+  String get evidencePackNtpNote;
+
+  /// No description provided for @evidencePackPhotoTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진 #{index}'**
+  String evidencePackPhotoTitle(int index);
+
+  /// No description provided for @evidencePackTimestamp.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영 시각'**
+  String get evidencePackTimestamp;
+
+  /// No description provided for @evidencePackGps.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS 좌표'**
+  String get evidencePackGps;
+
+  /// No description provided for @evidencePackAddress.
+  ///
+  /// In ko, this message translates to:
+  /// **'주소'**
+  String get evidencePackAddress;
+
+  /// No description provided for @evidencePackProject.
+  ///
+  /// In ko, this message translates to:
+  /// **'프로젝트'**
+  String get evidencePackProject;
+
+  /// No description provided for @evidencePackMemo.
+  ///
+  /// In ko, this message translates to:
+  /// **'현장 메모'**
+  String get evidencePackMemo;
+
+  /// No description provided for @evidencePackPhotoHash.
+  ///
+  /// In ko, this message translates to:
+  /// **'파일 SHA-256'**
+  String get evidencePackPhotoHash;
+
+  /// No description provided for @evidencePackChainHash.
+  ///
+  /// In ko, this message translates to:
+  /// **'체인 SHA-256'**
+  String get evidencePackChainHash;
+
+  /// No description provided for @evidencePackPrevHash.
+  ///
+  /// In ko, this message translates to:
+  /// **'직전 체인'**
+  String get evidencePackPrevHash;
+
+  /// No description provided for @evidencePackVerifyTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'외부 검증 방법'**
+  String get evidencePackVerifyTitle;
+
+  /// No description provided for @evidencePackVerifyStep1.
+  ///
+  /// In ko, this message translates to:
+  /// **'1. 각 사진 파일을 별도 저장한다.'**
+  String get evidencePackVerifyStep1;
+
+  /// No description provided for @evidencePackVerifyStep2.
+  ///
+  /// In ko, this message translates to:
+  /// **'2. 표준 SHA-256 도구로 파일의 해시를 계산한다 (예: Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256).'**
+  String get evidencePackVerifyStep2;
+
+  /// No description provided for @evidencePackVerifyStep3.
+  ///
+  /// In ko, this message translates to:
+  /// **'3. 계산된 해시가 본 문서의 \"파일 SHA-256\" 값과 일치하는지 확인한다.'**
+  String get evidencePackVerifyStep3;
+
+  /// No description provided for @evidencePackVerifyStep4.
+  ///
+  /// In ko, this message translates to:
+  /// **'4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.'**
+  String get evidencePackVerifyStep4;
 }
 
 class _AppLocalizationsDelegate

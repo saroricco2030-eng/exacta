@@ -1,5 +1,5 @@
 /// Drift ORM database - SQLite local storage
-/// Tables: Projects, Photos, StampConfigs | Migration v1-v6
+/// Tables: Projects, Photos, StampConfigs | Migration v1-v10
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -39,6 +39,11 @@ class Photos extends Table {
   BoolColumn get isVideo => boolean().withDefault(const Constant(false))();
   TextColumn get photoCode => text().nullable()(); // 고유 추적 코드 EX-YYYYMMDD-HHMMSS-XXXX
   TextColumn get weatherInfo => text().nullable()(); // 촬영 시 날씨 정보
+  // ── 법적 증거 팩 (v10) ──
+  TextColumn get photoHash => text().nullable()(); // 파일 바이트 SHA-256 (hex)
+  TextColumn get prevHash => text().nullable()(); // 직전 사진의 chainHash — 체인 연결
+  TextColumn get chainHash => text().nullable()(); // SHA-256(photoHash|prevHash|timestamp|lat|lng)
+  BoolColumn get ntpSynced => boolean().withDefault(const Constant(false))(); // 촬영 시 NTP 동기화 상태
   TextColumn get createdAt => text()();
 }
 
@@ -74,7 +79,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase get instance => _instance ??= AppDatabase._();
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -123,6 +128,13 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 9) {
             await m.addColumn(stampConfigs, stampConfigs.stampLayout);
+          }
+          if (from < 10) {
+            // 법적 증거 팩: photoHash/prevHash/chainHash/ntpSynced 컬럼 추가
+            await m.addColumn(photos, photos.photoHash);
+            await m.addColumn(photos, photos.prevHash);
+            await m.addColumn(photos, photos.chainHash);
+            await m.addColumn(photos, photos.ntpSynced);
           }
         },
       );
@@ -321,6 +333,26 @@ class AppDatabase extends _$AppDatabase {
           ..limit(1))
         .getSingleOrNull();
   }
+
+  /// 증거 체인: 가장 최근 chainHash 반환 (없으면 null — 제네시스 블록)
+  /// createdAt 기준 DESC 로 정렬하여 "가장 마지막으로 추가된 사진"의 체인 해시를 가져온다.
+  /// timestamp 기반이 아니라 createdAt 기반인 이유: NTP 시간이 밀려있을 수 있지만
+  /// 물리적 삽입 순서는 createdAt이 권위 있음.
+  Future<String?> getLatestChainHash() async {
+    final result = await (select(photos)
+          ..where((t) => t.chainHash.isNotNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+          ..limit(1))
+        .getSingleOrNull();
+    return result?.chainHash;
+  }
+
+  /// 증거 체인 전체 검증용: chainHash가 있는 모든 사진을 createdAt 순으로 조회
+  Future<List<Photo>> getAllPhotosForChain() =>
+      (select(photos)
+            ..where((t) => t.chainHash.isNotNull())
+            ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+          .get();
 
   Stream<Photo?> watchLatestPhoto() {
     return (select(photos)

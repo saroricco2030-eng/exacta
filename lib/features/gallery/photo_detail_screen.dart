@@ -16,6 +16,7 @@ import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/core/theme/app_theme.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/data/providers.dart';
+import 'package:exacta/services/evidence_hash_service.dart';
 
 class PhotoDetailScreen extends ConsumerStatefulWidget {
   const PhotoDetailScreen({super.key, required this.photo});
@@ -70,6 +71,7 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
       builder: (ctx) => _PhotoInfoSheet(
         photo: _photo,
         onProjectChanged: (newProjectId) async {
+          // 전체 필드 복원 + projectId만 교체 — drift copyWith 대신 PhotosCompanion 수동 구성
           await ref.read(dbProvider).updatePhoto(
                 PhotosCompanion(
                   id: drift.Value(_photo.id),
@@ -87,29 +89,16 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
                   photoCode: drift.Value(_photo.photoCode),
                   weatherInfo: drift.Value(_photo.weatherInfo),
                   projectId: drift.Value(newProjectId),
+                  photoHash: drift.Value(_photo.photoHash),
+                  prevHash: drift.Value(_photo.prevHash),
+                  chainHash: drift.Value(_photo.chainHash),
+                  ntpSynced: drift.Value(_photo.ntpSynced),
                   createdAt: drift.Value(_photo.createdAt),
                 ),
               );
-          // 로컬 상태 업데이트 — 다시 열지 않아도 즉시 반영
+          // 로컬 상태 업데이트 — copyWith 활용
           setState(() {
-            _photo = Photo(
-              id: _photo.id,
-              filePath: _photo.filePath,
-              thumbnailPath: _photo.thumbnailPath,
-              presetType: _photo.presetType,
-              memo: _photo.memo,
-              tags: _photo.tags,
-              timestamp: _photo.timestamp,
-              latitude: _photo.latitude,
-              longitude: _photo.longitude,
-              address: _photo.address,
-              isSecure: _photo.isSecure,
-              isVideo: _photo.isVideo,
-              photoCode: _photo.photoCode,
-              weatherInfo: _photo.weatherInfo,
-              projectId: newProjectId,
-              createdAt: _photo.createdAt,
-            );
+            _photo = _photo.copyWith(projectId: drift.Value(newProjectId));
           });
         },
       ),
@@ -645,10 +634,334 @@ class _PhotoInfoSheetState extends ConsumerState<_PhotoInfoSheet> {
                 value: _currentProjectName!,
                 dotColor: _currentProjectColor,
               ),
+
+            // ── 법적 증거 섹션 ──
+            if (photo.photoHash != null) ...[
+              const SizedBox(height: 16),
+              _EvidenceCard(photo: photo),
+            ],
             const SizedBox(height: 24),
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── 법적 증거 카드 ────────────────────────────────────────────
+class _EvidenceCard extends StatefulWidget {
+  const _EvidenceCard({required this.photo});
+  final Photo photo;
+
+  @override
+  State<_EvidenceCard> createState() => _EvidenceCardState();
+}
+
+class _EvidenceCardState extends State<_EvidenceCard> {
+  _VerifyState _state = _VerifyState.idle;
+
+  Future<void> _verify() async {
+    final l = context.l10n;
+    setState(() => _state = _VerifyState.verifying);
+    HapticFeedback.lightImpact();
+    final ok = await EvidenceHashService.verifyFile(
+      filePath: widget.photo.filePath,
+      expectedHash: widget.photo.photoHash!,
+    );
+    if (!mounted) return;
+    setState(() => _state = ok ? _VerifyState.ok : _VerifyState.fail);
+    HapticFeedback.mediumImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              ok ? LucideIcons.shieldCheck : LucideIcons.shieldAlert,
+              size: 18,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(ok ? l.evidenceVerifyOk : l.evidenceVerifyFail),
+            ),
+          ],
+        ),
+        backgroundColor: ok ? AppColors.darkSuccess : AppColors.darkDanger,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final photo = widget.photo;
+    final photoHash = photo.photoHash!;
+    final chainHash = photo.chainHash;
+    final prevHash = photo.prevHash;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.darkSurfaceHi,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.darkAccent.withValues(alpha: 0.25),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 헤더
+            Row(
+              children: [
+                const Icon(LucideIcons.shieldCheck,
+                    size: 16, color: AppColors.darkAccent),
+                const SizedBox(width: 8),
+                Text(
+                  l.evidenceSectionTitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.darkAccent,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const Spacer(),
+                // NTP 상태 배지
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: photo.ntpSynced
+                        ? AppColors.darkSuccess.withValues(alpha: 0.15)
+                        : AppColors.darkWarning.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        photo.ntpSynced
+                            ? LucideIcons.clock
+                            : LucideIcons.clockAlert,
+                        size: 10,
+                        color: photo.ntpSynced
+                            ? AppColors.darkSuccess
+                            : AppColors.darkWarning,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        photo.ntpSynced
+                            ? l.evidenceNtpSynced
+                            : l.evidenceNtpLocal,
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: photo.ntpSynced
+                              ? AppColors.darkSuccess
+                              : AppColors.darkWarning,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // 해시 행들
+            _HashRow(
+              label: l.evidenceHashLabel,
+              value: EvidenceHashService.shortPreview(photoHash),
+            ),
+            if (chainHash != null) ...[
+              const SizedBox(height: 6),
+              _HashRow(
+                label: l.evidenceChainLabel,
+                value: EvidenceHashService.shortPreview(chainHash),
+              ),
+            ],
+            const SizedBox(height: 6),
+            _HashRow(
+              label: l.evidencePrevLabel,
+              value: prevHash == null
+                  ? l.evidenceGenesis
+                  : EvidenceHashService.shortPreview(prevHash),
+              isGenesis: prevHash == null,
+            ),
+
+            const SizedBox(height: 14),
+
+            // 검증 버튼
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: Material(
+                color: _backgroundFor(_state),
+                borderRadius: BorderRadius.circular(12),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap:
+                      _state == _VerifyState.verifying ? null : _verify,
+                  child: Center(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 220),
+                      child: _buttonChild(_state, l),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _backgroundFor(_VerifyState state) {
+    switch (state) {
+      case _VerifyState.idle:
+      case _VerifyState.verifying:
+        return AppColors.darkAccent.withValues(alpha: 0.12);
+      case _VerifyState.ok:
+        return AppColors.darkSuccess.withValues(alpha: 0.15);
+      case _VerifyState.fail:
+        return AppColors.darkDanger.withValues(alpha: 0.15);
+    }
+  }
+
+  Widget _buttonChild(_VerifyState state, dynamic l) {
+    switch (state) {
+      case _VerifyState.idle:
+        return Row(
+          key: const ValueKey('idle'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.fingerprint,
+                size: 14, color: AppColors.darkAccent),
+            const SizedBox(width: 8),
+            Text(
+              l.evidenceVerifyButton,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkAccent,
+              ),
+            ),
+          ],
+        );
+      case _VerifyState.verifying:
+        return Row(
+          key: const ValueKey('verifying'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.darkAccent,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              l.evidenceVerifying,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkAccent,
+              ),
+            ),
+          ],
+        );
+      case _VerifyState.ok:
+        return Row(
+          key: const ValueKey('ok'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.shieldCheck,
+                size: 14, color: AppColors.darkSuccess),
+            const SizedBox(width: 8),
+            Text(
+              l.evidenceVerifyOk,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.darkSuccess,
+              ),
+            ),
+          ],
+        );
+      case _VerifyState.fail:
+        return Row(
+          key: const ValueKey('fail'),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(LucideIcons.shieldAlert,
+                size: 14, color: AppColors.darkDanger),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                l.evidenceVerifyFail,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.darkDanger,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        );
+    }
+  }
+}
+
+enum _VerifyState { idle, verifying, ok, fail }
+
+class _HashRow extends StatelessWidget {
+  const _HashRow({
+    required this.label,
+    required this.value,
+    this.isGenesis = false,
+  });
+  final String label;
+  final String value;
+  final bool isGenesis;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 88,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.darkText3,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontFamily:
+                  isGenesis ? null : AppTheme.monoFontFamily,
+              fontSize: isGenesis ? 11 : 12,
+              color: AppColors.darkText2,
+              fontStyle:
+                  isGenesis ? FontStyle.italic : FontStyle.normal,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

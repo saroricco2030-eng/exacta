@@ -14,6 +14,7 @@ import 'package:exacta/services/stamp_burn_service.dart';
 import 'package:exacta/services/gallery_register_service.dart';
 import 'package:exacta/services/photo_code_service.dart';
 import 'package:exacta/services/ntp_service.dart';
+import 'package:exacta/services/evidence_hash_service.dart';
 
 class PhotoSaveService {
   final AppDatabase _db;
@@ -128,6 +129,28 @@ class PhotoSaveService {
       throw Exception('Failed to write photo file: $e');
     }
 
+    // 4.5. 증거 해시 계산 (체인 오브 커스터디)
+    //   - photoHash: 번인된 파일 바이트의 SHA-256
+    //   - prevHash: DB에 이미 있는 가장 최근 chainHash
+    //   - chainHash: SHA-256(photoHash|prevHash|timestamp|lat|lng)
+    //   실패 시 null로 저장하고 진행 — 저장 자체는 실패시키지 않음.
+    String? photoHash;
+    String? prevHash;
+    String? chainHash;
+    try {
+      photoHash = EvidenceHashService.computeBytesHash(burnedBytes);
+      prevHash = await _db.getLatestChainHash();
+      chainHash = EvidenceHashService.computeChainHash(
+        photoHash: photoHash,
+        prevHash: prevHash,
+        timestampIso: now.toIso8601String(),
+        latitude: isSecure ? null : latitude,
+        longitude: isSecure ? null : longitude,
+      );
+    } catch (e) {
+      debugPrint('Evidence hash failed: $e');
+    }
+
     // 5~7. 임시 파일 삭제 + DB 삽입 + 갤러리 등록 — 병렬 실행
     final dbFuture = _db.insertPhoto(
       PhotosCompanion.insert(
@@ -144,6 +167,10 @@ class PhotoSaveService {
         photoCode: Value(photoCode),
         weatherInfo: Value(weatherText),
         projectId: Value(projectId),
+        photoHash: Value(photoHash),
+        prevHash: Value(prevHash),
+        chainHash: Value(chainHash),
+        ntpSynced: Value(NtpService.isSynced),
         createdAt: now.toIso8601String(),
       ),
     ).catchError((e) {
@@ -183,7 +210,7 @@ class PhotoSaveService {
     double? longitude,
     String? address,
   }) async {
-    final now = DateTime.now();
+    final now = NtpService.now(); // NTP 보정 시간 (증거성)
     final isSecure = preset == CameraPreset.secure;
 
     final appDir = await getApplicationDocumentsDirectory();
@@ -225,6 +252,24 @@ class PhotoSaveService {
       throw Exception('Failed to copy video file: $e');
     }
 
+    // 증거 해시 계산 (영상도 체인에 포함)
+    String? photoHash;
+    String? prevHash;
+    String? chainHash;
+    try {
+      photoHash = await EvidenceHashService.computeFileHash(destPath);
+      prevHash = await _db.getLatestChainHash();
+      chainHash = EvidenceHashService.computeChainHash(
+        photoHash: photoHash,
+        prevHash: prevHash,
+        timestampIso: now.toIso8601String(),
+        latitude: isSecure ? null : latitude,
+        longitude: isSecure ? null : longitude,
+      );
+    } catch (e) {
+      debugPrint('Evidence hash (video) failed: $e');
+    }
+
     // DB 삽입 — 실패 시 저장된 파일 정리
     try {
       final id = await _db.insertPhoto(
@@ -240,6 +285,10 @@ class PhotoSaveService {
           isSecure: Value(isSecure),
           isVideo: const Value(true),
           projectId: Value(projectId),
+          photoHash: Value(photoHash),
+          prevHash: Value(prevHash),
+          chainHash: Value(chainHash),
+          ntpSynced: Value(NtpService.isSynced),
           createdAt: now.toIso8601String(),
         ),
       );

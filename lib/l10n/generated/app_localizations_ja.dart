@@ -620,4 +620,133 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localeJapanese => '日本語';
+
+  @override
+  String get evidenceSectionTitle => '法的証拠';
+
+  @override
+  String get evidenceHashLabel => 'ファイルハッシュ';
+
+  @override
+  String get evidenceChainLabel => 'チェーンハッシュ';
+
+  @override
+  String get evidencePrevLabel => '前のチェーン';
+
+  @override
+  String get evidenceGenesis => '最初のブロック';
+
+  @override
+  String get evidenceNtpSynced => 'NTP同期済み';
+
+  @override
+  String get evidenceNtpLocal => 'ローカル時計';
+
+  @override
+  String get evidenceVerifyButton => 'ファイル整合性検証';
+
+  @override
+  String get evidenceVerifying => '検証中...';
+
+  @override
+  String get evidenceVerifyOk => '検証完了 — ファイルは改ざんされていません';
+
+  @override
+  String get evidenceVerifyFail => '警告: ファイルハッシュ不一致 — 改ざんまたは破損';
+
+  @override
+  String get evidenceNoHash => 'この写真には証拠ハッシュがありません';
+
+  @override
+  String get evidenceExportTitle => '証拠パックPDF';
+
+  @override
+  String get evidenceExportDesc => '法的提出用 — ハッシュチェーン + メタデータを含む';
+
+  @override
+  String get evidenceCaseNameLabel => '案件名';
+
+  @override
+  String get evidenceCaseNamePlaceholder => '例: 2026-03 漏水紛争';
+
+  @override
+  String get evidenceAuthorLabel => '作成者';
+
+  @override
+  String get evidenceAuthorPlaceholder => '例: 山田現場';
+
+  @override
+  String get evidenceGenerate => '証拠パック生成';
+
+  @override
+  String get evidencePackGenerated => '証拠パックが生成されました';
+
+  @override
+  String get evidencePackCover => '法的証拠パック';
+
+  @override
+  String get evidencePackCaseName => '案件名';
+
+  @override
+  String get evidencePackAuthor => '作成者';
+
+  @override
+  String get evidencePackGeneratedAt => '生成日時';
+
+  @override
+  String get evidencePackPhotoCount => '写真枚数';
+
+  @override
+  String get evidencePackHashAlgo => 'ハッシュアルゴリズム';
+
+  @override
+  String get evidencePackNtpNote =>
+      'すべてのタイムスタンプはNTPサーバーで補正されており、各写真はSHA-256ハッシュチェーンで連結されています。1枚でも改ざんされると以降すべてのチェーンハッシュが無効になります。';
+
+  @override
+  String evidencePackPhotoTitle(int index) {
+    return '写真 #$index';
+  }
+
+  @override
+  String get evidencePackTimestamp => '撮影時刻';
+
+  @override
+  String get evidencePackGps => 'GPS座標';
+
+  @override
+  String get evidencePackAddress => '住所';
+
+  @override
+  String get evidencePackProject => 'プロジェクト';
+
+  @override
+  String get evidencePackMemo => '現場メモ';
+
+  @override
+  String get evidencePackPhotoHash => 'ファイルSHA-256';
+
+  @override
+  String get evidencePackChainHash => 'チェーンSHA-256';
+
+  @override
+  String get evidencePackPrevHash => '前のチェーン';
+
+  @override
+  String get evidencePackVerifyTitle => '外部検証方法';
+
+  @override
+  String get evidencePackVerifyStep1 => '1. 各写真ファイルを別途保存する。';
+
+  @override
+  String get evidencePackVerifyStep2 =>
+      '2. 標準SHA-256ツールでファイルのハッシュを計算する (Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256)。';
+
+  @override
+  String get evidencePackVerifyStep3 =>
+      '3. 計算されたハッシュが本書の「ファイルSHA-256」値と一致するか確認する。';
+
+  @override
+  String get evidencePackVerifyStep4 =>
+      '4. チェーンハッシュはSHA-256(ファイルハッシュ | 前のチェーン | タイムスタンプ | 緯度 | 経度)式で再計算可能。';
 }

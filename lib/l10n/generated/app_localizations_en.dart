@@ -624,4 +624,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localeJapanese => '日本語';
+
+  @override
+  String get evidenceSectionTitle => 'Legal Evidence';
+
+  @override
+  String get evidenceHashLabel => 'File Hash';
+
+  @override
+  String get evidenceChainLabel => 'Chain Hash';
+
+  @override
+  String get evidencePrevLabel => 'Previous Chain';
+
+  @override
+  String get evidenceGenesis => 'Genesis Block';
+
+  @override
+  String get evidenceNtpSynced => 'NTP Synced';
+
+  @override
+  String get evidenceNtpLocal => 'Local Clock';
+
+  @override
+  String get evidenceVerifyButton => 'Verify File Integrity';
+
+  @override
+  String get evidenceVerifying => 'Verifying...';
+
+  @override
+  String get evidenceVerifyOk => 'Verified — file has not been tampered';
+
+  @override
+  String get evidenceVerifyFail =>
+      'Warning: file hash mismatch — tampered or corrupted';
+
+  @override
+  String get evidenceNoHash => 'This photo has no evidence hash';
+
+  @override
+  String get evidenceExportTitle => 'Evidence Pack PDF';
+
+  @override
+  String get evidenceExportDesc =>
+      'For legal submission — includes hash chain + metadata';
+
+  @override
+  String get evidenceCaseNameLabel => 'Case Name';
+
+  @override
+  String get evidenceCaseNamePlaceholder => 'e.g. 2026-03 Water Damage Dispute';
+
+  @override
+  String get evidenceAuthorLabel => 'Author';
+
+  @override
+  String get evidenceAuthorPlaceholder => 'e.g. Jane Field';
+
+  @override
+  String get evidenceGenerate => 'Generate Evidence Pack';
+
+  @override
+  String get evidencePackGenerated => 'Evidence pack generated';
+
+  @override
+  String get evidencePackCover => 'Legal Evidence Pack';
+
+  @override
+  String get evidencePackCaseName => 'Case Name';
+
+  @override
+  String get evidencePackAuthor => 'Author';
+
+  @override
+  String get evidencePackGeneratedAt => 'Generated At';
+
+  @override
+  String get evidencePackPhotoCount => 'Photo Count';
+
+  @override
+  String get evidencePackHashAlgo => 'Hash Algorithm';
+
+  @override
+  String get evidencePackNtpNote =>
+      'All timestamps are corrected using an NTP server, and each photo is linked by a SHA-256 hash chain. Tampering with a single photo invalidates all subsequent chain hashes.';
+
+  @override
+  String evidencePackPhotoTitle(int index) {
+    return 'Photo #$index';
+  }
+
+  @override
+  String get evidencePackTimestamp => 'Captured At';
+
+  @override
+  String get evidencePackGps => 'GPS Coordinates';
+
+  @override
+  String get evidencePackAddress => 'Address';
+
+  @override
+  String get evidencePackProject => 'Project';
+
+  @override
+  String get evidencePackMemo => 'Field Memo';
+
+  @override
+  String get evidencePackPhotoHash => 'File SHA-256';
+
+  @override
+  String get evidencePackChainHash => 'Chain SHA-256';
+
+  @override
+  String get evidencePackPrevHash => 'Previous Chain';
+
+  @override
+  String get evidencePackVerifyTitle => 'External Verification';
+
+  @override
+  String get evidencePackVerifyStep1 => '1. Save each photo file separately.';
+
+  @override
+  String get evidencePackVerifyStep2 =>
+      '2. Compute SHA-256 with a standard tool (Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256).';
+
+  @override
+  String get evidencePackVerifyStep3 =>
+      '3. Confirm that the computed hash matches the \"File SHA-256\" value in this document.';
+
+  @override
+  String get evidencePackVerifyStep4 =>
+      '4. Chain hashes can be re-computed via SHA-256(fileHash | prevChain | timestamp | lat | lng).';
 }

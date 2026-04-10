@@ -620,4 +620,133 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localeJapanese => '日本語';
+
+  @override
+  String get evidenceSectionTitle => '법적 증거';
+
+  @override
+  String get evidenceHashLabel => '파일 해시';
+
+  @override
+  String get evidenceChainLabel => '체인 해시';
+
+  @override
+  String get evidencePrevLabel => '직전 체인';
+
+  @override
+  String get evidenceGenesis => '최초 블록';
+
+  @override
+  String get evidenceNtpSynced => 'NTP 동기화됨';
+
+  @override
+  String get evidenceNtpLocal => '로컬 시계';
+
+  @override
+  String get evidenceVerifyButton => '파일 무결성 검증';
+
+  @override
+  String get evidenceVerifying => '검증 중...';
+
+  @override
+  String get evidenceVerifyOk => '검증 완료 — 파일이 변조되지 않음';
+
+  @override
+  String get evidenceVerifyFail => '경고: 파일 해시 불일치 — 변조 또는 손상';
+
+  @override
+  String get evidenceNoHash => '이 사진은 증거 해시가 없습니다';
+
+  @override
+  String get evidenceExportTitle => '증거 팩 PDF';
+
+  @override
+  String get evidenceExportDesc => '법적 제출용 — 해시 체인 + 메타데이터 포함';
+
+  @override
+  String get evidenceCaseNameLabel => '사건명 / 건명';
+
+  @override
+  String get evidenceCaseNamePlaceholder => '예: 2026-03 누수 분쟁';
+
+  @override
+  String get evidenceAuthorLabel => '작성자';
+
+  @override
+  String get evidenceAuthorPlaceholder => '예: 김현장';
+
+  @override
+  String get evidenceGenerate => '증거 팩 생성';
+
+  @override
+  String get evidencePackGenerated => '증거 팩이 생성되었습니다';
+
+  @override
+  String get evidencePackCover => '법적 증거 팩';
+
+  @override
+  String get evidencePackCaseName => '사건명';
+
+  @override
+  String get evidencePackAuthor => '작성자';
+
+  @override
+  String get evidencePackGeneratedAt => '작성 일시';
+
+  @override
+  String get evidencePackPhotoCount => '사진 수';
+
+  @override
+  String get evidencePackHashAlgo => '해시 알고리즘';
+
+  @override
+  String get evidencePackNtpNote =>
+      '모든 타임스탬프는 NTP 서버로 보정되었으며, 각 사진은 SHA-256 해시 체인으로 연결되어 있습니다. 사진 1장을 조작하면 이후 모든 사진의 체인 해시가 무효가 됩니다.';
+
+  @override
+  String evidencePackPhotoTitle(int index) {
+    return '사진 #$index';
+  }
+
+  @override
+  String get evidencePackTimestamp => '촬영 시각';
+
+  @override
+  String get evidencePackGps => 'GPS 좌표';
+
+  @override
+  String get evidencePackAddress => '주소';
+
+  @override
+  String get evidencePackProject => '프로젝트';
+
+  @override
+  String get evidencePackMemo => '현장 메모';
+
+  @override
+  String get evidencePackPhotoHash => '파일 SHA-256';
+
+  @override
+  String get evidencePackChainHash => '체인 SHA-256';
+
+  @override
+  String get evidencePackPrevHash => '직전 체인';
+
+  @override
+  String get evidencePackVerifyTitle => '외부 검증 방법';
+
+  @override
+  String get evidencePackVerifyStep1 => '1. 각 사진 파일을 별도 저장한다.';
+
+  @override
+  String get evidencePackVerifyStep2 =>
+      '2. 표준 SHA-256 도구로 파일의 해시를 계산한다 (예: Linux: sha256sum / macOS: shasum -a 256 / Windows: certutil -hashfile FILE SHA256).';
+
+  @override
+  String get evidencePackVerifyStep3 =>
+      '3. 계산된 해시가 본 문서의 \"파일 SHA-256\" 값과 일치하는지 확인한다.';
+
+  @override
+  String get evidencePackVerifyStep4 =>
+      '4. 체인 해시는 SHA-256(파일해시 | 직전체인 | 타임스탬프 | 위도 | 경도) 공식으로 재계산하여 검증 가능하다.';
 }

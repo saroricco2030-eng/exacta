@@ -16,6 +16,7 @@ import 'package:exacta/core/extensions/build_context_ext.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/data/providers.dart';
 import 'package:exacta/services/pdf_report_service.dart';
+import 'package:exacta/services/evidence_pack_service.dart';
 
 class ExportScreen extends ConsumerStatefulWidget {
   const ExportScreen({super.key, this.projectId});
@@ -345,6 +346,25 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 12),
+                      // 증거 팩 PDF (SHA-256 체인)
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: Material(
+                          color: context.accentDim,
+                          borderRadius: BorderRadius.circular(16),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: _isExporting
+                                ? null
+                                : () => _exportEvidencePack(nonVideo),
+                            child: Icon(LucideIcons.shieldCheck,
+                                color: context.accent,
+                                size: 22),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -461,6 +481,189 @@ class _ExportScreenState extends ConsumerState<ExportScreen> {
       if (mounted) setState(() => _isExporting = false);
     }
   }
+
+  /// 증거 팩 PDF 내보내기 — 사건명/작성자 입력 다이얼로그 → PDF 생성 → 공유
+  Future<void> _exportEvidencePack(List<Photo> allPhotos) async {
+    final l = context.l10n;
+    final selected =
+        allPhotos.where((p) => _selectedIds.contains(p.id)).toList();
+    if (selected.isEmpty) return;
+
+    // 해시가 없는 사진은 증거 팩에 포함할 수 없음 — v10 이전 촬영분 필터링
+    final withHash = selected.where((p) => p.photoHash != null).toList();
+    if (withHash.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l.evidenceNoHash),
+          backgroundColor: context.danger,
+        ),
+      );
+      return;
+    }
+
+    final meta = await _promptEvidenceMeta();
+    if (meta == null) return;
+
+    setState(() => _isExporting = true);
+
+    try {
+      final strings = _evidenceStringsFor(l);
+      final pdfPath = await EvidencePackService.generate(
+        photos: withHash,
+        caseName: meta.caseName,
+        author: meta.author,
+        strings: strings,
+      );
+      await Share.shareXFiles([XFile(pdfPath)]);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l.evidencePackGenerated),
+            backgroundColor: context.accent,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Evidence pack failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l.commonError),
+            backgroundColor: context.danger,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  Future<_EvidenceMeta?> _promptEvidenceMeta() async {
+    final l = context.l10n;
+    final caseCtrl = TextEditingController();
+    final authorCtrl = TextEditingController();
+    final result = await showDialog<_EvidenceMeta>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: ctx.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Icon(LucideIcons.shieldCheck, size: 20, color: ctx.accent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l.evidenceExportTitle,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: ctx.text1,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.evidenceExportDesc,
+              style: TextStyle(fontSize: 12, color: ctx.text3),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: caseCtrl,
+              maxLength: 80,
+              decoration: InputDecoration(
+                labelText: l.evidenceCaseNameLabel,
+                hintText: l.evidenceCaseNamePlaceholder,
+                counterText: '',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: authorCtrl,
+              maxLength: 40,
+              decoration: InputDecoration(
+                labelText: l.evidenceAuthorLabel,
+                hintText: l.evidenceAuthorPlaceholder,
+                counterText: '',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final caseName = caseCtrl.text.trim();
+              final author = authorCtrl.text.trim();
+              if (caseName.isEmpty || author.isEmpty) return;
+              Navigator.pop(
+                ctx,
+                _EvidenceMeta(caseName: caseName, author: author),
+              );
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: ctx.accent,
+              foregroundColor: ctx.onAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(l.evidenceGenerate),
+          ),
+        ],
+      ),
+    );
+    caseCtrl.dispose();
+    authorCtrl.dispose();
+    return result;
+  }
+
+  EvidencePackStrings _evidenceStringsFor(dynamic l) {
+    return EvidencePackStrings(
+      cover: l.evidencePackCover,
+      caseName: l.evidencePackCaseName,
+      author: l.evidencePackAuthor,
+      generatedAt: l.evidencePackGeneratedAt,
+      photoCount: l.evidencePackPhotoCount,
+      hashAlgo: l.evidencePackHashAlgo,
+      ntpNote: l.evidencePackNtpNote,
+      photoTitle: (i) => l.evidencePackPhotoTitle(i),
+      timestamp: l.evidencePackTimestamp,
+      gps: l.evidencePackGps,
+      address: l.evidencePackAddress,
+      project: l.evidencePackProject,
+      memo: l.evidencePackMemo,
+      photoHash: l.evidencePackPhotoHash,
+      chainHash: l.evidencePackChainHash,
+      prevHash: l.evidencePackPrevHash,
+      verifyTitle: l.evidencePackVerifyTitle,
+      verifyStep1: l.evidencePackVerifyStep1,
+      verifyStep2: l.evidencePackVerifyStep2,
+      verifyStep3: l.evidencePackVerifyStep3,
+      verifyStep4: l.evidencePackVerifyStep4,
+    );
+  }
+}
+
+class _EvidenceMeta {
+  final String caseName;
+  final String author;
+  const _EvidenceMeta({required this.caseName, required this.author});
 }
 
 class _ZipEntry {
