@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/core/colors.dart';
@@ -16,12 +17,13 @@ import 'package:exacta/features/splash/splash_screen.dart';
 import 'package:exacta/services/ntp_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   // 스플래시 유지 — Android 12+ 시스템 스플래시가 너무 빨리 사라지는 것을 막고
   // 브랜드 스플래시 전용 이미지를 충분히 노출시키기 위함.
   FlutterNativeSplash.preserve(widgetsBinding: binding);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await initializeDateFormatting();
   NtpService.sync();
   runApp(const ProviderScope(child: ExactaApp()));
 }

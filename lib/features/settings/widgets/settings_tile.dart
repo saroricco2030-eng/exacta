@@ -1,9 +1,14 @@
 /// Reusable settings UI components - tile, toggle, dropdown, color dot
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/extensions/build_context_ext.dart';
 import 'package:exacta/core/theme/app_theme.dart';
+
+// ── 공통 모션 상수 ────────────────────────────────────────────
+const _kTileAnimDuration = Duration(milliseconds: 220);
+const _kTileAnimCurve = Curves.easeOutCubic;
 
 // ── 섹션 헤더 ──────────────────────────────────────────────────
 class SectionHeader extends StatelessWidget {
@@ -37,22 +42,19 @@ class SettingsTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.trailing,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final Widget trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final content = Container(
       constraints: const BoxConstraints(minHeight: 56),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.border),
-      ),
       child: Row(
         children: [
           Icon(icon, size: 18, color: context.text2),
@@ -68,6 +70,29 @@ class SettingsTile extends StatelessWidget {
           ),
           trailing,
         ],
+      ),
+    );
+
+    return Material(
+      color: context.surface,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.border),
+        ),
+        child: onTap != null
+            ? InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onTap!();
+                },
+                splashColor: context.accent.withValues(alpha: 0.08),
+                highlightColor: context.accent.withValues(alpha: 0.04),
+                child: content,
+              )
+            : content,
       ),
     );
   }
@@ -90,36 +115,76 @@ class ToggleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final activeBg = context.accent.withValues(alpha: 0.06);
+    final activeBorder = context.accent.withValues(alpha: 0.35);
+
     return Semantics(
       toggled: value,
       label: label,
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 56),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.border),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 18, color: context.text2),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: context.text1,
-                ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onChanged(!value);
+          },
+          splashColor: context.accent.withValues(alpha: 0.08),
+          highlightColor: context.accent.withValues(alpha: 0.04),
+          child: AnimatedContainer(
+            duration: _kTileAnimDuration,
+            curve: _kTileAnimCurve,
+            constraints: const BoxConstraints(minHeight: 56),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: value ? activeBg : context.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: value ? activeBorder : context.border,
               ),
             ),
-            Switch.adaptive(
-              value: value,
-              onChanged: onChanged,
-              activeTrackColor: context.accent,
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: _kTileAnimDuration,
+                  curve: _kTileAnimCurve,
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: value
+                        ? context.accent.withValues(alpha: 0.12)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 18,
+                    color: value ? context.accent : context.text2,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: context.text1,
+                    ),
+                  ),
+                ),
+                Switch.adaptive(
+                  value: value,
+                  onChanged: (v) {
+                    HapticFeedback.selectionClick();
+                    onChanged(v);
+                  },
+                  activeTrackColor: context.accent,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -156,14 +221,33 @@ class DropdownValue extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
       initialValue: value,
-      onSelected: onChanged,
+      onSelected: (v) {
+        HapticFeedback.selectionClick();
+        onChanged(v);
+      },
+      color: context.surface,
+      elevation: 8,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: context.border),
+      ),
       itemBuilder: (ctx) => items
           .map((item) => PopupMenuItem(
                 value: item,
-                child: Text(_labelFor(item)),
+                child: Text(
+                  _labelFor(item),
+                  style: TextStyle(
+                    color: context.text1,
+                    fontWeight: item == value
+                        ? FontWeight.w600
+                        : FontWeight.w400,
+                  ),
+                ),
               ))
           .toList(),
-      child: Container(
+      child: AnimatedContainer(
+        duration: _kTileAnimDuration,
+        curve: _kTileAnimCurve,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: context.surfaceHi,
@@ -172,15 +256,27 @@ class DropdownValue extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              _labelFor(value),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: context.text1,
-                fontFamily: (useMonoFont && itemLabels == null)
-                    ? AppTheme.monoFontFamily
-                    : null,
+            AnimatedSwitcher(
+              duration: _kTileAnimDuration,
+              transitionBuilder: (child, anim) => FadeTransition(
+                opacity: anim,
+                child: SizeTransition(
+                  sizeFactor: anim,
+                  axis: Axis.horizontal,
+                  child: child,
+                ),
+              ),
+              child: Text(
+                _labelFor(value),
+                key: ValueKey(value),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: context.text1,
+                  fontFamily: (useMonoFont && itemLabels == null)
+                      ? AppTheme.monoFontFamily
+                      : null,
+                ),
               ),
             ),
             const SizedBox(width: 4),
@@ -206,7 +302,9 @@ class ColorDot extends StatelessWidget {
     } catch (e) {
       color = context.accent;
     }
-    return Container(
+    return AnimatedContainer(
+      duration: _kTileAnimDuration,
+      curve: _kTileAnimCurve,
       width: 24,
       height: 24,
       decoration: BoxDecoration(

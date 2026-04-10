@@ -17,4 +17,18 @@ class GalleryRegisterService {
       // 네이티브 채널 미구현 시 무시 — 개발 단계에서는 정상
     }
   }
+
+  /// MediaStore의 Pictures/Exacta 항목 전체 제거. 토글 OFF 시 호출.
+  /// 반환값: 삭제된 행 개수 (실패/지원 안됨 → 0)
+  static Future<int> removeAllFromGallery() async {
+    if (!Platform.isAndroid) return 0;
+    try {
+      final result = await _channel.invokeMethod<int>('removeAllFromGallery');
+      return result ?? 0;
+    } on MissingPluginException {
+      return 0;
+    } on PlatformException {
+      return 0;
+    }
+  }
 }

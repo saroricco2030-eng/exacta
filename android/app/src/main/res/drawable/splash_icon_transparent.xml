@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ 시스템 스플래시의 아이콘 단계를 숨기기 위한 투명 1x1 벡터.
+     플랫폼이 강제로 표시하는 splash icon 슬롯에 이 드로어블을 끼워
+     이음새 없이 Flutter 브랜드 스플래시만 보이게 한다. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1dp"
+    android:height="1dp"
+    android:viewportWidth="1"
+    android:viewportHeight="1">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,0L1,0L1,1L0,1Z" />
+</vector>

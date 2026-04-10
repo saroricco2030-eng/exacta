@@ -1,4 +1,6 @@
 /// Settings screen - stamp/camera/security/theme/locale/export/about/storage
+/// 낙관적 업데이트 — 토글/변경 시 로컬 state 즉시 반영, DB write는 백그라운드.
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/drift.dart' hide Column;
@@ -6,11 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
-import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/data/providers.dart';
 import 'package:exacta/features/export/export_screen.dart';
 import 'package:exacta/providers/theme_notifier.dart';
+import 'package:exacta/services/gallery_register_service.dart';
 
 import 'package:exacta/features/settings/widgets/stamp_settings_section.dart';
 import 'package:exacta/features/settings/widgets/camera_settings_section.dart';
@@ -32,6 +34,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   StampConfig? _config;
   bool _hasError = false;
 
+  static const _stampColorOptions = [
+    '#FFFFFF', '#FF9B7B', '#B8A0E8', '#7ECBB4',
+    '#F0C078', '#FFD700', '#42A5F5', '#EF5350',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -47,10 +54,120 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  /// 설정 변경 후 로컬 state만 갱신 (StreamProvider 리빌드 없음)
-  void _refreshConfig() async {
-    final config = await AppDatabase.instance.getStampConfig();
-    if (mounted) setState(() => _config = config);
+  /// 낙관적 업데이트 — 로컬 state 즉시 갱신 후 DB write는 백그라운드.
+  /// DB 실패 시 직전 값으로 롤백하고 스낵바 표시.
+  Future<void> _update({
+    String? dateFormat,
+    String? fontFamily,
+    String? stampColor,
+    String? stampPosition,
+    String? stampLayout,
+    bool? showInNativeGallery,
+    String? resolution,
+    bool? shutterSound,
+    bool? batterySaver,
+    bool? exifStrip,
+    bool? secureShareLimit,
+    String? logoPath,
+    String? signaturePath,
+    String? themeMode,
+    String? locale,
+  }) async {
+    final current = _config;
+    if (current == null) return;
+
+    // 1. 로컬 state 즉시 갱신 (낙관적) — copyWith는 null 파라미터를 무시.
+    //    logoPath/signaturePath는 빈 문자열("")로 "삭제" 의미이므로 별도 처리.
+    final updated = current.copyWith(
+      dateFormat: dateFormat,
+      fontFamily: fontFamily,
+      stampColor: stampColor,
+      stampPosition: stampPosition,
+      stampLayout: stampLayout,
+      showInNativeGallery: showInNativeGallery,
+      resolution: resolution,
+      shutterSound: shutterSound,
+      batterySaver: batterySaver,
+      exifStrip: exifStrip,
+      secureShareLimit: secureShareLimit,
+      themeMode: themeMode,
+      locale: locale,
+      logoPath: logoPath != null
+          ? Value(logoPath.isEmpty ? null : logoPath)
+          : const Value.absent(),
+      signaturePath: signaturePath != null
+          ? Value(signaturePath.isEmpty ? null : signaturePath)
+          : const Value.absent(),
+    );
+
+    setState(() => _config = updated);
+
+    // 2. 테마/언어 notifier 즉시 동기화
+    if (themeMode != null) {
+      ref.read(themeProvider.notifier).applyFromDb(themeMode);
+    }
+    if (locale != null) {
+      ref.read(localeProvider.notifier).applyFromDb(locale);
+    }
+
+    // 3. DB write는 백그라운드 — 실패 시 롤백
+    try {
+      await ref.read(dbProvider).updateStampConfig(
+            StampConfigsCompanion(
+              id: const Value(1),
+              dateFormat: Value(updated.dateFormat),
+              fontFamily: Value(updated.fontFamily),
+              stampColor: Value(updated.stampColor),
+              stampPosition: Value(updated.stampPosition),
+              stampLayout: Value(updated.stampLayout),
+              showInNativeGallery: Value(updated.showInNativeGallery),
+              resolution: Value(updated.resolution),
+              shutterSound: Value(updated.shutterSound),
+              batterySaver: Value(updated.batterySaver),
+              exifStrip: Value(updated.exifStrip),
+              secureShareLimit: Value(updated.secureShareLimit),
+              logoPath: Value(updated.logoPath),
+              signaturePath: Value(updated.signaturePath),
+              themeMode: Value(updated.themeMode),
+              locale: Value(updated.locale),
+            ),
+          );
+
+      // 순정 갤러리 토글 변경 시 양방향 동기화 (비차단)
+      if (showInNativeGallery != null &&
+          showInNativeGallery != current.showInNativeGallery) {
+        unawaited(_syncNativeGallery(showInNativeGallery));
+      }
+    } catch (e) {
+      debugPrint('updateStampConfig failed: $e');
+      // 롤백
+      if (mounted) {
+        setState(() => _config = current);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.commonError),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  /// 순정 갤러리 토글 양방향 동기화
+  Future<void> _syncNativeGallery(bool enabled) async {
+    try {
+      if (!enabled) {
+        await GalleryRegisterService.removeAllFromGallery();
+      } else {
+        final all = await ref.read(dbProvider).getAllPhotos();
+        for (final photo in all) {
+          if (photo.isSecure || photo.isVideo) continue;
+          await GalleryRegisterService.registerToGallery(photo.filePath);
+        }
+      }
+    } catch (e) {
+      debugPrint('syncNativeGallery failed: $e');
+    }
   }
 
   @override
@@ -100,232 +217,107 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
     }
 
+    final config = _config!;
+
     return Scaffold(
       body: SafeArea(
-        child: _SettingsBody(
-          config: _config!,
-          l: l,
-          ref: ref,
-          onConfigChanged: _refreshConfig,
+        child: ListView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          children: [
+            Text(
+              l.settingsTitle,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 24),
+
+            StampSettingsSection(
+              config: config,
+              l: l,
+              onUpdate: _update,
+              stampColorOptions: _stampColorOptions,
+            ),
+            const SizedBox(height: 24),
+
+            CameraSettingsSection(
+              config: config,
+              l: l,
+              onUpdate: _update,
+            ),
+            const SizedBox(height: 24),
+
+            SecuritySettingsSection(
+              config: config,
+              l: l,
+              onUpdate: _update,
+            ),
+            const SizedBox(height: 24),
+
+            ThemeLocaleSection(
+              config: config,
+              l: l,
+              onUpdate: _update,
+            ),
+            const SizedBox(height: 24),
+
+            // ── 내보내기 ──
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: Material(
+                color: context.surfaceHi,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      SlideUpRoute(page: const ExportScreen()),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        Icon(LucideIcons.download,
+                            size: 18, color: context.accent),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l.exportTitle,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: context.text1,
+                            ),
+                          ),
+                        ),
+                        Icon(LucideIcons.chevronRight,
+                            size: 18, color: context.text3),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            const _StorageSection(),
+            const SizedBox(height: 24),
+
+            AboutSection(l: l),
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SettingsBody extends StatelessWidget {
-  const _SettingsBody({
-    required this.config,
-    required this.l,
-    required this.ref,
-    required this.onConfigChanged,
-  });
-
-  final StampConfig config;
-  final AppLocalizations l;
-  final WidgetRef ref;
-  final VoidCallback onConfigChanged;
-
-  Future<void> _update({
-    String? dateFormat,
-    String? fontFamily,
-    String? stampColor,
-    String? stampPosition,
-    String? stampLayout,
-    bool? showInNativeGallery,
-    String? resolution,
-    bool? shutterSound,
-    bool? batterySaver,
-    bool? exifStrip,
-    bool? secureShareLimit,
-    String? logoPath,
-    String? signaturePath,
-    String? themeMode,
-    String? locale,
-  }) async {
-    // M22: DB write 실패 catch
-    try {
-      await ref.read(dbProvider).updateStampConfig(
-            StampConfigsCompanion(
-              id: const Value(1),
-              dateFormat: Value(dateFormat ?? config.dateFormat),
-              fontFamily: Value(fontFamily ?? config.fontFamily),
-              stampColor: Value(stampColor ?? config.stampColor),
-              stampPosition: Value(stampPosition ?? config.stampPosition),
-              stampLayout: Value(stampLayout ?? config.stampLayout),
-              showInNativeGallery:
-                  Value(showInNativeGallery ?? config.showInNativeGallery),
-              resolution: Value(resolution ?? config.resolution),
-              shutterSound: Value(shutterSound ?? config.shutterSound),
-              batterySaver: Value(batterySaver ?? config.batterySaver),
-              exifStrip: Value(exifStrip ?? config.exifStrip),
-              secureShareLimit:
-                  Value(secureShareLimit ?? config.secureShareLimit),
-              logoPath: Value(logoPath ?? config.logoPath),
-              signaturePath: Value(signaturePath ?? config.signaturePath),
-              themeMode: Value(themeMode ?? config.themeMode),
-              locale: Value(locale ?? config.locale),
-            ),
-          );
-      onConfigChanged();
-    } catch (e) {
-      debugPrint('updateStampConfig failed: $e');
-      rethrow;
-    }
-  }
-
-  /// build()에서 context를 캡쳐하여 Notifier 동기화하는 래퍼
-  SettingsUpdateCallback _updateWithNotifiers(BuildContext ctx) {
-    return ({
-      String? dateFormat,
-      String? fontFamily,
-      String? stampColor,
-      String? stampPosition,
-      String? stampLayout,
-      bool? showInNativeGallery,
-      String? resolution,
-      bool? shutterSound,
-      bool? batterySaver,
-      bool? exifStrip,
-      bool? secureShareLimit,
-      String? logoPath,
-      String? signaturePath,
-      String? themeMode,
-      String? locale,
-    }) async {
-      await _update(
-        dateFormat: dateFormat,
-        fontFamily: fontFamily,
-        stampColor: stampColor,
-        stampPosition: stampPosition,
-        stampLayout: stampLayout,
-        showInNativeGallery: showInNativeGallery,
-        resolution: resolution,
-        shutterSound: shutterSound,
-        batterySaver: batterySaver,
-        exifStrip: exifStrip,
-        secureShareLimit: secureShareLimit,
-        logoPath: logoPath,
-        signaturePath: signaturePath,
-        themeMode: themeMode,
-        locale: locale,
-      );
-      if (themeMode != null) {
-        ref.read(themeProvider.notifier).applyFromDb(themeMode);
-      }
-      if (locale != null) {
-        ref.read(localeProvider.notifier).applyFromDb(locale);
-      }
-    };
-  }
-
-  static const _stampColorOptions = [
-    '#FFFFFF', '#FF9B7B', '#B8A0E8', '#7ECBB4',
-    '#F0C078', '#FFD700', '#42A5F5', '#EF5350',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      children: [
-        Text(
-          l.settingsTitle,
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        const SizedBox(height: 24),
-
-        // ── 타임스탬프 ──
-        StampSettingsSection(
-          config: config,
-          l: l,
-          onUpdate: _update,
-          stampColorOptions: _stampColorOptions,
-        ),
-        const SizedBox(height: 24),
-
-        // ── 카메라 + 저장 ──
-        CameraSettingsSection(
-          config: config,
-          l: l,
-          onUpdate: _update,
-        ),
-        const SizedBox(height: 24),
-
-        // ── 보안 ──
-        SecuritySettingsSection(
-          config: config,
-          l: l,
-          onUpdate: _update,
-        ),
-        const SizedBox(height: 24),
-
-        // ── 테마/언어 ──
-        ThemeLocaleSection(
-          config: config,
-          l: l,
-          onUpdate: _updateWithNotifiers(context),
-        ),
-        const SizedBox(height: 24),
-
-        // ── 내보내기 ──
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: Material(
-            color: context.surfaceHi,
-            borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () {
-                Navigator.of(context).push(
-                  SlideUpRoute(page: const ExportScreen(),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Icon(LucideIcons.download,
-                        size: 18, color: context.accent),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        l.exportTitle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: context.text1,
-                        ),
-                      ),
-                    ),
-                    Icon(LucideIcons.chevronRight,
-                        size: 18, color: context.text3),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-
-        // ── 저장 공간 ──
-        _StorageSection(l: l),
-        const SizedBox(height: 24),
-
-        // ── 앱 정보 ──
-        AboutSection(l: l),
-        const SizedBox(height: 32),
-      ],
-    );
-  }
-}
-
 // ── 저장 공간 섹션 ──
 class _StorageSection extends StatefulWidget {
-  const _StorageSection({required this.l});
-  final AppLocalizations l;
+  const _StorageSection();
 
   @override
   State<_StorageSection> createState() => _StorageSectionState();
@@ -373,10 +365,11 @@ class _StorageSectionState extends State<_StorageSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionHeader(icon: LucideIcons.hardDrive, label: widget.l.storageUsed),
+        SectionHeader(icon: LucideIcons.hardDrive, label: l.storageUsed),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
@@ -390,29 +383,38 @@ class _StorageSectionState extends State<_StorageSection> {
               Icon(LucideIcons.database, size: 18, color: context.text2),
               const SizedBox(width: 12),
               Expanded(
-                child: _loaded
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.l.storagePhotos(_photoCount),
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: context.text1),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _formatBytes(_totalBytes),
-                            style: TextStyle(
-                              fontFamily: AppTheme.monoFontFamily,
-                              fontSize: 12,
-                              color: context.text3,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  child: _loaded
+                      ? Column(
+                          key: const ValueKey('loaded'),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l.storagePhotos(_photoCount),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: context.text1,
+                              ),
                             ),
-                          ),
-                        ],
-                      )
-                    : Text(
-                        widget.l.storageCalculating,
-                        style: TextStyle(fontSize: 13, color: context.text3),
-                      ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _formatBytes(_totalBytes),
+                              style: TextStyle(
+                                fontFamily: AppTheme.monoFontFamily,
+                                fontSize: 12,
+                                color: context.text3,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          l.storageCalculating,
+                          key: const ValueKey('loading'),
+                          style: TextStyle(fontSize: 13, color: context.text3),
+                        ),
+                ),
               ),
             ],
           ),

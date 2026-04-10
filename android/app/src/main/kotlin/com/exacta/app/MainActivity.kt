@@ -35,10 +35,17 @@ class MainActivity : FlutterActivity() {
                             result.error("INVALID_PATH", "Path is null", null)
                         }
                     }
+                    "removeAllFromGallery" -> {
+                        val deleted = removeAllFromGallery()
+                        result.success(deleted)
+                    }
                     else -> result.notImplemented()
                 }
             }
     }
+
+    private fun mimeFor(file: File): String =
+        if (file.extension.equals("png", true)) "image/png" else "image/jpeg"
 
     private fun addToGallery(filePath: String) {
         val file = File(filePath)
@@ -46,7 +53,7 @@ class MainActivity : FlutterActivity() {
 
         val values = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, file.name)
-            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.MIME_TYPE, mimeFor(file))
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/Exacta")
                 put(MediaStore.Images.Media.IS_PENDING, 1)
@@ -68,6 +75,35 @@ class MainActivity : FlutterActivity() {
                 values.put(MediaStore.Images.Media.IS_PENDING, 0)
                 resolver.update(it, values, null, null)
             }
+        }
+    }
+
+    /// MediaStore의 Pictures/Exacta 항목 전체 삭제 (앱이 삽입한 항목만 동의 없이 삭제 가능)
+    /// Returns the number of rows deleted.
+    private fun removeAllFromGallery(): Int {
+        val resolver = contentResolver
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
+                val selectionArgs = arrayOf("Pictures/Exacta/%")
+                resolver.delete(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    selection,
+                    selectionArgs
+                )
+            } else {
+                // Pre-Q: DATA 컬럼 경로 매칭
+                @Suppress("DEPRECATION")
+                val selection = "${MediaStore.Images.Media.DATA} LIKE ?"
+                val selectionArgs = arrayOf("%/Pictures/Exacta/%")
+                resolver.delete(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    selection,
+                    selectionArgs
+                )
+            }
+        } catch (e: Exception) {
+            0
         }
     }
 }

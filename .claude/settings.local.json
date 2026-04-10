@@ -71,7 +71,9 @@
       "Bash(python:*)",
       "Bash(explorer C:\\\\Users\\\\saror\\\\Desktop\\\\exacta\\\\build\\\\app\\\\outputs\\\\flutter-apk:*)",
       "Bash(start:*)",
-      "Bash(cmd.exe:*)"
+      "Bash(cmd.exe:*)",
+      "Bash(adb:*)",
+      "Bash(C:/Users/saror/AppData/Local/Android/sdk/platform-tools/adb.exe:*)"
     ]
   }
 }

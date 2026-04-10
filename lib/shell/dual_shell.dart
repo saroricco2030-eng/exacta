@@ -84,20 +84,22 @@ class _DualShellState extends ConsumerState<DualShell> {
       backgroundColor: context.bg,
       body: SafeArea(
         bottom: false,
-        child: IndexedStack(
-          index: _currentTab,
-          children: [
-            // 탭 0: 홈 — 테마별 다른 페이지
-            isDark ? const ListenNowPage() : const ExploreTab(),
-            const GalleryScreen(),
-            const SizedBox(), // 카메라 (push)
-            const ProjectsScreen(),
-            // 탭 4: 설정 — SettingsScreen 직접 연결 (중간 단계 제거)
-            const SettingsScreen(),
-          ],
+        child: RepaintBoundary(
+          child: IndexedStack(
+            index: _currentTab,
+            children: [
+              // 탭 0: 홈 — 테마별 다른 페이지
+              isDark ? const ListenNowPage() : const ExploreTab(),
+              const GalleryScreen(),
+              const SizedBox(), // 카메라 (push)
+              const ProjectsScreen(),
+              // 탭 4: 설정 — SettingsScreen 직접 연결 (중간 단계 제거)
+              const SettingsScreen(),
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNav(isDark, l),
+      bottomNavigationBar: RepaintBoundary(child: _buildBottomNav(isDark, l)),
     ),
     );
   }
@@ -142,20 +144,63 @@ class _DualShellState extends ConsumerState<DualShell> {
 
   Widget _tab(IconData icon, String label, int index, Color active, Color inactive) {
     final isActive = _currentTab == index;
-    final color = isActive ? active : inactive;
     return Expanded(
       child: Semantics(
         button: true, label: label, selected: isActive,
-        child: GestureDetector(
-          onTap: () { HapticFeedback.selectionClick(); setState(() => _currentTab = index); },
-          behavior: HitTestBehavior.opaque,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: color, size: 24),
-              const SizedBox(height: 4),
-              Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: color)),
-            ],
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              if (_currentTab == index) return;
+              HapticFeedback.selectionClick();
+              setState(() => _currentTab = index);
+            },
+            splashColor: active.withValues(alpha: 0.08),
+            highlightColor: active.withValues(alpha: 0.04),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 아이콘: 선택 시 알약 배경 + 색상 전환
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  width: 44,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? active.withValues(alpha: 0.12)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  alignment: Alignment.center,
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 1.0, end: isActive ? 1.08 : 1.0),
+                    duration: const Duration(milliseconds: 260),
+                    curve: Curves.easeOutCubic,
+                    builder: (_, scale, child) => Transform.scale(
+                      scale: scale,
+                      child: child,
+                    ),
+                    child: Icon(
+                      icon,
+                      color: isActive ? active : inactive,
+                      size: 22,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                    color: isActive ? active : inactive,
+                  ),
+                  child: Text(label),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -164,23 +209,59 @@ class _DualShellState extends ConsumerState<DualShell> {
 
   Widget _cameraTab(String label, Color active) {
     return Expanded(
-      child: GestureDetector(
-        onTap: _openCamera,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 44, height: 32,
-              decoration: BoxDecoration(
-                color: active,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(LucideIcons.camera, color: Colors.white, size: 20),
+      child: Semantics(
+        button: true,
+        label: label,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _openCamera,
+            splashColor: active.withValues(alpha: 0.15),
+            highlightColor: active.withValues(alpha: 0.08),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.94, end: 1.0),
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutBack,
+                  builder: (_, scale, child) => Transform.scale(
+                    scale: scale,
+                    child: child,
+                  ),
+                  child: Container(
+                    width: 44,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: active,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: active.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      LucideIcons.camera,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: active,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: active)),
-          ],
+          ),
         ),
       ),
     );

@@ -2,7 +2,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -146,13 +145,11 @@ class StampSettingsSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
 
-        GestureDetector(
-          onTap: () { HapticFeedback.lightImpact(); _showColorPicker(context); },
-          child: SettingsTile(
-            icon: LucideIcons.palette,
-            label: l.settingsStampColor,
-            trailing: ColorDot(hex: config.stampColor),
-          ),
+        SettingsTile(
+          icon: LucideIcons.palette,
+          label: l.settingsStampColor,
+          trailing: ColorDot(hex: config.stampColor),
+          onTap: () => _showColorPicker(context),
         ),
         const SizedBox(height: 8),
 
@@ -183,12 +180,11 @@ class StampSettingsSection extends StatelessWidget {
         const SizedBox(height: 8),
 
         // 로고 선택
-        GestureDetector(
-          onTap: () { HapticFeedback.lightImpact(); _pickLogo(context); },
-          child: SettingsTile(
-            icon: LucideIcons.image,
-            label: l.stampLogo,
-            trailing: config.logoPath != null
+        SettingsTile(
+          onTap: () => _pickLogo(context),
+          icon: LucideIcons.image,
+          label: l.stampLogo,
+          trailing: config.logoPath != null
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -220,50 +216,47 @@ class StampSettingsSection extends StatelessWidget {
                       color: context.accent,
                     ),
                   ),
-          ),
         ),
         const SizedBox(height: 8),
 
         // 서명 등록
-        GestureDetector(
-          onTap: () { HapticFeedback.lightImpact(); _openSignaturePad(context); },
-          child: SettingsTile(
-            icon: LucideIcons.penTool,
-            label: l.stampSignature,
-            trailing: config.signaturePath != null &&
-                    config.signaturePath!.isNotEmpty
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.file(
-                          File(config.signaturePath!),
-                          width: 48,
-                          cacheWidth: 96,
-                          height: 24,
-                          fit: BoxFit.contain,
-                          errorBuilder: (ctx, e, st) => Icon(
-                              LucideIcons.imageOff,
-                              size: 16, color: ctx.text3),
-                        ),
+        SettingsTile(
+          onTap: () => _openSignaturePad(context),
+          icon: LucideIcons.penTool,
+          label: l.stampSignature,
+          trailing: config.signaturePath != null &&
+                  config.signaturePath!.isNotEmpty
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.file(
+                        File(config.signaturePath!),
+                        width: 48,
+                        cacheWidth: 96,
+                        height: 24,
+                        fit: BoxFit.contain,
+                        errorBuilder: (ctx, e, st) => Icon(
+                            LucideIcons.imageOff,
+                            size: 16, color: ctx.text3),
                       ),
-                      const SizedBox(width: 8),
-                      GestureDetector(
-                        onTap: () => onUpdate(signaturePath: ''),
-                        child: Icon(LucideIcons.x,
-                            size: 16, color: context.text3),
-                      ),
-                    ],
-                  )
-                : Text(
-                    l.stampSignatureDraw,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.accent,
                     ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => onUpdate(signaturePath: ''),
+                      child: Icon(LucideIcons.x,
+                          size: 16, color: context.text3),
+                    ),
+                  ],
+                )
+              : Text(
+                  l.stampSignatureDraw,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.accent,
                   ),
-          ),
+                ),
         ),
       ],
     );

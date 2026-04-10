@@ -134,10 +134,12 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
           // ── 촬영 활동 캘린더 ──
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: PhotoCalendar(accentColor: AirbnbColors.primary),
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: RepaintBoundary(
+                child: PhotoCalendar(accentColor: AirbnbColors.primary),
+              ),
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 20)),

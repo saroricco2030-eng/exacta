@@ -7,6 +7,10 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowSplashScreenBackground">#0D1118</item>
+        <!-- 시스템 스플래시 아이콘 단계 숨김 — Flutter 브랜드 스플래시만 보이도록 -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_transparent</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">#0D1118</item>
+        <item name="android:windowSplashScreenAnimationDuration">1</item>
     </style>
     <!-- Theme applied to the Android Window as soon as the process has started.
          This theme determines the color of the Android Window while your

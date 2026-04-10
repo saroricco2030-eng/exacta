@@ -65,6 +65,7 @@ class _StampEditSheetState extends State<StampEditSheet> {
   late bool _showSpeed;
   late final TextEditingController _memoController;
   late final TextEditingController _tagsController;
+  late int? _selectedProjectId;
   List<Project> _projects = [];
 
   @override
@@ -77,9 +78,17 @@ class _StampEditSheetState extends State<StampEditSheet> {
     _showCompass = widget.showCompass;
     _showAltitude = widget.showAltitude;
     _showSpeed = widget.showSpeed;
+    _selectedProjectId = widget.selectedProjectId;
     _memoController = TextEditingController(text: widget.memo);
     _tagsController = TextEditingController(text: widget.tags);
     _loadProjects();
+  }
+
+  void _selectProject(int? id) {
+    if (_selectedProjectId == id) return;
+    setState(() => _selectedProjectId = id);
+    HapticFeedback.selectionClick();
+    widget.onProjectChanged?.call(id);
   }
 
   Future<void> _loadProjects() async {
@@ -311,9 +320,9 @@ class _StampEditSheetState extends State<StampEditSheet> {
                 separatorBuilder: (context, index) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    final isActive = widget.selectedProjectId == null;
+                    final isActive = _selectedProjectId == null;
                     return GestureDetector(
-                      onTap: () => widget.onProjectChanged?.call(null),
+                      onTap: () => _selectProject(null),
                       child: Container(
                         height: 40,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -344,13 +353,13 @@ class _StampEditSheetState extends State<StampEditSheet> {
                     );
                   }
                   final project = _projects[index - 1];
-                  final isActive = widget.selectedProjectId == project.id;
+                  final isActive = _selectedProjectId == project.id;
                   final projectColor = project.color != null
                       ? Color(
                           int.parse(project.color!.replaceFirst('#', '0xFF')))
                       : AppColors.darkAccent;
                   return GestureDetector(
-                    onTap: () => widget.onProjectChanged?.call(project.id),
+                    onTap: () => _selectProject(project.id),
                     child: Container(
                       height: 40,
                       padding: const EdgeInsets.symmetric(horizontal: 16),

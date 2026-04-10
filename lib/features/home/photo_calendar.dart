@@ -1,5 +1,6 @@
-/// GitHub 잔디 스타일 촬영 활동 캘린더
+/// 이번 주 촬영 활동 스트립 (일~토, 월 라벨 포함)
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:exacta/data/database.dart';
 
 class PhotoCalendar extends StatefulWidget {
@@ -11,7 +12,7 @@ class PhotoCalendar extends StatefulWidget {
 }
 
 class _PhotoCalendarState extends State<PhotoCalendar> {
-  Map<int, int> _counts = {};
+  Map<DateTime, int> _counts = {};
   bool _loaded = false;
 
   @override
@@ -22,84 +23,110 @@ class _PhotoCalendarState extends State<PhotoCalendar> {
 
   Future<void> _load() async {
     final now = DateTime.now();
-    final counts = await AppDatabase.instance.getDailyPhotoCounts(now.year, now.month);
-    if (mounted) setState(() { _counts = counts; _loaded = true; });
+    // 이번 주 일요일 (DateTime.weekday: Mon=1..Sun=7 → Sun=0 보정)
+    final sunday = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday % 7));
+
+    final byDate = <DateTime, int>{};
+    final currentCounts = await AppDatabase.instance
+        .getDailyPhotoCounts(now.year, now.month);
+    currentCounts.forEach((day, c) {
+      byDate[DateTime(now.year, now.month, day)] = c;
+    });
+    // 주가 전월에 걸치면 전월 데이터도 가져온다
+    if (sunday.month != now.month) {
+      final prevCounts = await AppDatabase.instance
+          .getDailyPhotoCounts(sunday.year, sunday.month);
+      prevCounts.forEach((day, c) {
+        byDate[DateTime(sunday.year, sunday.month, day)] = c;
+      });
+    }
+    if (mounted) setState(() { _counts = byDate; _loaded = true; });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded) return const SizedBox(height: 120);
+    if (!_loaded) return const SizedBox(height: 80);
 
     final now = DateTime.now();
-    final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
-    // 1일의 요일 (0=월 ~ 6=일)
-    final firstWeekday = DateTime(now.year, now.month, 1).weekday - 1;
+    final today = DateTime(now.year, now.month, now.day);
+    final sunday = today.subtract(Duration(days: now.weekday % 7));
+    final week = List.generate(7, (i) => sunday.add(Duration(days: i)));
+
     final maxCount = _counts.values.fold<int>(0, (a, b) => a > b ? a : b);
+    final locale = Localizations.localeOf(context).toString();
+    // 주가 두 달에 걸치면 "3월 ~ 4월" 형태로
+    final saturday = week.last;
+    final monthFmt = DateFormat.MMMM(locale);
+    final monthLabel = sunday.month == saturday.month
+        ? monthFmt.format(today)
+        : '${monthFmt.format(sunday)} ~ ${monthFmt.format(saturday)}';
+    final weekdayFmt = DateFormat.E(locale);
+    final mutedColor = Theme.of(context).textTheme.bodySmall?.color
+        ?.withValues(alpha: 0.45);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 요일 헤더
-        Row(
-          children: ['일', '월', '화', '수', '목', '금', '토']
-              .map((d) => Expanded(
-                    child: Center(
-                      child: Text(d,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
-                          )),
-                    ),
-                  ))
-              .toList(),
-        ),
-        const SizedBox(height: 4),
-        // 날짜 그리드
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7,
-            mainAxisSpacing: 3,
-            crossAxisSpacing: 3,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Text(
+            monthLabel,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
+            ),
           ),
-          // 일요일 시작 보정: firstWeekday(월=0) → 일요일 기준으로 변환
-          itemCount: ((firstWeekday % 7 + 6) % 7) + daysInMonth,
-          itemBuilder: (ctx, index) {
-            final sunOffset = (firstWeekday + 1) % 7; // 일요일 기준 offset
-            if (index < sunOffset) return const SizedBox();
-            final day = index - sunOffset + 1;
-            if (day > daysInMonth) return const SizedBox();
-
-            final count = _counts[day] ?? 0;
-            final isToday = day == now.day;
+        ),
+        Row(
+          children: week.map((date) {
+            final count = _counts[date] ?? 0;
+            final isToday = date == today;
             final intensity = maxCount > 0 ? (count / maxCount).clamp(0.0, 1.0) : 0.0;
-
-            return Container(
-              decoration: BoxDecoration(
-                color: count > 0
-                    ? widget.accentColor.withValues(alpha: 0.15 + intensity * 0.65)
-                    : Theme.of(context).dividerColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(4),
-                border: isToday
-                    ? Border.all(color: widget.accentColor, width: 1.5)
-                    : null,
-              ),
-              child: Center(
-                child: Text(
-                  '$day',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: isToday ? FontWeight.w700 : FontWeight.w400,
-                    color: count > 0
-                        ? widget.accentColor
-                        : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.3),
-                  ),
+            return Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Column(
+                  children: [
+                    Text(
+                      weekdayFmt.format(date),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: mutedColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: count > 0
+                            ? widget.accentColor.withValues(alpha: 0.15 + intensity * 0.65)
+                            : Theme.of(context).dividerColor.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(10),
+                        border: isToday
+                            ? Border.all(color: widget.accentColor, width: 1.5)
+                            : null,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${date.day}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
+                            color: count > 0
+                                ? widget.accentColor
+                                : Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
-          },
+          }).toList(),
         ),
       ],
     );
