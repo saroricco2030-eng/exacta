@@ -671,7 +671,9 @@ class _EvidenceCardState extends State<_EvidenceCard> {
     if (!mounted) return;
     setState(() => _state = ok ? _VerifyState.ok : _VerifyState.fail);
     HapticFeedback.mediumImpact();
-    ScaffoldMessenger.of(context).showSnackBar(
+    // 기존 스낵바 모두 제거 → 반복 탭 시 중첩 방지
+    final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
+    messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
