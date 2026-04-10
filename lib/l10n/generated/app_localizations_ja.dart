@@ -625,6 +625,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localeJapanese => '日本語';
 
   @override
+  String get tamperProofTitle => '改ざん不可能な写真';
+
+  @override
+  String get tamperProofIntro => 'この写真は以下の技術的理由により偽造が不可能です';
+
+  @override
+  String get tamperProofNtp =>
+      '撮影時刻はインターネット標準時刻(NTP)サーバーで補正されて記録されます。端末の時計を変えても実際の時刻は変わりません。';
+
+  @override
+  String get tamperProofBurnIn =>
+      'GPS座標・住所・時刻が写真のピクセルに直接合成されており、EXIFメタデータを削除しても消せません。';
+
+  @override
+  String get tamperProofHash =>
+      'ファイル全体に固有のSHA-256指紋が記録されており、1バイトでも変更されると即座に検知されます。';
+
+  @override
+  String get tamperProofChain =>
+      '各写真は直前の写真と数学的に連結されており、1枚でも改ざんすると以降すべての写真のチェーンが壊れます。';
+
+  @override
   String get evidenceSectionTitle => '法的証拠';
 
   @override

@@ -629,6 +629,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localeJapanese => '日本語';
 
   @override
+  String get tamperProofTitle => 'Tamper-Proof Photo';
+
+  @override
+  String get tamperProofIntro =>
+      'This photo cannot be forged for the following technical reasons';
+
+  @override
+  String get tamperProofNtp =>
+      'Capture time is corrected by an Internet standard (NTP) time server. Changing the device clock does not affect the recorded time.';
+
+  @override
+  String get tamperProofBurnIn =>
+      'GPS coordinates, address, and time are baked directly into the photo pixels, so removing EXIF metadata cannot erase them.';
+
+  @override
+  String get tamperProofHash =>
+      'A unique SHA-256 fingerprint is computed over the entire file. Changing even a single byte is detected instantly.';
+
+  @override
+  String get tamperProofChain =>
+      'Each photo is mathematically linked to the previous one. Tampering with a single photo breaks the chain for all subsequent photos.';
+
+  @override
   String get evidenceSectionTitle => 'Legal Evidence';
 
   @override

@@ -698,9 +698,6 @@ class _EvidenceCardState extends State<_EvidenceCard> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final photo = widget.photo;
-    final photoHash = photo.photoHash!;
-    final chainHash = photo.chainHash;
-    final prevHash = photo.prevHash;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -720,18 +717,19 @@ class _EvidenceCardState extends State<_EvidenceCard> {
             Row(
               children: [
                 const Icon(LucideIcons.shieldCheck,
-                    size: 16, color: AppColors.darkAccent),
+                    size: 18, color: AppColors.darkAccent),
                 const SizedBox(width: 8),
-                Text(
-                  l.evidenceSectionTitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.darkAccent,
-                    letterSpacing: 0.3,
+                Expanded(
+                  child: Text(
+                    l.tamperProofTitle,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.darkText1,
+                      letterSpacing: 0.1,
+                    ),
                   ),
                 ),
-                const Spacer(),
                 // NTP 상태 배지
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -772,30 +770,27 @@ class _EvidenceCardState extends State<_EvidenceCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // 해시 행들
-            _HashRow(
-              label: l.evidenceHashLabel,
-              value: EvidenceHashService.shortPreview(photoHash),
-            ),
-            if (chainHash != null) ...[
-              const SizedBox(height: 6),
-              _HashRow(
-                label: l.evidenceChainLabel,
-                value: EvidenceHashService.shortPreview(chainHash),
-              ),
-            ],
-            const SizedBox(height: 6),
-            _HashRow(
-              label: l.evidencePrevLabel,
-              value: prevHash == null
-                  ? l.evidenceGenesis
-                  : EvidenceHashService.shortPreview(prevHash),
-              isGenesis: prevHash == null,
-            ),
 
             const SizedBox(height: 14),
+
+            // 설명 인트로
+            Text(
+              l.tamperProofIntro,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.darkText2,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // 4가지 사유
+            _TamperReason(icon: LucideIcons.clock, text: l.tamperProofNtp),
+            _TamperReason(icon: LucideIcons.mapPin, text: l.tamperProofBurnIn),
+            _TamperReason(icon: LucideIcons.fingerprint, text: l.tamperProofHash),
+            _TamperReason(icon: LucideIcons.link, text: l.tamperProofChain),
+
+            const SizedBox(height: 12),
 
             // 검증 버튼
             SizedBox(
@@ -925,45 +920,37 @@ class _EvidenceCardState extends State<_EvidenceCard> {
 
 enum _VerifyState { idle, verifying, ok, fail }
 
-class _HashRow extends StatelessWidget {
-  const _HashRow({
-    required this.label,
-    required this.value,
-    this.isGenesis = false,
-  });
-  final String label;
-  final String value;
-  final bool isGenesis;
+class _TamperReason extends StatelessWidget {
+  const _TamperReason({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 88,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.darkText3,
-              fontWeight: FontWeight.w500,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(icon,
+                size: 13,
+                color: AppColors.darkAccent.withValues(alpha: 0.75)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.darkText2,
+                height: 1.55,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontFamily:
-                  isGenesis ? null : AppTheme.monoFontFamily,
-              fontSize: isGenesis ? 11 : 12,
-              color: AppColors.darkText2,
-              fontStyle:
-                  isGenesis ? FontStyle.italic : FontStyle.normal,
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

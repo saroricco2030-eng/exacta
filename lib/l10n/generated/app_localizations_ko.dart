@@ -625,6 +625,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localeJapanese => '日本語';
 
   @override
+  String get tamperProofTitle => '수정 불가 사진';
+
+  @override
+  String get tamperProofIntro => '이 사진은 다음 기술적 이유로 위조가 불가능합니다';
+
+  @override
+  String get tamperProofNtp =>
+      '촬영 시각이 인터넷 표준 시간(NTP) 서버로 보정되어 기록됩니다. 기기 시계를 바꿔도 실제 시각이 그대로 남습니다.';
+
+  @override
+  String get tamperProofBurnIn =>
+      'GPS 좌표·주소·시각이 사진 픽셀에 직접 합성되어 있어 EXIF 메타데이터를 제거해도 지울 수 없습니다.';
+
+  @override
+  String get tamperProofHash =>
+      '파일 전체에 고유 SHA-256 지문이 찍혀 있어 1바이트만 변경되어도 즉시 감지됩니다.';
+
+  @override
+  String get tamperProofChain =>
+      '직전 촬영 사진과 수학적으로 연결되어 있어, 사진 1장만 조작해도 이후 모든 사진의 체인이 깨집니다.';
+
+  @override
   String get evidenceSectionTitle => '법적 증거';
 
   @override

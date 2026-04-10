@@ -264,6 +264,13 @@
   "localeEnglish": "English",
   "localeJapanese": "日本語",
 
+  "tamperProofTitle": "Tamper-Proof Photo",
+  "tamperProofIntro": "This photo cannot be forged for the following technical reasons",
+  "tamperProofNtp": "Capture time is corrected by an Internet standard (NTP) time server. Changing the device clock does not affect the recorded time.",
+  "tamperProofBurnIn": "GPS coordinates, address, and time are baked directly into the photo pixels, so removing EXIF metadata cannot erase them.",
+  "tamperProofHash": "A unique SHA-256 fingerprint is computed over the entire file. Changing even a single byte is detected instantly.",
+  "tamperProofChain": "Each photo is mathematically linked to the previous one. Tampering with a single photo breaks the chain for all subsequent photos.",
+
   "evidenceSectionTitle": "Legal Evidence",
   "evidenceHashLabel": "File Hash",
   "evidenceChainLabel": "Chain Hash",
