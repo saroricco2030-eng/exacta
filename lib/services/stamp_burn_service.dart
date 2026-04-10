@@ -159,13 +159,16 @@ class StampBurnService {
       }
     }
 
-    // 메모 (14sp, 주소와 비슷하지만 볼드로 구분) — M10: 최대 3줄까지 허용
+    // 메모 — 중요 필드.
+    // text 모드: 시간(34sp) 수준으로 크게(26sp) + 좌측 컬럼 전폭(60%+)에 여러 줄 전개
+    // bar/card 모드: 기존대로 14sp 작은 우상단
     if (!isSecure && memo != null && memo.isNotEmpty) {
       painters.memo = _tp(memo,
-          fontSize: 14 * scale, fontWeight: FontWeight.w600,
-          color: stampColor.withValues(alpha: alpha(0.9)),
-          maxWidth: imgW * 0.5,
-          maxLines: 3,
+          fontSize: (isTextMode ? 26 : 14) * scale,
+          fontWeight: FontWeight.w700,
+          color: stampColor.withValues(alpha: alpha(isTextMode ? 0.95 : 0.9)),
+          maxWidth: imgW * (isTextMode ? 0.62 : 0.5),
+          maxLines: isTextMode ? 4 : 3,
           shadows: ts);
     }
 
@@ -271,7 +274,7 @@ class StampBurnService {
       // Row crossAxisAlignment: start — 두 열 높이 불일치 시 상단 정렬
       // ════════════════════════════════════════════════════════
 
-      // 좌측 컬럼 높이
+      // 좌측 컬럼 높이 (시간→날짜→주소→센서→memo)
       double leftH = 0;
       if (painters.timeHhMm != null) {
         leftH += painters.timeHhMm!.height;
@@ -284,6 +287,9 @@ class StampBurnService {
       }
       if (painters.overlay != null) {
         leftH += (leftH > 0 ? 2 * scale : 0) + painters.overlay!.height;
+      }
+      if (!isSecure && painters.memo != null) {
+        leftH += (leftH > 0 ? 8 * scale : 0) + painters.memo!.height;
       }
 
       // 우측 컬럼 높이
@@ -306,9 +312,7 @@ class StampBurnService {
       if (painters.secureBadge != null) {
         barHeight += painters.secureBadge!.height + 6 * scale;
       }
-      if (!isSecure && painters.memo != null) {
-        barHeight += painters.memo!.height + 6 * scale;
-      }
+      // memo는 이제 좌측 컬럼 내부 → leftH에 이미 포함됨, 중복 가산 X
       if (logoImage != null || sigImage != null) {
         barHeight += 6 * scale;
         final logoH = logoImage?.height.toDouble() ?? 0;
@@ -335,16 +339,10 @@ class StampBurnService {
         y += painters.secureBadge!.height + 6 * scale;
       }
 
-      // 메모 (메인 Row 위쪽 전폭)
-      if (!isSecure && painters.memo != null) {
-        painters.memo!.paint(canvas, Offset(padding, y));
-        y += painters.memo!.height + 6 * scale;
-      }
-
       // ── 메인 Row 시작 ──
       final rowY = y;
 
-      // 좌측 열: 시간 → 날짜 → 주소 → 센서
+      // 좌측 열: 시간 → 날짜 → 주소 → 센서 → memo(크게)
       double leftY = rowY;
       if (painters.timeHhMm != null) {
         painters.timeHhMm!.paint(canvas, Offset(padding, leftY));
@@ -370,6 +368,11 @@ class StampBurnService {
         if (leftY > rowY) leftY += 2 * scale;
         painters.overlay!.paint(canvas, Offset(padding, leftY));
         leftY += painters.overlay!.height;
+      }
+      if (!isSecure && painters.memo != null) {
+        if (leftY > rowY) leftY += 8 * scale;
+        painters.memo!.paint(canvas, Offset(padding, leftY));
+        leftY += painters.memo!.height;
       }
 
       // 우측 열: • 도시 → 좌표 → 증거 ID (우측 정렬)

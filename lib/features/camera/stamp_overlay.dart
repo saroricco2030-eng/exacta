@@ -165,8 +165,9 @@ class StampOverlay extends StatelessWidget {
     }
     final sensorText = !_isSecure ? sensorLine() : '';
     final hasAddress = !_isSecure && showAddress && address.isNotEmpty;
+    final hasMemo = memo.isNotEmpty;
 
-    // 좌측 컬럼
+    // 좌측 컬럼 — 시간/날짜/주소/센서 + memo(있을 때 좌측 전폭 여러 줄)
     final leftChildren = <Widget>[
       if (showTime)
         Row(
@@ -196,6 +197,15 @@ class StampOverlay extends StatelessWidget {
           child: Text(sensorText, maxLines: 1, overflow: TextOverflow.ellipsis,
             style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)),
               letterSpacing: 0.2, shadows: sh)),
+        ),
+      // memo — 중요 필드. 시간 수준으로 크고 굵게, 좌측 전폭에 여러 줄 전개
+      if (hasMemo)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(memo, maxLines: 4, overflow: TextOverflow.ellipsis,
+            softWrap: true,
+            style: _ts(24, FontWeight.w700, c.withValues(alpha: a(0.95)),
+              shadows: sh).copyWith(height: 1.15)),
         ),
     ];
 
@@ -245,15 +255,9 @@ class StampOverlay extends StatelessWidget {
         children: [
           if (_isSecure) _secureBadge(c),
 
-          // 메모 (메인 Row 위 전폭)
-          if (memo.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Text(memo, maxLines: 2, overflow: TextOverflow.ellipsis,
-                style: _ts(12, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
-            ),
-
           // ── 메인 Row ──
+          // 좌측은 Expanded로 폭 최대 사용 → memo가 여러 줄 전개될 공간 확보
+          // 우측은 내용 폭만큼만 (crossAxis.end)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -264,7 +268,7 @@ class StampOverlay extends StatelessWidget {
                   children: leftChildren,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
