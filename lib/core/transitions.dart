@@ -86,31 +86,3 @@ class FadeRoute<T> extends PageRouteBuilder<T> {
           },
         );
 }
-
-/// 페이드 + 살짝 확대 — 다이얼로그 류 진입용 (필요 시)
-class FadeScaleRoute<T> extends PageRouteBuilder<T> {
-  final Widget page;
-
-  FadeScaleRoute({required this.page})
-      : super(
-          opaque: false,
-          barrierColor: Colors.black54,
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionDuration: const Duration(milliseconds: 220),
-          reverseTransitionDuration: const Duration(milliseconds: 180),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curve = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            );
-            return FadeTransition(
-              opacity: curve,
-              child: ScaleTransition(
-                scale: Tween<double>(begin: 0.96, end: 1.0).animate(curve),
-                child: child,
-              ),
-            );
-          },
-        );
-}

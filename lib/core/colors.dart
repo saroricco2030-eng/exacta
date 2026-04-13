@@ -1,23 +1,23 @@
-/// Static theme color tokens — ThemeData 정의 및 화면별 직접 참조용
-/// Airbnb Light Mode (라이트) + Apple Music Dark Mode (다크)
-/// 동적 context 기반 참조는 build_context_ext.dart 확장 사용 권장
+/// 페이지 전용 솔리드 컬러 — const 위젯 최적화용
+/// ★ 디자인 토큰 원본: core/theme/app_colors.dart
+/// ★ 동적 테마 반응: core/extensions/build_context_ext.dart
 import 'package:flutter/material.dart';
 
-class AppColors {
-  AppColors._();
+class DarkModeColors {
+  DarkModeColors._();
 
-  static const Color background = Color(0xFF000000);
-  static const Color surface1 = Color(0xFF0F0F0F);
-  static const Color surface2 = Color(0xFF1C1C1E);
-  static const Color surface3 = Color(0xFF2C2C2E);
-  static const Color accent = Color(0xFFFA2D48);
-  static const Color accentDim = Color(0x26FA2D48);
+  static const Color background = Color(0xFF0D1118);
+  static const Color surface1 = Color(0xFF151B24);
+  static const Color surface2 = Color(0xFF1C2430);
+  static const Color surface3 = Color(0xFF252D3A);
+  static const Color accent = Color(0xFFFFB49A);
+  static const Color accentDim = Color(0x1FFFB49A);
   static const Color text1 = Color(0xFFF5F5F7);
   static const Color text2 = Color(0xCCEBEBF5);
   static const Color text3 = Color(0x61EBEBF5);
   static const Color glassBorder = Color(0x1AFFFFFF);
   static const Color glass = Color(0x12FFFFFF);
-  static const Color miniPlayerBg = Color(0xFF1E1E1E);
+  static const Color miniPlayerBg = Color(0xFF151B24);
 
   static const List<LinearGradient> albumGradients = [
     LinearGradient(
@@ -103,44 +103,17 @@ class AppColors {
   ];
 }
 
-// ── Airbnb Light Theme Colors ──
-class AirbnbColors {
-  AirbnbColors._();
+// ── Exacta Light 홈 페이지 전용 (const 최적화용 솔리드 컬러) ──
+class LightPageColors {
+  LightPageColors._();
 
-  static const Color primary = Color(0xFFFF385C);
-  static const Color primaryLight = Color(0xFFFFE6EA);
-  static const Color bg = Color(0xFFFFFFFF);
-  static const Color bg2 = Color(0xFFF7F7F7);
-  static const Color bg3 = Color(0xFFEBEBEB);
-  static const Color border = Color(0xFFDDDDDD);
-  static const Color text1 = Color(0xFF222222);
-  static const Color text2 = Color(0xFF717171);
-  static const Color text3 = Color(0xFFB0B0B0);
-
-  static const List<LinearGradient> placeholders = [
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFE8D5B7), Color(0xFFA0522D)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFB7D5E8), Color(0xFF2A6496)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFD5E8B7), Color(0xFF3A7A3A)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFE8B7D5), Color(0xFFA02A6A)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFF5DEB3), Color(0xFFC8A44A)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFB7C5E8), Color(0xFF2A3A8C)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFE8C8B7), Color(0xFF8C4A2A)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFC8E8B7), Color(0xFF2A8C3A)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFE8E0B7), Color(0xFF8C7A2A)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFD4B7E8), Color(0xFF6A2A8C)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFB7E8E4), Color(0xFF2A7A76)]),
-    LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight,
-      colors: [Color(0xFFE8B7B7), Color(0xFF8C2A2A)]),
-  ];
+  static const Color primary = Color(0xFFFF9B7B);
+  static const Color primaryLight = Color(0xFFFFF0E6);
+  static const Color bg = Color(0xFFFFF8F2);
+  static const Color bg2 = Color(0xFFFFF0E6);
+  static const Color bg3 = Color(0xFFE8DCD0);
+  static const Color border = Color(0xFFE8D8CC);
+  static const Color text1 = Color(0xFF3D2E22);
+  static const Color text2 = Color(0xFF9E8E80);
+  static const Color text3 = Color(0xFFC5BBB4);
 }

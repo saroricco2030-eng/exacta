@@ -1,13 +1,13 @@
-/// Airbnb-style home tab - hero card, calendar, today strip, photo history, stats
+/// Exacta light home tab - hero card, calendar, today strip, photo history, stats
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../core/colors.dart';
-import '../core/extensions/build_context_ext.dart';
-import '../core/theme/app_theme.dart';
-import '../data/database.dart';
-import '../data/providers.dart';
+import 'package:exacta/core/colors.dart';
+import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/theme/app_theme.dart';
+import 'package:exacta/data/database.dart';
+import 'package:exacta/data/providers.dart';
 import '../features/camera/camera_screen.dart';
 import '../features/gallery/photo_detail_screen.dart';
 import '../features/home/photo_calendar.dart';
@@ -52,7 +52,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
     final latestAsync = ref.watch(latestPhotoProvider);
 
     return RefreshIndicator(
-      color: AirbnbColors.primary,
+      color: LightPageColors.primary,
       onRefresh: () async {
         ref.invalidate(weeklyStatsProvider);
         ref.invalidate(latestPhotoProvider);
@@ -71,7 +71,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                   Container(
                     width: 36, height: 36,
                     decoration: BoxDecoration(
-                      color: AirbnbColors.primary,
+                      color: LightPageColors.primary,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(LucideIcons.aperture, size: 20, color: Colors.white),
@@ -79,7 +79,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(l.homeTitle,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: AirbnbColors.text1, letterSpacing: -0.5),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: LightPageColors.text1, letterSpacing: -0.5),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                 ],
@@ -112,17 +112,17 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AirbnbColors.bg2,
+                    color: LightPageColors.bg2,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      Icon(LucideIcons.activity, size: 14, color: AirbnbColors.primary),
+                      Icon(LucideIcons.activity, size: 14, color: LightPageColors.primary),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
                           '${l.homeTodayPhotos(_todayStats!.total)}  ·  ${l.homeTodaySecure(_todayStats!.secure)}  ·  ${l.homeTodayProjects(_todayStats!.projects)}',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AirbnbColors.text2),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: LightPageColors.text2),
                           maxLines: 1, overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -138,7 +138,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: RepaintBoundary(
-                child: PhotoCalendar(accentColor: AirbnbColors.primary),
+                child: PhotoCalendar(accentColor: LightPageColors.primary),
               ),
             ),
           ),
@@ -150,7 +150,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Text(l.homeRecentProjects,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AirbnbColors.text1)),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: LightPageColors.text1)),
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
@@ -167,7 +167,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                       return _ShootChip(
                         icon: LucideIcons.camera,
                         label: l.navCamera,
-                        color: AirbnbColors.primary,
+                        color: LightPageColors.primary,
                         onTap: () => Navigator.of(context).push(FadeRoute(page: const CameraScreen())),
                       );
                     }
@@ -219,13 +219,13 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
             loading: () => [
               const SliverToBoxAdapter(
                 child: SizedBox(height: 200,
-                  child: Center(child: CircularProgressIndicator(color: AirbnbColors.primary, strokeWidth: 2))),
+                  child: Center(child: CircularProgressIndicator(color: LightPageColors.primary, strokeWidth: 2))),
               ),
             ],
             error: (_, _) => [
               SliverToBoxAdapter(
                 child: SizedBox(height: 200,
-                  child: Center(child: Text(l.commonError, style: const TextStyle(color: AirbnbColors.text2)))),
+                  child: Center(child: Text(l.commonError, style: const TextStyle(color: LightPageColors.text2)))),
               ),
             ],
             data: (photos) {
@@ -241,13 +241,13 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                             Container(
                               width: 64, height: 64,
                               decoration: BoxDecoration(
-                                color: AirbnbColors.primaryLight,
+                                color: LightPageColors.primaryLight,
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Icon(LucideIcons.camera, size: 28, color: AirbnbColors.primary),
+                              child: const Icon(LucideIcons.camera, size: 28, color: LightPageColors.primary),
                             ),
                             const SizedBox(height: 16),
-                            Text(l.homeNoPhotosYet, style: const TextStyle(fontSize: 14, color: AirbnbColors.text2)),
+                            Text(l.homeNoPhotosYet, style: const TextStyle(fontSize: 14, color: LightPageColors.text2)),
                           ],
                         ),
                       ),
@@ -274,18 +274,18 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                           children: [
                             Flexible(
                               child: Text(_dateLabel(dateStr, l),
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AirbnbColors.text1),
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: LightPageColors.text1),
                                 maxLines: 1, overflow: TextOverflow.ellipsis),
                             ),
                             const SizedBox(width: 8),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AirbnbColors.bg2,
+                                color: LightPageColors.bg2,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Text(l.galleryPhotos(groups[dateStr]!.length),
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AirbnbColors.text2)),
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: LightPageColors.text2)),
                             ),
                           ],
                         ),
@@ -306,10 +306,10 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: photo.isVideo
-                                ? Container(color: AirbnbColors.bg2,
-                                    child: const Center(child: Icon(LucideIcons.play, size: 24, color: AirbnbColors.text3)))
-                                : Image.file(File(photo.filePath), fit: BoxFit.cover, cacheWidth: 400,
-                                    errorBuilder: (_, _, _) => Container(color: AirbnbColors.bg2)),
+                                ? Container(color: LightPageColors.bg2,
+                                    child: const Center(child: Icon(LucideIcons.play, size: 24, color: LightPageColors.text3)))
+                                : Image.file(File(photo.filePath), fit: BoxFit.cover, cacheWidth: 400, cacheHeight: 400,
+                                    errorBuilder: (_, _, _) => Container(color: LightPageColors.bg2)),
                             ),
                           );
                         },
@@ -335,7 +335,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(colors: [Color(0xFFFFF0F2), Color(0xFFFFF8F0)]),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AirbnbColors.primary.withValues(alpha: 0.1)),
+                    border: Border.all(color: LightPageColors.primary.withValues(alpha: 0.1)),
                   ),
                   child: Row(
                     children: [
@@ -389,16 +389,16 @@ class _HeroPhotoCard extends StatelessWidget {
                 child: photo.isVideo
                     ? Container(
                         height: 220,
-                        color: AirbnbColors.bg2,
-                        child: const Center(child: Icon(LucideIcons.play, size: 48, color: AirbnbColors.text3)))
+                        color: LightPageColors.bg2,
+                        child: const Center(child: Icon(LucideIcons.play, size: 48, color: LightPageColors.text3)))
                     : Image.file(
                         File(photo.filePath),
                         fit: BoxFit.cover,
                         height: 220,
                         cacheWidth: 800,
                         errorBuilder: (_, _, _) => Container(
-                          height: 220, color: AirbnbColors.bg2,
-                          child: const Center(child: Icon(LucideIcons.imageOff, size: 32, color: AirbnbColors.text3))),
+                          height: 220, color: LightPageColors.bg2,
+                          child: const Center(child: Icon(LucideIcons.imageOff, size: 32, color: LightPageColors.text3))),
                       ),
               ),
             ),
@@ -516,12 +516,12 @@ class _LightStat extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, size: 16, color: AirbnbColors.primary),
+          Icon(icon, size: 16, color: LightPageColors.primary),
           const SizedBox(height: 6),
           Text(value, style: TextStyle(fontFamily: AppTheme.monoFontFamily,
-            fontSize: 22, fontWeight: FontWeight.w700, color: AirbnbColors.text1)),
+            fontSize: 22, fontWeight: FontWeight.w700, color: LightPageColors.text1)),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 10, color: AirbnbColors.text2),
+          Text(label, style: const TextStyle(fontSize: 10, color: LightPageColors.text2),
             overflow: TextOverflow.ellipsis, maxLines: 1),
         ],
       ),
@@ -540,13 +540,13 @@ class _FilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AirbnbColors.primary : Colors.white,
+          color: isActive ? LightPageColors.primary : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isActive ? AirbnbColors.primary : AirbnbColors.border),
+          border: Border.all(color: isActive ? LightPageColors.primary : LightPageColors.border),
         ),
         child: Text(label, style: TextStyle(
           fontSize: 13, fontWeight: FontWeight.w500,
-          color: isActive ? Colors.white : AirbnbColors.text1),
+          color: isActive ? Colors.white : LightPageColors.text1),
           maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     );

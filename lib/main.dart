@@ -9,6 +9,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/core/colors.dart';
+import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/providers/theme_notifier.dart';
 import 'package:exacta/shell/dual_shell.dart';
@@ -25,6 +26,10 @@ Future<void> main() async {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await initializeDateFormatting();
   NtpService.sync();
+  // Google Fonts: 오프라인에서도 캐시된 폰트 사용, 실패 시 시스템 폰트 폴백
+  GoogleFonts.config.allowRuntimeFetching = true;
+  // 갤러리에서 대량 사진 스크롤 시 메모리 안정화
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 100 * 1024 * 1024;
   runApp(const ProviderScope(child: ExactaApp()));
 }
 
@@ -38,6 +43,89 @@ class ExactaApp extends ConsumerStatefulWidget {
 class _ExactaAppState extends ConsumerState<ExactaApp> {
   bool? _showOnboarding;
   bool _splashDone = false;
+
+  // ThemeData 캐시 — build()마다 50+ 객체 재생성 방지
+  static ThemeData? _lightThemeCache;
+  static ThemeData? _darkThemeCache;
+
+  static ThemeData get _lightTheme {
+    return _lightThemeCache ??= _buildLightTheme();
+  }
+
+  static ThemeData get _darkTheme {
+    return _darkThemeCache ??= _buildDarkTheme();
+  }
+
+  static ThemeData _buildLightTheme() {
+    final sora = GoogleFonts.soraTextTheme();
+    return ThemeData(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.lightBg,
+      canvasColor: AppColors.lightBg,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      colorScheme: const ColorScheme.light(
+        primary: AppColors.lightAccent,
+        secondary: AppColors.lightAccent,
+        surface: AppColors.lightSurface,
+        error: AppColors.lightDanger,
+        onPrimary: AppColors.lightOnAccent,
+        onSurface: AppColors.lightText1,
+      ),
+      appBarTheme: const AppBarTheme(backgroundColor: AppColors.lightBg, foregroundColor: AppColors.lightText1, elevation: 0, scrolledUnderElevation: 0),
+      bottomSheetTheme: const BottomSheetThemeData(backgroundColor: AppColors.lightSurface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24)))),
+      dialogTheme: DialogThemeData(backgroundColor: AppColors.lightSurface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+      snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+      cardTheme: CardThemeData(color: AppColors.lightSurface, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.lightBorder, width: 1)), elevation: 0),
+      inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: AppColors.lightSurfaceHi,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightBorder)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.lightAccent, width: 1.5)),
+        hintStyle: const TextStyle(color: AppColors.lightText3)),
+      textTheme: sora.copyWith(
+        headlineMedium: GoogleFonts.sora(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.lightText1),
+        titleMedium: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.lightText1),
+        labelSmall: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.lightText2),
+        bodyMedium: GoogleFonts.sora(fontSize: 14, color: AppColors.lightText1, height: 1.6),
+        bodySmall: GoogleFonts.sora(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.lightText2),
+      ),
+      iconTheme: const IconThemeData(color: AppColors.lightText2, size: 22),
+      dividerColor: AppColors.lightBorder,
+    );
+  }
+
+  static ThemeData _buildDarkTheme() {
+    final sora = GoogleFonts.soraTextTheme();
+    return ThemeData(
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.darkBg,
+      canvasColor: AppColors.darkBg,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.darkAccent, secondary: AppColors.darkInfo,
+        surface: DarkModeColors.surface2, error: AppColors.darkDanger,
+        onPrimary: AppColors.darkOnAccent, onSurface: AppColors.darkText1,
+      ),
+      appBarTheme: const AppBarTheme(backgroundColor: AppColors.darkBg, foregroundColor: AppColors.darkText1, elevation: 0, scrolledUnderElevation: 0),
+      bottomSheetTheme: BottomSheetThemeData(backgroundColor: DarkModeColors.surface2, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24)))),
+      dialogTheme: DialogThemeData(backgroundColor: DarkModeColors.surface2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+      snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
+      cardTheme: CardThemeData(color: DarkModeColors.surface2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AppColors.darkBorder, width: 1)), elevation: 0),
+      inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: DarkModeColors.surface3,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.darkBorder)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.darkAccent, width: 1.5)),
+        hintStyle: const TextStyle(color: AppColors.darkText3)),
+      textTheme: sora.copyWith(
+        headlineMedium: GoogleFonts.sora(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AppColors.darkText1),
+        titleMedium: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.darkText1),
+        labelSmall: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AppColors.darkText2),
+        bodyMedium: GoogleFonts.sora(fontSize: 14, color: AppColors.darkText1, height: 1.6),
+        bodySmall: GoogleFonts.sora(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AppColors.darkText2),
+      ),
+      iconTheme: const IconThemeData(color: AppColors.darkText2, size: 22),
+      dividerColor: AppColors.darkBorder,
+    );
+  }
 
   @override
   void initState() {
@@ -70,8 +158,6 @@ class _ExactaAppState extends ConsumerState<ExactaApp> {
     final themeMode = ref.watch(themeProvider);
     final locale = ref.watch(localeProvider);
 
-    final sora = GoogleFonts.soraTextTheme();
-
     return MaterialApp(
       title: 'Exacta',
       debugShowCheckedModeBanner: false,
@@ -79,73 +165,8 @@ class _ExactaAppState extends ConsumerState<ExactaApp> {
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-
-      // ── Light (Airbnb) ──
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: AirbnbColors.bg,
-        canvasColor: AirbnbColors.bg,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        colorScheme: const ColorScheme.light(
-          primary: AirbnbColors.primary,
-          secondary: AirbnbColors.primary,
-          surface: Color(0xFFFFFFFF),
-          error: Color(0xFFDC2626),
-          onPrimary: Color(0xFFFFFFFF),
-          onSurface: AirbnbColors.text1,
-        ),
-        appBarTheme: const AppBarTheme(backgroundColor: AirbnbColors.bg, foregroundColor: AirbnbColors.text1, elevation: 0, scrolledUnderElevation: 0),
-        bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24)))),
-        dialogTheme: DialogThemeData(backgroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
-        cardTheme: CardThemeData(color: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: AirbnbColors.border, width: 1)), elevation: 0),
-        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: AirbnbColors.bg2,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AirbnbColors.border)),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AirbnbColors.primary, width: 1.5)),
-          hintStyle: const TextStyle(color: AirbnbColors.text3)),
-        textTheme: sora.copyWith(
-          headlineMedium: GoogleFonts.sora(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: AirbnbColors.text1),
-          titleMedium: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w600, color: AirbnbColors.text1),
-          labelSmall: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: AirbnbColors.text2),
-          bodyMedium: GoogleFonts.sora(fontSize: 14, color: AirbnbColors.text1, height: 1.6),
-          bodySmall: GoogleFonts.sora(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: AirbnbColors.text2),
-        ),
-        iconTheme: const IconThemeData(color: AirbnbColors.text2, size: 22),
-        dividerColor: AirbnbColors.border,
-      ),
-
-      // ── Dark (Apple Music) ──
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: AppColors.background,
-        canvasColor: AppColors.background,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFFFA2D48), secondary: Color(0xFFB8A0E8),
-          surface: Color(0xFF1C1C1E), error: Color(0xFFEF5350),
-          onPrimary: Color(0xFFFFFFFF), onSurface: Color(0xFFF5F5F7),
-        ),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF000000), foregroundColor: Color(0xFFF5F5F7), elevation: 0, scrolledUnderElevation: 0),
-        bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Color(0xFF1C1C1E), shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24)))),
-        dialogTheme: DialogThemeData(backgroundColor: const Color(0xFF1C1C1E), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)))),
-        cardTheme: CardThemeData(color: const Color(0xFF1C1C1E), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0x1AFFFFFF), width: 1)), elevation: 0),
-        inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: const Color(0xFF2C2C2E),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0x1AFFFFFF))),
-          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFFA2D48), width: 1.5)),
-          hintStyle: const TextStyle(color: Color(0x4DEBEBF5))),
-        textTheme: sora.copyWith(
-          headlineMedium: GoogleFonts.sora(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.3, color: const Color(0xFFF5F5F7)),
-          titleMedium: GoogleFonts.sora(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFFF5F5F7)),
-          labelSmall: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.3, color: const Color(0x99EBEBF5)),
-          bodyMedium: GoogleFonts.sora(fontSize: 14, color: const Color(0xFFF5F5F7), height: 1.6),
-          bodySmall: GoogleFonts.sora(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.5, color: const Color(0x99EBEBF5)),
-        ),
-        iconTheme: const IconThemeData(color: Color(0x99EBEBF5), size: 22),
-        dividerColor: const Color(0x1AFFFFFF),
-      ),
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
 
       home: !_splashDone
           ? SplashScreen(onDone: () => setState(() => _splashDone = true))

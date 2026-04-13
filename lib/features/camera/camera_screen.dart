@@ -109,6 +109,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     _initCamera();
     _startClock();
     _locationService.isSecureMode = () => _preset == CameraPreset.secure;
+    _locationService.isMounted = () => mounted;
   }
 
   Future<void> _loadSettings() async {
@@ -424,8 +425,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       final capturePreset = _preset;
       final captureMemo = _memo.isNotEmpty ? _memo : null;
       final captureTags = _tags.isNotEmpty ? _tags : null;
-      // 대원칙 2: FK 정합성 — 삭제된 프로젝트 ID가 DB에 저장되는 것 방지
-      final captureProjectId = await _validateProjectId(_selectedProjectId);
+      // FK 정합성 검증을 백그라운드 save 내부로 이동 — 셔터 응답 시간 단축
+      final captureProjectId = _selectedProjectId;
       final captureLat = _locationService.currentPosition?.latitude;
       final captureLng = _locationService.currentPosition?.longitude;
       final captureAddr = _locationService.currentAddress.isNotEmpty
@@ -1071,7 +1072,7 @@ class _CameraError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
+          const Icon(
             LucideIcons.cameraOff,
             size: 48,
             color: AppColors.darkText3,
@@ -1082,6 +1083,26 @@ class _CameraError extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.darkText2,
+            ),
+          ),
+          const SizedBox(height: 24),
+          GestureDetector(
+            onTap: () => openAppSettings(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.darkAccentDim,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.darkAccent.withValues(alpha: 0.3)),
+              ),
+              child: Text(
+                l.openSettingsAction,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.darkAccent,
+                ),
+              ),
             ),
           ),
         ],

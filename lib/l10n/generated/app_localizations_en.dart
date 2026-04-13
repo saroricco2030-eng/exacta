@@ -368,7 +368,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyBody =>
-      'Exacta does not collect any personal information.\n\nAll photos and data are stored only on your device and are never transmitted to external servers.\n\nLocation data is used solely for stamp burn-in purposes. When using Secure Mode, location data is completely removed.\n\nCamera and storage permissions are used only for capturing and saving photos.';
+      'Exacta does not collect any personal information.\n\n■ Data Storage\nAll photos and data are stored only on your device and are never transmitted to external servers.\n\n■ Location Data\nLocation data is used solely for stamp burn-in purposes. When using Secure Mode, location data is completely removed.\n\n■ Permission Usage\n• Camera: Photo/video capture\n• Location: GPS coordinates and address stamp\n• Storage: Saving photo files\n• Microphone: Audio recording during video capture\n\n■ Third-Party Services\nWeather information is provided by the Open-Meteo API. GPS coordinates are sent for weather queries only; no other personal data is transmitted.\n\n■ Data Retention\nAll data is immediately deleted when you uninstall the app. There is no separate data retention period.\n\n■ Your Rights\nYou can delete photos anytime from the in-app gallery, or uninstall the app to remove all data.\n\n■ Contact\nsupport@exacta.app';
 
   @override
   String get termsTitle => 'Terms of Use';
@@ -838,4 +838,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stampPresetClean => 'Clean';
+
+  @override
+  String get commonSelect => 'Select';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get commonBack => 'Back';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonSkip => 'Skip';
+
+  @override
+  String get exitConfirmMessage => 'Exit the app?';
+
+  @override
+  String get stampEditLabel => 'Edit stamp';
+
+  @override
+  String get commonStart => 'Start';
+
+  @override
+  String get openSettingsAction => 'Open Settings';
+
+  @override
+  String get onboardingReplay => 'Replay Onboarding';
 }

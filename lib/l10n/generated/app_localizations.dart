@@ -787,7 +787,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyBody.
   ///
   /// In ko, this message translates to:
-  /// **'Exacta는 사용자의 개인정보를 수집하지 않습니다.\n\n모든 사진과 데이터는 기기 내부에만 저장되며, 외부 서버로 전송되지 않습니다.\n\n위치 정보는 스탬프 번인 목적으로만 사용되며, 보안 모드 사용 시 위치 정보가 완전히 제거됩니다.\n\n카메라 및 저장소 권한은 촬영과 사진 저장에만 사용됩니다.'**
+  /// **'Exacta는 사용자의 개인정보를 수집하지 않습니다.\n\n■ 데이터 저장\n모든 사진과 데이터는 기기 내부에만 저장되며, 외부 서버로 전송되지 않습니다.\n\n■ 위치 정보\n위치 정보는 스탬프 번인 목적으로만 사용되며, 보안 모드 사용 시 위치 정보가 완전히 제거됩니다.\n\n■ 권한 사용 목적\n• 카메라: 사진/영상 촬영\n• 위치: GPS 좌표 및 주소 스탬프\n• 저장소: 사진 파일 저장\n• 마이크: 영상 촬영 시 음성 녹음\n\n■ 제3자 서비스\n날씨 정보 표시를 위해 Open-Meteo API를 사용합니다. GPS 좌표가 날씨 조회 시 전송되며, 다른 개인정보는 전송되지 않습니다.\n\n■ 데이터 보존\n앱을 삭제하면 모든 데이터가 즉시 삭제됩니다. 별도의 데이터 보존 기간은 없습니다.\n\n■ 사용자 권리\n언제든지 앱 내 갤러리에서 사진을 삭제하거나, 앱을 삭제하여 모든 데이터를 제거할 수 있습니다.\n\n■ 문의\nsupport@exacta.app'**
   String get privacyBody;
 
   /// No description provided for @termsTitle.
@@ -1641,6 +1641,66 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'깔끔'**
   String get stampPresetClean;
+
+  /// No description provided for @commonSelect.
+  ///
+  /// In ko, this message translates to:
+  /// **'선택'**
+  String get commonSelect;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In ko, this message translates to:
+  /// **'확인'**
+  String get commonOk;
+
+  /// No description provided for @commonBack.
+  ///
+  /// In ko, this message translates to:
+  /// **'뒤로'**
+  String get commonBack;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In ko, this message translates to:
+  /// **'닫기'**
+  String get commonClose;
+
+  /// No description provided for @commonSkip.
+  ///
+  /// In ko, this message translates to:
+  /// **'건너뛰기'**
+  String get commonSkip;
+
+  /// No description provided for @exitConfirmMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'앱을 종료하시겠습니까?'**
+  String get exitConfirmMessage;
+
+  /// No description provided for @stampEditLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 편집'**
+  String get stampEditLabel;
+
+  /// No description provided for @commonStart.
+  ///
+  /// In ko, this message translates to:
+  /// **'시작'**
+  String get commonStart;
+
+  /// No description provided for @openSettingsAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정 열기'**
+  String get openSettingsAction;
+
+  /// No description provided for @onboardingReplay.
+  ///
+  /// In ko, this message translates to:
+  /// **'온보딩 다시 보기'**
+  String get onboardingReplay;
 }
 
 class _AppLocalizationsDelegate

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/core/transitions.dart';
 import 'package:exacta/providers/theme_notifier.dart';
 import 'package:exacta/pages/listen_now_page.dart';
@@ -51,14 +52,14 @@ class _DualShellState extends ConsumerState<DualShell> {
       SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xFF141414),
+        systemNavigationBarColor: AppColors.darkBg,
         systemNavigationBarIconBrightness: Brightness.light,
       ));
     } else {
       SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.white,
+        systemNavigationBarColor: AppColors.lightSurface,
         systemNavigationBarIconBrightness: Brightness.dark,
       ));
     }
@@ -74,7 +75,7 @@ class _DualShellState extends ConsumerState<DualShell> {
             content: Text(_exitMessage(context)),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.commonCancel)),
-              TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.commonSave.isNotEmpty ? 'OK' : 'OK')),
+              TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l.commonOk)),
             ],
           ),
         );
@@ -104,17 +105,10 @@ class _DualShellState extends ConsumerState<DualShell> {
     );
   }
 
-  String _exitMessage(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode;
-    return switch (locale) {
-      'ko' => '앱을 종료하시겠습니까?',
-      'ja' => 'アプリを終了しますか？',
-      _ => 'Exit the app?',
-    };
-  }
+  String _exitMessage(BuildContext context) => context.l10n.exitConfirmMessage;
 
   Widget _buildBottomNav(bool isDark, dynamic l) {
-    final navBg = isDark ? const Color(0xF2141414) : Colors.white;
+    final navBg = isDark ? AppColors.darkBg.withValues(alpha: 0.95) : AppColors.lightSurface;
     final borderColor = context.border;
     final activeColor = context.accent;
     final inactiveColor = context.text3;

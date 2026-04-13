@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
+import 'package:exacta/core/theme/app_colors.dart';
 
 /// 브랜드 스플래시 — 전용 이미지(assets/branding/splash.png)를
 /// 원본 해상도 그대로 풀스크린 렌더링한다.
@@ -38,10 +41,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF0D1118) : const Color(0xFFFFF8F2);
+    final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final versionColor = isDark
-        ? Colors.white.withValues(alpha: 0.35)
-        : const Color(0xFF3D2E22).withValues(alpha: 0.35);
+        ? AppColors.darkText2.withValues(alpha: 0.35)
+        : AppColors.lightText1.withValues(alpha: 0.35);
     return Scaffold(
       backgroundColor: bg,
       body: Stack(
@@ -63,9 +66,8 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Text(
                 _versionText,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: GoogleFonts.jetBrainsMono(
                   fontSize: 11,
-                  fontFamily: 'monospace',
                   fontFeatures: const [FontFeature.tabularFigures()],
                   letterSpacing: 0.5,
                   color: versionColor,

@@ -31,15 +31,16 @@ final stampConfigProvider = StreamProvider<StampConfig>((ref) {
   return ref.watch(dbProvider).watchStampConfig();
 });
 
-/// ── 홈 통계 — 사진 변경 시 자동 갱신 (count 스트림 기반, 전체 로드 아님) ──
+/// ── 홈 통계 — 사진 변경 시 자동 갱신 (단일 트랜잭션 통합 쿼리) ──
 final weeklyStatsProvider = StreamProvider<HomeStats>((ref) {
   final db = ref.watch(dbProvider);
-  // 사진 count 변경 감지 → 통계 재계산
   return db.watchPhotoCount().asyncMap((_) async {
-    final photos = await db.getWeeklyPhotoCount();
-    final secure = await db.getWeeklySecureCount();
-    final projects = await db.getActiveProjectCount();
-    return HomeStats(weeklyPhotos: photos, securePhotos: secure, activeProjects: projects);
+    final stats = await db.getWeeklyStatsAll();
+    return HomeStats(
+      weeklyPhotos: stats.weekly,
+      securePhotos: stats.secure,
+      activeProjects: stats.activeProjects,
+    );
   });
 });
 

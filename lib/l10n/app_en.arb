@@ -149,7 +149,7 @@
   "settingsPrivacyPolicy": "Privacy Policy",
   "settingsTerms": "Terms of Use",
   "privacyTitle": "Privacy Policy",
-  "privacyBody": "Exacta does not collect any personal information.\n\nAll photos and data are stored only on your device and are never transmitted to external servers.\n\nLocation data is used solely for stamp burn-in purposes. When using Secure Mode, location data is completely removed.\n\nCamera and storage permissions are used only for capturing and saving photos.",
+  "privacyBody": "Exacta does not collect any personal information.\n\n■ Data Storage\nAll photos and data are stored only on your device and are never transmitted to external servers.\n\n■ Location Data\nLocation data is used solely for stamp burn-in purposes. When using Secure Mode, location data is completely removed.\n\n■ Permission Usage\n• Camera: Photo/video capture\n• Location: GPS coordinates and address stamp\n• Storage: Saving photo files\n• Microphone: Audio recording during video capture\n\n■ Third-Party Services\nWeather information is provided by the Open-Meteo API. GPS coordinates are sent for weather queries only; no other personal data is transmitted.\n\n■ Data Retention\nAll data is immediately deleted when you uninstall the app. There is no separate data retention period.\n\n■ Your Rights\nYou can delete photos anytime from the in-app gallery, or uninstall the app to remove all data.\n\n■ Contact\nsupport@exacta.app",
   "termsTitle": "Terms of Use",
   "termsBody": "Thank you for using Exacta.\n\n1. This app is provided for on-site photo documentation.\n2. Users are responsible for managing their captured photos.\n3. The developer is not liable for any data loss during app use.\n4. This app is free and contains no advertisements.",
 
@@ -333,5 +333,16 @@
   "stampPresetMinimal": "Minimal",
   "stampPresetTimeOnly": "Time Only",
   "stampPresetGpsOnly": "GPS Only",
-  "stampPresetClean": "Clean"
+  "stampPresetClean": "Clean",
+
+  "commonSelect": "Select",
+  "commonOk": "OK",
+  "commonBack": "Back",
+  "commonClose": "Close",
+  "commonSkip": "Skip",
+  "exitConfirmMessage": "Exit the app?",
+  "stampEditLabel": "Edit stamp",
+  "commonStart": "Start",
+  "openSettingsAction": "Open Settings",
+  "onboardingReplay": "Replay Onboarding"
 }

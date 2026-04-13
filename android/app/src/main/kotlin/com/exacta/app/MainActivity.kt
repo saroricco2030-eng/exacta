@@ -23,6 +23,16 @@ class MainActivity : FlutterActivity() {
             }
         }
 
+        // 딥링크 / 앱 바로가기 처리
+        intent?.data?.let { uri ->
+            if (uri.scheme == "exacta") {
+                when (uri.host) {
+                    "camera" -> widgetChannel.invokeMethod("openCamera", null)
+                    "gallery" -> widgetChannel.invokeMethod("openGallery", null)
+                }
+            }
+        }
+
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {

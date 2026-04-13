@@ -75,7 +75,7 @@ class ProjectCard extends StatelessWidget {
                               child: Image.file(
                                 File(thumbnails[i].filePath),
                                 fit: BoxFit.cover,
-                                cacheWidth: 120,
+                                cacheWidth: 120, cacheHeight: 120,
                                 errorBuilder: (_, _, _) => Container(color: context.surfaceHi),
                               ),
                             ),

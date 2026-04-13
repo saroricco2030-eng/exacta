@@ -1,4 +1,5 @@
 /// NTP network time sync for tamper-proof timestamps
+import 'package:flutter/foundation.dart';
 import 'package:ntp/ntp.dart';
 
 /// 네트워크 시간 동기화 — 위변조 방지
@@ -14,6 +15,8 @@ class NtpService {
       _synced = true;
     } catch (e) {
       _offset = Duration.zero;
+      _synced = false;
+      debugPrint('NTP sync failed: $e');
     }
   }
 

@@ -368,7 +368,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get privacyBody =>
-      'Exactaは個人情報を一切収集しません。\n\nすべての写真とデータはデバイス内にのみ保存され、外部サーバーには送信されません。\n\n位置情報はスタンプ焼き込み目的でのみ使用されます。セキュアモード使用時は位置情報が完全に削除されます。\n\nカメラとストレージの権限は撮影と写真保存にのみ使用されます。';
+      'Exactaは個人情報を一切収集しません。\n\n■ データ保存\nすべての写真とデータはデバイス内にのみ保存され、外部サーバーには送信されません。\n\n■ 位置情報\n位置情報はスタンプ焼き込み目的でのみ使用されます。セキュアモード使用時は位置情報が完全に削除されます。\n\n■ 権限の使用目的\n• カメラ：写真・動画撮影\n• 位置情報：GPS座標と住所スタンプ\n• ストレージ：写真ファイル保存\n• マイク：動画撮影時の音声録音\n\n■ 第三者サービス\n天気情報表示のためOpen-Meteo APIを使用します。天気照会時にGPS座標が送信されますが、その他の個人情報は送信されません。\n\n■ データ保持\nアプリをアンインストールすると、すべてのデータが即座に削除されます。別途のデータ保持期間はありません。\n\n■ ユーザーの権利\nアプリ内ギャラリーからいつでも写真を削除でき、アプリをアンインストールしてすべてのデータを消去できます。\n\n■ お問い合わせ\nsupport@exacta.app';
 
   @override
   String get termsTitle => '利用規約';
@@ -830,4 +830,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stampPresetClean => 'シンプル';
+
+  @override
+  String get commonSelect => '選択';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get commonBack => '戻る';
+
+  @override
+  String get commonClose => '閉じる';
+
+  @override
+  String get commonSkip => 'スキップ';
+
+  @override
+  String get exitConfirmMessage => 'アプリを終了しますか？';
+
+  @override
+  String get stampEditLabel => 'スタンプ編集';
+
+  @override
+  String get commonStart => 'スタート';
+
+  @override
+  String get openSettingsAction => '設定を開く';
+
+  @override
+  String get onboardingReplay => 'オンボーディングを再表示';
 }

@@ -25,10 +25,13 @@ class LocationService {
   /// [onUpdate] — 값이 갱신될 때마다 호출 (보통 setState).
   bool Function() isSecureMode = () => false;
 
+  /// [isMounted] — 위젯 dispose 후 콜백 방지용 (camera_screen의 mounted 전달)
+  bool Function() isMounted = () => true;
+
   void start(VoidCallback onUpdate) {
     _updateLocation(onUpdate);
     _locationTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      _updateLocation(onUpdate);
+      if (isMounted()) _updateLocation(onUpdate);
     });
     _startCompass(onUpdate);
   }
@@ -48,7 +51,7 @@ class LocationService {
         final now = DateTime.now();
         if (now.difference(_lastCompassNotify).inMilliseconds >= 500) {
           _lastCompassNotify = now;
-          onUpdate();
+          if (isMounted()) onUpdate();
         }
       }
     });
@@ -85,7 +88,7 @@ class LocationService {
               .join(' ');
         }
       } catch (e) {
-        // 주소 변환 실패 시 GPS 좌표만 표시
+        debugPrint('Geocoding failed: $e');
       }
 
       currentPosition = position;
@@ -96,9 +99,9 @@ class LocationService {
       // 날씨 가져오기 (5분 캐시, 실패 시 무시)
       weather = await WeatherService.fetch(position.latitude, position.longitude);
 
-      onUpdate();
+      if (isMounted()) onUpdate();
     } catch (e) {
-      // 위치 가져오기 실패 — 조용히 무시
+      debugPrint('Location update failed: $e');
     }
   }
 

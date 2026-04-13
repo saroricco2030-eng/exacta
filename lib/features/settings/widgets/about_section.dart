@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:exacta/core/extensions/build_context_ext.dart';
 import 'package:exacta/core/theme/app_theme.dart';
@@ -70,6 +71,22 @@ class _AboutSectionState extends State<AboutSection> {
           onTap: () => _showLegalPage(context, l.termsTitle, l.termsBody),
           icon: LucideIcons.fileText,
           label: l.settingsTerms,
+          trailing: Icon(LucideIcons.chevronRight,
+              size: 16, color: context.text3),
+        ),
+        const SizedBox(height: 8),
+
+        SettingsTile(
+          onTap: () async {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('onboarding_done', false);
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(l.onboardingReplay)),
+            );
+          },
+          icon: LucideIcons.bookOpen,
+          label: l.onboardingReplay,
           trailing: Icon(LucideIcons.chevronRight,
               size: 16, color: context.text3),
         ),

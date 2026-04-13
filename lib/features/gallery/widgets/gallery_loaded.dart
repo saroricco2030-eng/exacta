@@ -276,13 +276,14 @@ class PhotoTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Semantics(
       button: true,
-      label: photo.isVideo ? 'Video' : 'Photo',
+      label: photo.isVideo ? context.l10n.cameraModeVideo : context.l10n.cameraModePhoto,
       selected: isSelected,
       child: GestureDetector(
         onTap: onTap,
         onLongPress: onLongPress,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
+          clipBehavior: Clip.hardEdge,
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -299,7 +300,7 @@ class PhotoTile extends ConsumerWidget {
                 Image.file(
                   File(photo.filePath),
                   fit: BoxFit.cover,
-                  cacheWidth: 200,
+                  cacheWidth: 200, cacheHeight: 200,
                   errorBuilder: (ctx, err, st) => Container(
                     color: ctx.surfaceHi,
                     child: Icon(LucideIcons.image, color: ctx.text3),

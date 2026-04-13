@@ -340,9 +340,46 @@ class AppDatabase extends _$AppDatabase {
     return row.read(countExp) ?? 0;
   }
 
-  /// 사진 테이블 변경 감지용 가벼운 스트림 (count만)
+  /// 홈 통계 단일 호출 — 3개 COUNT 쿼리를 1 트랜잭션에 묶어 오버헤드 최소화
+  Future<({int weekly, int secure, int activeProjects})> getWeeklyStatsAll() async {
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    final startStr = DateTime(weekStart.year, weekStart.month, weekStart.day)
+        .toIso8601String();
+
+    return transaction(() async {
+      final countExp = photos.id.count();
+
+      final weeklyRow = await (selectOnly(photos)
+            ..addColumns([countExp])
+            ..where(photos.timestamp.isBiggerOrEqualValue(startStr)))
+          .getSingle();
+
+      final secureRow = await (selectOnly(photos)
+            ..addColumns([countExp])
+            ..where(photos.timestamp.isBiggerOrEqualValue(startStr) &
+                photos.isSecure.equals(true)))
+          .getSingle();
+
+      final projExp = projects.id.count();
+      final projRow = await (selectOnly(projects)
+            ..addColumns([projExp])
+            ..where(projects.status.equals(ProjectStatus.active.value)))
+          .getSingle();
+
+      return (
+        weekly: weeklyRow.read(countExp) ?? 0,
+        secure: secureRow.read(countExp) ?? 0,
+        activeProjects: projRow.read(projExp) ?? 0,
+      );
+    });
+  }
+
+  /// 사진 테이블 변경 감지용 가벼운 스트림 (COUNT 집계 — 전체 로드 방지)
   Stream<int> watchPhotoCount() {
-    return (select(photos)).watch().map((list) => list.length);
+    final countExp = photos.id.count();
+    final query = selectOnly(photos)..addColumns([countExp]);
+    return query.watchSingle().map((row) => row.read(countExp) ?? 0);
   }
 
   /// 가장 최근 촬영 사진 1장
@@ -393,17 +430,21 @@ class AppDatabase extends _$AppDatabase {
     return (total: all.length, secure: secureCount, projects: projectIds.length);
   }
 
-  /// 특정 월의 일별 촬영 수 (캘린더용)
+  /// 특정 월의 일별 촬영 수 (캘린더용 — DB 집계, 전체 로드 방지)
   Future<Map<int, int>> getDailyPhotoCounts(int year, int month) async {
     final monthStr = '$year-${month.toString().padLeft(2, '0')}';
-    final all = await (select(photos)
-          ..where((t) => t.timestamp.like('$monthStr%')))
-        .get();
-
+    final dayExpr = photos.timestamp.substr(9, 2); // ISO 8601 dd 부분
+    final countExpr = photos.id.count();
+    final query = selectOnly(photos)
+      ..addColumns([dayExpr, countExpr])
+      ..where(photos.timestamp.like('$monthStr%'))
+      ..groupBy([dayExpr]);
+    final rows = await query.get();
     final counts = <int, int>{};
-    for (final photo in all) {
-      final day = int.tryParse(photo.timestamp.substring(8, 10)) ?? 0;
-      counts[day] = (counts[day] ?? 0) + 1;
+    for (final row in rows) {
+      final dayStr = row.read(dayExpr);
+      final day = int.tryParse(dayStr ?? '') ?? 0;
+      counts[day] = row.read(countExpr) ?? 0;
     }
     return counts;
   }
@@ -417,10 +458,11 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
-  /// 전체 사진/영상 수 + 파일 경로 목록 (저장 공간 계산용)
+  /// 전체 사진/영상 파일 경로만 조회 (SELECT filePath ONLY — 메모리 최적화)
   Future<List<String>> getAllFilePaths() async {
-    final all = await (select(photos)).get();
-    return all.map((p) => p.filePath).toList();
+    final query = selectOnly(photos)..addColumns([photos.filePath]);
+    final rows = await query.get();
+    return rows.map((row) => row.read(photos.filePath)!).toList();
   }
 
   // ── StampConfig DAO ─────────────────────────────────────────
@@ -448,6 +490,11 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final file = File(p.join(dir.path, 'exacta.db'));
-    return NativeDatabase.createInBackground(file);
+    return NativeDatabase.createInBackground(
+      file,
+      setup: (db) {
+        db.execute('PRAGMA foreign_keys = ON;');
+      },
+    );
   });
 }

@@ -1,15 +1,15 @@
-/// Apple Music-style home tab - photo history first, stats + quick actions at bottom
+/// Exacta dark home tab - photo history first, stats + quick actions at bottom
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import '../core/colors.dart';
-import '../core/extensions/build_context_ext.dart';
-import '../core/theme/app_theme.dart';
-import '../data/database.dart';
-import '../data/providers.dart';
+import 'package:exacta/core/colors.dart';
+import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/theme/app_theme.dart';
+import 'package:exacta/data/database.dart';
+import 'package:exacta/data/providers.dart';
 import '../features/camera/camera_screen.dart';
 import '../features/gallery/gallery_screen.dart';
 import '../features/gallery/photo_detail_screen.dart';
@@ -56,7 +56,7 @@ class ListenNowPage extends ConsumerWidget {
                     fontFamily: AppTheme.monoFontFamily,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.text1,
+                    color: DarkModeColors.text1,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -64,15 +64,15 @@ class ListenNowPage extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.surface2,
+                    color: DarkModeColors.surface2,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.glassBorder),
+                    border: Border.all(color: DarkModeColors.glassBorder),
                   ),
                   child: Text(
                     _formattedDate(context),
                     style: TextStyle(
                       fontFamily: AppTheme.monoFontFamily,
-                      fontSize: 12, color: AppColors.text2,
+                      fontSize: 12, color: DarkModeColors.text2,
                     ),
                   ),
                 ),
@@ -88,7 +88,7 @@ class ListenNowPage extends ConsumerWidget {
             const SliverToBoxAdapter(
               child: SizedBox(
                 height: 200,
-                child: Center(child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2)),
+                child: Center(child: CircularProgressIndicator(color: DarkModeColors.accent, strokeWidth: 2)),
               ),
             ),
           ],
@@ -96,7 +96,7 @@ class ListenNowPage extends ConsumerWidget {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 200,
-                child: Center(child: Text(l.commonError, style: TextStyle(color: AppColors.text2))),
+                child: Center(child: Text(l.commonError, style: TextStyle(color: DarkModeColors.text2))),
               ),
             ),
           ],
@@ -113,16 +113,16 @@ class ListenNowPage extends ConsumerWidget {
                           Container(
                             width: 80, height: 80,
                             decoration: BoxDecoration(
-                              color: AppColors.surface2,
+                              color: DarkModeColors.surface2,
                               borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: AppColors.glassBorder),
+                              border: Border.all(color: DarkModeColors.glassBorder),
                             ),
-                            child: const Icon(LucideIcons.camera, size: 36, color: AppColors.accent),
+                            child: const Icon(LucideIcons.camera, size: 36, color: DarkModeColors.accent),
                           ),
                           const SizedBox(height: 20),
-                          Text(l.emptyGallery, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.text1)),
+                          Text(l.emptyGallery, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: DarkModeColors.text1)),
                           const SizedBox(height: 8),
-                          Text(l.emptyGalleryAction, style: TextStyle(fontSize: 13, color: AppColors.text2)),
+                          Text(l.emptyGalleryAction, style: TextStyle(fontSize: 13, color: DarkModeColors.text2)),
                         ],
                       ),
                     ),
@@ -149,16 +149,16 @@ class ListenNowPage extends ConsumerWidget {
                       child: Row(
                         children: [
                           Text(_dateLabel(dateStr, l),
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.text1)),
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: DarkModeColors.text1)),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.surface2,
+                              color: DarkModeColors.surface2,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(l.galleryPhotos(groups[dateStr]!.length),
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.text2)),
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: DarkModeColors.text2)),
                           ),
                         ],
                       ),
@@ -182,13 +182,13 @@ class ListenNowPage extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(8),
                             child: photo.isVideo
                               ? Container(
-                                  color: AppColors.surface2,
-                                  child: const Center(child: Icon(LucideIcons.play, size: 24, color: AppColors.text3)))
+                                  color: DarkModeColors.surface2,
+                                  child: const Center(child: Icon(LucideIcons.play, size: 24, color: DarkModeColors.text3)))
                               : Image.file(
                                   File(photo.filePath),
                                   fit: BoxFit.cover,
-                                  cacheWidth: 400,
-                                  errorBuilder: (_, _, _) => Container(color: AppColors.surface2),
+                                  cacheWidth: 400, cacheHeight: 400,
+                                  errorBuilder: (_, _, _) => Container(color: DarkModeColors.surface2),
                                 ),
                           ),
                         );
@@ -229,9 +229,9 @@ class ListenNowPage extends ConsumerWidget {
             child: Row(
               children: [
                 Text(l.homeQuickActions,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text1)),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: DarkModeColors.text1)),
                 const Spacer(),
-                Icon(LucideIcons.sparkles, size: 14, color: AppColors.text3),
+                Icon(LucideIcons.sparkles, size: 14, color: DarkModeColors.text3),
               ],
             ),
           ),
@@ -278,9 +278,9 @@ class ListenNowPage extends ConsumerWidget {
             child: Row(
               children: [
                 Text(l.homeActiveProject,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text1)),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: DarkModeColors.text1)),
                 const Spacer(),
-                Icon(LucideIcons.chevronRight, size: 16, color: AppColors.text3),
+                Icon(LucideIcons.chevronRight, size: 16, color: DarkModeColors.text3),
               ],
             ),
           ),
@@ -290,7 +290,7 @@ class ListenNowPage extends ConsumerWidget {
           child: projectsAsync.when(
             loading: () => const Padding(
               padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2)),
+              child: Center(child: CircularProgressIndicator(color: DarkModeColors.accent, strokeWidth: 2)),
             ),
             error: (_, _) => _emptyProjects(l),
             data: (projects) {
@@ -304,7 +304,7 @@ class ListenNowPage extends ConsumerWidget {
                   separatorBuilder: (_, _) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final project = projects[index];
-                    final gradients = AppColors.albumGradients;
+                    final gradients = DarkModeColors.albumGradients;
                     final gradient = gradients[index % gradients.length];
                     return GestureDetector(
                       onTap: () => Navigator.of(context).push(
@@ -363,17 +363,17 @@ class ListenNowPage extends ConsumerWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(32),
         decoration: BoxDecoration(
-          color: AppColors.surface2,
+          color: DarkModeColors.surface2,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.glassBorder),
+          border: Border.all(color: DarkModeColors.glassBorder),
         ),
         child: Column(
           children: [
-            Icon(LucideIcons.folderPlus, size: 32, color: AppColors.text3),
+            Icon(LucideIcons.folderPlus, size: 32, color: DarkModeColors.text3),
             const SizedBox(height: 12),
-            Text(l.emptyProjects, style: TextStyle(color: AppColors.text3, fontSize: 14)),
+            Text(l.emptyProjects, style: TextStyle(color: DarkModeColors.text3, fontSize: 14)),
             const SizedBox(height: 4),
-            Text(l.emptyProjectsAction, style: TextStyle(color: AppColors.text3.withValues(alpha: 0.5), fontSize: 12)),
+            Text(l.emptyProjectsAction, style: TextStyle(color: DarkModeColors.text3.withValues(alpha: 0.5), fontSize: 12)),
           ],
         ),
       ),
@@ -497,10 +497,10 @@ class _HeroCardShimmer extends StatelessWidget {
     return Container(
       width: double.infinity, height: 160,
       decoration: BoxDecoration(
-        color: AppColors.surface2, borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.glassBorder),
+        color: DarkModeColors.surface2, borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: DarkModeColors.glassBorder),
       ),
-      child: const Center(child: CircularProgressIndicator(color: AppColors.accent, strokeWidth: 2)),
+      child: const Center(child: CircularProgressIndicator(color: DarkModeColors.accent, strokeWidth: 2)),
     );
   }
 }
@@ -515,7 +515,7 @@ class _QuickAction extends StatelessWidget {
       child: Semantics(
         button: true, label: label,
         child: Material(
-          color: AppColors.surface2,
+          color: DarkModeColors.surface2,
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -524,7 +524,7 @@ class _QuickAction extends StatelessWidget {
               height: 80,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.glassBorder),
+                border: Border.all(color: DarkModeColors.glassBorder),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -535,7 +535,7 @@ class _QuickAction extends StatelessWidget {
                     child: Icon(icon, size: 18, color: Colors.white),
                   ),
                   const SizedBox(height: 8),
-                  Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.text2), overflow: TextOverflow.ellipsis),
+                  Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: DarkModeColors.text2), overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),

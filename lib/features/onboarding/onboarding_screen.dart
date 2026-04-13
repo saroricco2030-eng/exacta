@@ -21,7 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const _pages = [
     _PageData(
       icon: LucideIcons.camera,
-      gradient: [Color(0xFFFA2D48), Color(0xFFE31C5F)],
+      gradient: [Color(0xFFFF9B7B), Color(0xFFE880A0)],
       titleKey: 'onboarding1Title',
       descKey: 'onboarding1Desc',
     ),
@@ -83,7 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: GestureDetector(
                     onTap: _complete,
                     child: Text(
-                      'Skip',
+                      context.l10n.commonSkip,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -149,7 +149,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         child: Center(
                           child: _currentPage == _pages.length - 1
                               ? Text(
-                                  l.commonSave.isEmpty ? 'Start' : _getStartText(l),
+                                  _getStartText(l),
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -188,7 +188,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     };
   }
 
-  String _getStartText(dynamic l) => l.homeTitle;
+  String _getStartText(dynamic l) => l.commonStart;
 }
 
 class _PageData {

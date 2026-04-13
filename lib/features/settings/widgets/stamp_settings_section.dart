@@ -194,7 +194,7 @@ class StampSettingsSection extends StatelessWidget {
                         child: Image.file(
                           File(config.logoPath!),
                           width: 32,
-                          cacheWidth: 64,
+                          cacheWidth: 64, cacheHeight: 64,
                           height: 32,
                           fit: BoxFit.cover,
                           errorBuilder: (ctx, e, st) => Icon(
@@ -235,7 +235,7 @@ class StampSettingsSection extends StatelessWidget {
                       child: Image.file(
                         File(config.signaturePath!),
                         width: 48,
-                        cacheWidth: 96,
+                        cacheWidth: 96, cacheHeight: 48,
                         height: 24,
                         fit: BoxFit.contain,
                         errorBuilder: (ctx, e, st) => Icon(

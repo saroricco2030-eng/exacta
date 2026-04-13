@@ -182,6 +182,8 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
               controller: _nameController,
               autofocus: true,
               maxLength: 50,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _save(),
               style: TextStyle(fontSize: 15, color: context.text1),
               decoration: InputDecoration(
                 hintText: l.projectNameHint,

@@ -20,6 +20,10 @@ class PhotoSaveService {
   final AppDatabase _db;
   final StampBurnService _stampService = StampBurnService();
 
+  // 디렉토리 캐시 — 매 촬영마다 getApplicationDocumentsDirectory() 호출 방지
+  static Directory? _cachedAppDir;
+  static final Set<String> _createdDirs = {};
+
   PhotoSaveService(this._db);
 
   /// 저장된 파일 경로를 반환
@@ -58,11 +62,12 @@ class PhotoSaveService {
     final isSecure = preset == CameraPreset.secure;
     final photoCode = PhotoCodeService.generate(now);
 
-    // 1. 앱 내부 저장 디렉토리 생성
-    final appDir = await getApplicationDocumentsDirectory();
-    final photoDir = Directory(p.join(appDir.path, 'photos'));
-    if (!await photoDir.exists()) {
-      await photoDir.create(recursive: true);
+    // 1. 앱 내부 저장 디렉토리 (캐시 — 매번 OS 호출 방지)
+    _cachedAppDir ??= await getApplicationDocumentsDirectory();
+    final photoDir = Directory(p.join(_cachedAppDir!.path, 'photos'));
+    if (!_createdDirs.contains(photoDir.path)) {
+      if (!await photoDir.exists()) await photoDir.create(recursive: true);
+      _createdDirs.add(photoDir.path);
     }
 
     // 2. 파일명 생성
@@ -87,8 +92,9 @@ class PhotoSaveService {
     } else {
       targetDir = photoDir;
     }
-    if (!await targetDir.exists()) {
-      await targetDir.create(recursive: true);
+    if (!_createdDirs.contains(targetDir.path)) {
+      if (!await targetDir.exists()) await targetDir.create(recursive: true);
+      _createdDirs.add(targetDir.path);
     }
 
     final destPath = p.join(targetDir.path, fileName);
@@ -125,34 +131,39 @@ class PhotoSaveService {
       weekdayNames: weekdayNames ?? const ['월', '화', '수', '목', '금', '토', '일'],
     );
 
-    // 4. 번인된 이미지 저장 — 실패 시 명시적 throw
-    try {
-      await File(destPath).writeAsBytes(burnedBytes);
-    } catch (e) {
-      // C5: writeAsBytes 실패 시 명시적 예외 전파
-      throw Exception('Failed to write photo file: $e');
-    }
-
-    // 4.5. 증거 해시 계산 (체인 오브 커스터디)
-    //   - photoHash: 번인된 파일 바이트의 SHA-256
-    //   - prevHash: DB에 이미 있는 가장 최근 chainHash
-    //   - chainHash: SHA-256(photoHash|prevHash|timestamp|lat|lng)
-    //   실패 시 null로 저장하고 진행 — 저장 자체는 실패시키지 않음.
+    // 4. 파일 저장 + 해시 계산 병렬 실행 (I/O와 CPU를 동시에 활용)
     String? photoHash;
     String? prevHash;
     String? chainHash;
-    try {
-      photoHash = EvidenceHashService.computeBytesHash(burnedBytes);
-      prevHash = await _db.getLatestChainHash();
-      chainHash = EvidenceHashService.computeChainHash(
-        photoHash: photoHash,
-        prevHash: prevHash,
-        timestampIso: now.toIso8601String(),
-        latitude: isSecure ? null : latitude,
-        longitude: isSecure ? null : longitude,
-      );
-    } catch (e) {
-      debugPrint('Evidence hash failed: $e');
+
+    final writeFileFuture = File(destPath).writeAsBytes(burnedBytes)
+        .catchError((e) { throw Exception('Failed to write photo file: $e'); });
+
+    // 해시 + 체인: 파일 쓰기와 병렬로 isolate에서 계산
+    final hashFuture = Future(() async {
+      try {
+        final hash = await compute(_computeHashIsolate, burnedBytes);
+        final prev = await _db.getLatestChainHash();
+        final chain = EvidenceHashService.computeChainHash(
+          photoHash: hash,
+          prevHash: prev,
+          timestampIso: now.toIso8601String(),
+          latitude: isSecure ? null : latitude,
+          longitude: isSecure ? null : longitude,
+        );
+        return (hash: hash, prev: prev, chain: chain);
+      } catch (e) {
+        debugPrint('Evidence hash failed: $e');
+        return null;
+      }
+    });
+
+    final results = await Future.wait([writeFileFuture, hashFuture]);
+    final hashResult = results[1] as ({String hash, String? prev, String chain})?;
+    if (hashResult != null) {
+      photoHash = hashResult.hash;
+      prevHash = hashResult.prev;
+      chainHash = hashResult.chain;
     }
 
     // 5~7. 임시 파일 삭제 + DB 삽입 + 갤러리 등록 — 병렬 실행
@@ -182,7 +193,9 @@ class PhotoSaveService {
       debugPrint('insertPhoto failed: $e');
       try {
         File(destPath).deleteSync();
-      } catch (_) {}
+      } catch (deleteErr) {
+        debugPrint('Orphan file cleanup failed: $deleteErr');
+      }
       throw Exception('Failed to insert photo into DB: $e');
     });
 
@@ -305,4 +318,9 @@ class PhotoSaveService {
       throw Exception('Failed to insert video into DB: $e');
     }
   }
+}
+
+/// SHA-256 해시를 별도 isolate에서 계산 (메인 스레드 블로킹 방지)
+String _computeHashIsolate(List<int> bytes) {
+  return EvidenceHashService.computeBytesHash(bytes);
 }

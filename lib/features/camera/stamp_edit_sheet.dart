@@ -235,7 +235,7 @@ class _StampEditSheetState extends State<StampEditSheet> {
                 const Spacer(),
                 Semantics(
                   button: true,
-                  label: 'Close',
+                  label: context.l10n.commonClose,
                   child: GestureDetector(
                   onTap: () { HapticFeedback.lightImpact(); Navigator.of(context).pop(); },
                   behavior: HitTestBehavior.opaque,

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_camera">촬영</string>
+    <string name="shortcut_camera_long">바로 촬영하기</string>
+    <string name="shortcut_gallery">갤러리</string>
+    <string name="shortcut_gallery_long">갤러리 열기</string>
+</resources>

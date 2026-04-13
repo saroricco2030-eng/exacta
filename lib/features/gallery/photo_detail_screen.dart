@@ -48,7 +48,9 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
       await _videoController!.initialize();
       if (mounted) setState(() => _videoInitialized = true);
     } catch (e) {
-      debugPrint('Error: $e');
+      debugPrint('VideoPlayer init error: $e');
+      _videoController?.dispose();
+      _videoController = null;
     }
   }
 
@@ -193,15 +195,15 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
                   children: [
                     Semantics(
                       button: true,
-                      label: 'Back',
+                      label: l.commonBack,
                       child: GestureDetector(
                         onTap: () {
                           HapticFeedback.lightImpact();
                           Navigator.of(context).pop();
                         },
                         child: Container(
-                          width: 44,
-                          height: 44,
+                          width: 56,
+                          height: 56,
                           decoration: BoxDecoration(
                             color: AppColors.darkSurface,
                             shape: BoxShape.circle,
@@ -223,8 +225,8 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
                       child: GestureDetector(
                         onTap: _openInfoSheet,
                         child: Container(
-                          width: 44,
-                          height: 44,
+                          width: 56,
+                          height: 56,
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             color: AppColors.darkSurface,

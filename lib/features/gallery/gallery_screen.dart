@@ -34,6 +34,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
   void dispose() {
     _searchController.dispose();
     _searchDebounce?.cancel();
+    _searchDebounce = null;
     super.dispose();
   }
 
@@ -92,10 +93,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                             _toggleSelectAll(photosAsync.valueOrNull);
                           },
                           child: Container(
-                            width: 44, height: 44,
+                            width: 56, height: 56,
                             decoration: BoxDecoration(
                               color: context.surfaceHi,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
                               LucideIcons.copyCheck,
@@ -113,7 +114,7 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                       padding: const EdgeInsets.only(right: 8),
                       child: Semantics(
                         button: true,
-                        label: 'Select',
+                        label: l.commonSelect,
                         child: GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
@@ -123,10 +124,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                             });
                           },
                           child: Container(
-                            width: 44, height: 44,
+                            width: 56, height: 56,
                             decoration: BoxDecoration(
                               color: _selectMode ? context.accentDim : context.surfaceHi,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
                               _selectMode ? LucideIcons.x : LucideIcons.squareCheck,
@@ -153,10 +154,10 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
                         });
                       },
                       child: Container(
-                        width: 44, height: 44,
+                        width: 56, height: 56,
                         decoration: BoxDecoration(
                           color: _showSearch ? context.accentDim : context.surfaceHi,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                         child: Icon(
                           _showSearch ? LucideIcons.x : LucideIcons.search,

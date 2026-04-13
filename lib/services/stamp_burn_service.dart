@@ -12,7 +12,9 @@ import 'package:exacta/features/camera/camera_screen.dart';
 
 class StampBurnService {
   static const _monoFont = 'JetBrains Mono';
-  static const _jpegQuality = 92;
+  // Q85: 순정 카메라와 동등한 품질, Q92 대비 인코딩 30-50% 빠름
+  static const _jpegQuality = 85;
+  static final _addressSplitRegex = RegExp(r'[,\s]');
 
   // 스탬프 색상 상수
   static const _bgColor = Color(0x73000000);
@@ -722,7 +724,7 @@ class StampBurnService {
   /// "목포시 용당동 123-45" → "목포시"
   String _firstToken(String address) {
     final first = address
-        .split(RegExp(r'[,\s]'))
+        .split(_addressSplitRegex)
         .firstWhere((t) => t.trim().isNotEmpty, orElse: () => '');
     return first.isEmpty ? address : first;
   }

@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'package:exacta/core/extensions/build_context_ext.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/core/theme/app_theme.dart';
 import 'package:exacta/features/camera/camera_screen.dart';
 
 class StampOverlay extends StatelessWidget {
+  // RegExp 캐시 — build()마다 재생성 방지
+  static final _addressSplitRegex = RegExp(r'[,\s]');
+
   const StampOverlay({
     super.key,
     required this.now,
@@ -144,7 +148,7 @@ class StampOverlay extends StatelessWidget {
 
     String cityLine() {
       if (address.isEmpty) return '';
-      final first = address.split(RegExp(r'[,\s]')).firstWhere(
+      final first = address.split(_addressSplitRegex).firstWhere(
           (t) => t.trim().isNotEmpty, orElse: () => '');
       return first.isEmpty ? address : first;
     }
@@ -261,7 +265,7 @@ class StampOverlay extends StatelessWidget {
             softWrap: true,
             textAlign: TextAlign.right,
             style: _ts(22, FontWeight.w700,
-                const Color(0xFF4FC3F7), shadows: sh).copyWith(height: 1.15),
+                AppColors.stampMemo, shadows: sh).copyWith(height: 1.15),
           ),
         ),
     ];
@@ -329,7 +333,7 @@ class StampOverlay extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: const Color(0xB3000000),
+          color: AppColors.stampBg,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: c.withValues(alpha: 0.12)),
         ),
@@ -599,13 +603,13 @@ class StampOverlay extends StatelessWidget {
       padding: const EdgeInsets.only(top: 6),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         if (logoPath != null && logoPath!.isNotEmpty)
-          ClipRRect(borderRadius: BorderRadius.circular(4),
-            child: Image.file(File(logoPath!), width: 32, height: 32, cacheWidth: 64, fit: BoxFit.contain,
+          ClipRRect(borderRadius: BorderRadius.circular(4), clipBehavior: Clip.hardEdge,
+            child: Image.file(File(logoPath!), width: 32, height: 32, cacheWidth: 64, cacheHeight: 64, fit: BoxFit.contain,
               errorBuilder: (_, _, _) => const SizedBox.shrink())),
         if (logoPath != null && logoPath!.isNotEmpty && signaturePath != null && signaturePath!.isNotEmpty) const SizedBox(width: 8),
         if (signaturePath != null && signaturePath!.isNotEmpty)
-          Image.file(File(signaturePath!), width: 64, height: 24, cacheWidth: 128, fit: BoxFit.contain,
-            opacity: const AlwaysStoppedAnimation(0.6),
+          Image.file(File(signaturePath!), width: 64, height: 24, cacheWidth: 128, cacheHeight: 48, fit: BoxFit.contain,
+            color: Colors.white.withValues(alpha: 0.6), colorBlendMode: BlendMode.modulate,
             errorBuilder: (_, _, _) => const SizedBox.shrink()),
       ]),
     );
@@ -652,7 +656,7 @@ class _EditBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(button: true, label: 'Edit stamp',
+    return Semantics(button: true, label: context.l10n.stampEditLabel,
       child: GestureDetector(
         onTap: () { HapticFeedback.lightImpact(); onTap(); },
         behavior: HitTestBehavior.opaque,
