@@ -396,25 +396,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get photoDeleted => 'Photo deleted';
 
   @override
-  String get onboarding1TitleFull => 'Precise Field Photos';
+  String get onboarding1TitleFull => 'One tap,\ntime and place locked in';
 
   @override
   String get onboarding1DescFull =>
-      'Auto-stamp GPS, address, time, and weather on every photo';
+      'Construction · inspection · delivery · proof\nOne photo, one complete record';
 
   @override
-  String get onboarding2TitleFull => 'Project Management';
+  String get onboarding2TitleFull => 'Court-grade\nphoto evidence';
 
   @override
   String get onboarding2DescFull =>
-      'Organize photos by project and export PDF reports';
+      'SHA-256 hash chain + NTP server time\nInstant tamper detection, auto PDF evidence pack';
 
   @override
-  String get onboarding3TitleFull => 'Secure Capture Mode';
+  String get onboarding3TitleFull => 'Sensitive shots,\nlocation kept private';
 
   @override
   String get onboarding3DescFull =>
-      'Block all location data · Strip EXIF · NTP tamper-proof time';
+      'Secure mode — zero GPS, zero EXIF, hidden from gallery\nSafe in your private folder';
 
   @override
   String get themeLight => 'Light';
@@ -629,6 +629,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stampLayoutText => 'Text only';
+
+  @override
+  String get settingsStampSize => 'Stamp size';
+
+  @override
+  String get stampSizeSmall => 'Small';
+
+  @override
+  String get stampSizeMedium => 'Medium';
+
+  @override
+  String get stampSizeLarge => 'Large';
+
+  @override
+  String get settingsStampOpacity => 'Stamp opacity';
+
+  @override
+  String get settingsStampBgColor => 'Stamp background color';
+
+  @override
+  String get settingsCustomLine1 => 'Company name';
+
+  @override
+  String get settingsCustomLine1Hint => 'Enter company name';
+
+  @override
+  String get settingsCustomLine2 => 'Contact name';
+
+  @override
+  String get settingsCustomLine2Hint => 'Enter contact name';
 
   @override
   String get localeSystem => 'System';
@@ -862,6 +892,125 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonStart => 'Start';
+
+  @override
+  String get stampPositionTopLeft => 'Top Left';
+
+  @override
+  String get stampPositionTopCenter => 'Top Center';
+
+  @override
+  String get stampPositionTopRight => 'Top Right';
+
+  @override
+  String get stampPositionCenter => 'Center';
+
+  @override
+  String get stampPositionBottomLeft => 'Bottom Left';
+
+  @override
+  String get stampPositionBottomCenter => 'Bottom Center';
+
+  @override
+  String get stampPositionBottomRight => 'Bottom Right';
+
+  @override
+  String get photoDetailRestamp => 'Re-stamp';
+
+  @override
+  String get restampConfirm => 'Apply new stamp to this photo?';
+
+  @override
+  String get restampSuccess => 'Photo re-stamped';
+
+  @override
+  String get restampError => 'Re-stamp failed';
+
+  @override
+  String get homeWelcomeTitle => 'Take your first photo';
+
+  @override
+  String get homeWelcomeSubtitle =>
+      'Time · location · notes burned into every shot';
+
+  @override
+  String get homeWelcomeStartButton => 'Start Shooting';
+
+  @override
+  String get homeWelcomeBadgeTime => 'Auto timestamp';
+
+  @override
+  String get homeWelcomeBadgeGps => 'GPS stamp';
+
+  @override
+  String get homeWelcomeBadgeTamper => 'Tamper-proof';
+
+  @override
+  String get captureSuccessTitle => 'Captured';
+
+  @override
+  String get captureSuccessTamper => 'Tamper-proof · SHA-256 chain';
+
+  @override
+  String get emptyGalleryExampleLabel => 'Example';
+
+  @override
+  String get emptyGalleryStampPreviewAddress => 'Seoul, Gangnam';
+
+  @override
+  String get onboarding1Bullet1 => 'Auto time';
+
+  @override
+  String get onboarding1Bullet2 => 'Auto GPS';
+
+  @override
+  String get onboarding1Bullet3 => 'Auto address';
+
+  @override
+  String get onboarding2Bullet1 => 'Hash chain';
+
+  @override
+  String get onboarding2Bullet2 => 'NTP time';
+
+  @override
+  String get onboarding2Bullet3 => 'PDF export';
+
+  @override
+  String get onboarding3Bullet1 => 'GPS blocked';
+
+  @override
+  String get onboarding3Bullet2 => 'EXIF stripped';
+
+  @override
+  String get onboarding3Bullet3 => 'Hidden gallery';
+
+  @override
+  String get settingsSaveOriginal => 'Save original alongside';
+
+  @override
+  String get settingsSaveOriginalDesc =>
+      'Keeps the unstamped original in a separate folder (excluded in Secure mode)';
+
+  @override
+  String get photoDetailViewOriginal => 'View original';
+
+  @override
+  String get photoDetailShareOriginal => 'Share original';
+
+  @override
+  String get photoDetailOriginalLabel => 'Original (no stamp)';
+
+  @override
+  String get photoDetailStampedLabel => 'Stamped';
+
+  @override
+  String get cameraStampToggleLabel => 'Toggle stamp';
+
+  @override
+  String get cameraShutterLabel => 'Shutter';
+
+  @override
+  String get cameraStopRecordingLabel => 'Stop recording';
 
   @override
   String get openSettingsAction => 'Open Settings';

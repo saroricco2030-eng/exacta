@@ -240,7 +240,7 @@ class CameraBottomControls extends StatelessWidget {
               // 셔터/녹화/타임랩스 버튼 — 66dp
               Semantics(
                 button: true,
-                label: isRecording ? 'Stop recording' : 'Shutter',
+                label: isRecording ? l.cameraStopRecordingLabel : l.cameraShutterLabel,
                 child: GestureDetector(
                 onTap: onShutter,
                 child: Container(

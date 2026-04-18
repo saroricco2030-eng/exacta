@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:image/image.dart' as img;
 
+import 'package:exacta/core/safe_parse.dart';
+import 'package:exacta/core/stamp_date_formatter.dart';
 import 'package:exacta/features/camera/camera_screen.dart';
 
 class StampBurnService {
@@ -17,7 +19,6 @@ class StampBurnService {
   static final _addressSplitRegex = RegExp(r'[,\s]');
 
   // 스탬프 색상 상수
-  static const _bgColor = Color(0x73000000);
   static const _white30 = Color(0x4DFFFFFF);
 
   // 'text' 모드 전용 — 배경 없이 텍스트 가독성용 그림자
@@ -57,6 +58,12 @@ class StampBurnService {
     String? projectName,
     String? weatherText,
     String? photoCode,
+    // v12: 스탬프 커스터마이징 확장
+    String stampSize = 'medium',
+    double stampOpacity = 1.0,
+    String stampBgColor = '#000000',
+    String? customLine1,
+    String? customLine2,
   }) async {
     // C11: 미래 timestamp 검증 — 기기 시간이 NTP보다 5분 이상 미래면 경고 (조작 가능성)
     final nowUtc = DateTime.now();
@@ -83,8 +90,13 @@ class StampBurnService {
     final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, imgW, imgH));
     canvas.drawImage(image, Offset.zero, Paint());
 
-    // 3. scale: 375 = 프로토타입 기준 폰 너비
-    final scale = imgW / 375.0;
+    // 3. scale: 375 = 프로토타입 기준 폰 너비 + stampSize 배율
+    final sizeMultiplier = switch (stampSize) {
+      'small' => 0.7,
+      'large' => 1.3,
+      _ => 1.0,
+    };
+    final scale = (imgW / 375.0) * sizeMultiplier;
     final isSecure = preset == CameraPreset.secure;
     // 'text' 모드: 배경 사각형 없이 그림자 가독성으로만 렌더 (사진 전체가 보임)
     final isTextMode = stampLayout == 'text';
@@ -96,10 +108,16 @@ class StampBurnService {
 
     // fallback 화이트 — _parseColor 실패 시에만 사용.
     // Colors.white 대신 const 리터럴로 CLAUDE.md 컬러 토큰 원칙 준수.
-    final Color stampColor = _parseColor(stampColorHex) ?? const Color(0xFFFFFFFF);
+    final baseColor = SafeParse.color(stampColorHex);
+    final Color stampColor = baseColor.withValues(alpha: baseColor.a * stampOpacity);
+
+    // 동적 배경색 — stampBgColor + stampOpacity 적용
+    final bgBase = SafeParse.color(stampBgColor, fallback: const Color(0xFF000000));
+    final Color dynamicBgColor = bgBase.withValues(alpha: 0.45 * stampOpacity);
 
     final padding = 16.0 * scale;
-    final isTop = stampPosition == 'top';
+    final isTop = stampPosition.startsWith('top');
+    final isVertCenter = stampPosition == 'center';
 
     // ── 높이 계산을 위해 모든 TextPainter를 미리 생성 ──
     final painters = _StampPainters();
@@ -129,15 +147,17 @@ class StampBurnService {
     }
 
     // Row 1: 주소 + GPS
-    // text 모드: address = 풀 주소(좌측 컬럼), rightCity = 첫 토큰(우측 컬럼)
+    // text 모드: 좌측 주소 생략 (우측 도시명과 중복 방지), 우측에 도시명만 표시
     if (!isSecure) {
       if (showAddress && address != null && address.isNotEmpty) {
-        painters.address = _tp(address,
-            fontSize: (isTextMode ? 11 : 15) * scale,
-            fontWeight: FontWeight.w500,
-            color: stampColor.withValues(alpha: alpha(isTextMode ? 0.75 : 0.8)),
-            maxWidth: imgW * (isTextMode ? 0.55 : 0.45),
-            shadows: ts);
+        if (!isTextMode) {
+          painters.address = _tp(address,
+              fontSize: 15 * scale,
+              fontWeight: FontWeight.w500,
+              color: stampColor.withValues(alpha: alpha(0.8)),
+              maxWidth: imgW * 0.45,
+              shadows: ts);
+        }
         if (isTextMode) {
           painters.rightCity = _tp(_firstToken(address),
               fontSize: 13 * scale,
@@ -230,6 +250,18 @@ class StampBurnService {
           fontSize: 11 * scale, color: _white30, shadows: ts);
     }
 
+    // v12: 커스텀 텍스트 — 회사명 · 담당자명 한 줄로 합침
+    final customLineParts = <String>[
+      if (customLine1 != null && customLine1.isNotEmpty) customLine1,
+      if (customLine2 != null && customLine2.isNotEmpty) customLine2,
+    ];
+    if (customLineParts.isNotEmpty) {
+      painters.customLine1 = _tp(customLineParts.join(' · '),
+          fontSize: 12 * scale, fontWeight: FontWeight.w500,
+          color: stampColor.withValues(alpha: alpha(0.7)),
+          maxWidth: imgW * 0.6, shadows: ts);
+    }
+
     // 로고 — codec dispose 포함
     ui.Image? logoImage;
     if (logoPath != null && logoPath.isNotEmpty) {
@@ -288,6 +320,13 @@ class StampBurnService {
       if (painters.overlay != null) {
         leftH += (leftH > 0 ? 2 * scale : 0) + painters.overlay!.height;
       }
+      // v12: 커스텀 텍스트 줄 높이
+      if (painters.customLine1 != null) {
+        leftH += (leftH > 0 ? 2 * scale : 0) + painters.customLine1!.height;
+      }
+      if (painters.customLine2 != null) {
+        leftH += (leftH > 0 ? 2 * scale : 0) + painters.customLine2!.height;
+      }
 
       // 좌측 컬럼 폭 측정 — 우측 컬럼 시작 위치 산정용
       double leftWidth = 0;
@@ -303,6 +342,12 @@ class StampBurnService {
       }
       if (painters.overlay != null && painters.overlay!.width > leftWidth) {
         leftWidth = painters.overlay!.width;
+      }
+      if (painters.customLine1 != null && painters.customLine1!.width > leftWidth) {
+        leftWidth = painters.customLine1!.width;
+      }
+      if (painters.customLine2 != null && painters.customLine2!.width > leftWidth) {
+        leftWidth = painters.customLine2!.width;
       }
 
       // 우측 컬럼 경계 (overlay와 동일 패턴: 좌측 content + 12*scale 간격)
@@ -367,8 +412,9 @@ class StampBurnService {
         barHeight += 6 * scale + painters.tamperBadge!.height;
       }
 
-      final barTop = isTop ? 0.0 : imgH - barHeight;
-      // text 모드: 배경 사각형 생략 — 사진이 전부 보임
+      final barTop = isVertCenter
+          ? (imgH - barHeight) / 2
+          : isTop ? 0.0 : imgH - barHeight;
 
       double y = barTop + padding;
 
@@ -407,6 +453,17 @@ class StampBurnService {
         if (leftY > rowY) leftY += 2 * scale;
         painters.overlay!.paint(canvas, Offset(padding, leftY));
         leftY += painters.overlay!.height;
+      }
+      // v12: 커스텀 텍스트 줄 렌더
+      if (painters.customLine1 != null) {
+        if (leftY > rowY) leftY += 2 * scale;
+        painters.customLine1!.paint(canvas, Offset(padding, leftY));
+        leftY += painters.customLine1!.height;
+      }
+      if (painters.customLine2 != null) {
+        if (leftY > rowY) leftY += 2 * scale;
+        painters.customLine2!.paint(canvas, Offset(padding, leftY));
+        leftY += painters.customLine2!.height;
       }
 
       // 우측 열: • 도시 → 좌표 → 증거 ID (우측 정렬) → memo(꽉 채움)
@@ -512,6 +569,13 @@ class StampBurnService {
       if (painters.overlay != null) {
         barHeight += 6 * scale + painters.overlay!.height;
       }
+      // v12: 커스텀 텍스트 줄 높이
+      if (painters.customLine1 != null) {
+        barHeight += 2 * scale + painters.customLine1!.height;
+      }
+      if (painters.customLine2 != null) {
+        barHeight += 2 * scale + painters.customLine2!.height;
+      }
       if (painters.weather != null || painters.code != null) {
         barHeight += 4 * scale;
         barHeight += (painters.weather?.height ?? painters.code?.height ?? 0);
@@ -533,8 +597,10 @@ class StampBurnService {
         barHeight += 4 * scale + painters.tamperBadge!.height;
       }
 
-      final barTop = isTop ? 0.0 : imgH - barHeight;
-      final bgPaint = Paint()..color = _bgColor;
+      final barTop = isVertCenter
+          ? (imgH - barHeight) / 2
+          : isTop ? 0.0 : imgH - barHeight;
+      final bgPaint = Paint()..color = dynamicBgColor;
       canvas.drawRect(Rect.fromLTWH(0, barTop, imgW, barHeight), bgPaint);
 
       double y = barTop + padding;
@@ -593,6 +659,17 @@ class StampBurnService {
         y += 6 * scale;
         painters.overlay!.paint(canvas, Offset(padding, y));
         y += painters.overlay!.height;
+      }
+      // v12: 커스텀 텍스트 줄 렌더
+      if (painters.customLine1 != null) {
+        y += 2 * scale;
+        painters.customLine1!.paint(canvas, Offset(padding, y));
+        y += painters.customLine1!.height;
+      }
+      if (painters.customLine2 != null) {
+        y += 2 * scale;
+        painters.customLine2!.paint(canvas, Offset(padding, y));
+        y += painters.customLine2!.height;
       }
       if (painters.weather != null || painters.code != null) {
         y += 4 * scale;
@@ -709,16 +786,8 @@ class StampBurnService {
     return tp;
   }
 
-  String _formatDateOnly(DateTime ts, String format) {
-    final y = ts.year.toString();
-    final mo = ts.month.toString().padLeft(2, '0');
-    final d = ts.day.toString().padLeft(2, '0');
-    return switch (format) {
-      'MM/DD/YYYY' => '$mo/$d/$y',
-      'DD-MM-YYYY' => '$d-$mo-$y',
-      _ => '$y.$mo.$d',
-    };
-  }
+  String _formatDateOnly(DateTime ts, String format) =>
+      StampDateFormatter.format(ts, format);
 
   /// 주소에서 첫 의미있는 토큰 추출 (도시 수준 간결화)
   /// "목포시 용당동 123-45" → "목포시"
@@ -729,13 +798,6 @@ class StampBurnService {
     return first.isEmpty ? address : first;
   }
 
-  Color? _parseColor(String hex) {
-    try {
-      return Color(int.parse(hex.replaceFirst('#', '0xFF')));
-    } catch (e) {
-      return null;
-    }
-  }
 
   Future<Uint8List> _encodeJpeg(
       Uint8List rgbaBytes, int width, int height) async {
@@ -775,6 +837,8 @@ class _StampPainters {
   TextPainter? weather;
   TextPainter? code;
   TextPainter? tamperBadge;
+  TextPainter? customLine1;
+  TextPainter? customLine2;
 
   void disposeAll() {
     timeHhMm?.dispose();
@@ -791,6 +855,8 @@ class _StampPainters {
     weather?.dispose();
     code?.dispose();
     tamperBadge?.dispose();
+    customLine1?.dispose();
+    customLine2?.dispose();
   }
 }
 

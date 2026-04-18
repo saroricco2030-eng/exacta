@@ -380,11 +380,37 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
     final db = ref.read(dbProvider);
     final ids = _selectedIds.toList();
 
-    // 대원칙 4: 파일-DB 동기 — 파일과 DB를 함께 삭제
-    // 1) ID 목록으로 사진 메타데이터 1쿼리에 일괄 조회
-    // 2) 모든 파일을 병렬 삭제 (Future.wait)
-    // 3) DB는 단일 IN 쿼리로 한 번에 삭제
-    // → N=50 기준 100+ 순차 I/O → 1 쿼리 + 병렬 파일 삭제로 단축
+    // 1단계: 즉시 갤러리에서 숨김 (DB 임시 boolean이 아닌 SnackBar 지연)
+    if (mounted) {
+      setState(() {
+        _selectedIds.clear();
+        _selectMode = false;
+      });
+    }
+
+    // 2단계: 3초 Undo SnackBar — Undo 누르면 삭제 취소
+    bool undone = false;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l.galleryDeleteConfirmMessage(count)),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: l.commonUndo,
+          onPressed: () {
+            undone = true;
+            HapticFeedback.lightImpact();
+          },
+        ),
+      ),
+    );
+
+    // 3단계: 3.5초 후 실제 삭제 (Undo 시간 부여)
+    await Future.delayed(const Duration(milliseconds: 3500));
+    if (undone) return;
+
+    // 파일-DB 동기 삭제 — 1 쿼리 + 병렬 파일 삭제
     final list = await db.getPhotosByIds(ids);
     await Future.wait(list.map((photo) async {
       try {
@@ -394,18 +420,16 @@ class _GalleryScreenState extends ConsumerState<GalleryScreen> {
           final thumb = File(photo.thumbnailPath!);
           if (await thumb.exists()) await thumb.delete();
         }
-      } catch (_) {
-        // 파일 삭제 실패 — DB 삭제는 계속 진행
+        // v13: 원본 사진 cascade 삭제
+        if (photo.originalPath != null) {
+          final original = File(photo.originalPath!);
+          if (await original.exists()) await original.delete();
+        }
+      } catch (e) {
+        debugPrint('Bulk delete file failed (${photo.filePath}): $e');
       }
     }));
     await db.deletePhotosByIds(ids);
-
-    if (mounted) {
-      setState(() {
-        _selectedIds.clear();
-        _selectMode = false;
-      });
-    }
   }
 
   Color _parseColor(String? hex, BuildContext context) => context.parseHexColor(hex);

@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/enums.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/features/camera/widgets/toggle_chip.dart';
@@ -377,8 +378,7 @@ class _StampEditSheetState extends State<StampEditSheet> {
                   final project = _projects[index - 1];
                   final isActive = _selectedProjectId == project.id;
                   final projectColor = project.color != null
-                      ? Color(
-                          int.parse(project.color!.replaceFirst('#', '0xFF')))
+                      ? SafeParse.color(project.color, fallback: AppColors.darkAccent)
                       : AppColors.darkAccent;
                   return GestureDetector(
                     onTap: () => _selectProject(project.id),

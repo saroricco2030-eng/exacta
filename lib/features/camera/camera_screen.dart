@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/features/camera/stamp_overlay.dart';
@@ -87,6 +88,17 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   Timer? _shutterFlashTimer;
   String? _lastPhotoPath;
   DateTime _lastShutterTime = DateTime(2000);
+
+  // ── Wow 모먼트: 촬영 직후 증거 배지 ──
+  bool _showCaptureBadge = false;
+  Timer? _captureBadgeTimer;
+
+  // ── 스탬프 master on/off ──
+  bool _stampEnabled = true;
+
+  // ── 탭 투 포커스 ──
+  Offset? _focusPoint; // 화면 상 탭 지점 (px)
+  Timer? _focusIndicatorTimer;
 
   // ── 설정 ──
   StampConfig? _stampConfig;
@@ -168,6 +180,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     _controller?.dispose();
     _clockTimer?.cancel();
     _shutterFlashTimer?.cancel();
+    _captureBadgeTimer?.cancel();
+    _focusIndicatorTimer?.cancel();
     _nowNotifier.dispose();
     _locationVersion.dispose();
     _locationService.stop();
@@ -186,9 +200,27 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       if (mounted) setState(() => _isInitialized = false);
     } else if (state == AppLifecycleState.resumed) {
       if (_isInitializing) return;
-      if (_controller == null || !_isInitialized) {
-        _resumeCamera();
-      }
+      // 백그라운드 동안 권한이 회수됐을 가능성 — 권한 재검증 후 복구
+      _verifyPermissionAndResume();
+    }
+  }
+
+  /// 백그라운드에서 권한이 회수된 경우 감지 — 회수됐으면 에러 화면, 살아있으면 카메라 복구
+  Future<void> _verifyPermissionAndResume() async {
+    final cameraStatus = await Permission.camera.status;
+    if (!cameraStatus.isGranted) {
+      // 사용자가 설정에서 권한 회수 → 이전 컨트롤러 정리 + 에러 표시
+      await _controller?.dispose();
+      _controller = null;
+      if (mounted) setState(() {
+        _isInitialized = false;
+        _hasError = true;
+      });
+      return;
+    }
+    // 권한 OK → 컨트롤러가 없거나 초기화 안 됐으면 복구
+    if (_controller == null || !_isInitialized) {
+      _resumeCamera();
     }
   }
 
@@ -311,11 +343,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     }
   }
 
-  Color _parseStampColor() {
-    final hex = _stampConfig?.stampColor ?? '#FFFFFF';
-    try { return Color(int.parse(hex.replaceFirst('#', '0xFF'))); }
-    catch (e) { return Colors.white; }
-  }
+  Color _parseStampColor() =>
+      SafeParse.color(_stampConfig?.stampColor);
 
   /// 위치/나침반 업데이트 콜백 — ValueNotifier로 스탬프만 갱신 (전체 리빌드 없음)
   void _onLocationUpdated() {
@@ -323,8 +352,9 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   }
 
   void _startClock() {
+    // 스탬프가 꺼져있으면 매초 업데이트 불필요 — 배터리/CPU 절약
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) _nowNotifier.value = NtpService.now(); // NTP 보정 시간
+      if (mounted && _stampEnabled) _nowNotifier.value = NtpService.now();
     });
   }
 
@@ -397,6 +427,41 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     }
   }
 
+  /// 탭 투 포커스 — 탭 지점에 카메라 포커스 + 노출 맞추기
+  Future<void> _handleViewfinderTap(TapDownDetails details, Size viewSize) async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    // 화면 좌표 → 카메라 좌표계 (0.0 ~ 1.0)
+    final dx = (details.localPosition.dx / viewSize.width).clamp(0.0, 1.0);
+    final dy = (details.localPosition.dy / viewSize.height).clamp(0.0, 1.0);
+    final normalized = Offset(dx, dy);
+
+    // 포커스 인디케이터 표시 (1초)
+    if (mounted) {
+      setState(() => _focusPoint = details.localPosition);
+      _focusIndicatorTimer?.cancel();
+      _focusIndicatorTimer = Timer(const Duration(milliseconds: 1000), () {
+        if (mounted) setState(() => _focusPoint = null);
+      });
+    }
+
+    try {
+      await _controller!.setFocusPoint(normalized);
+      await _controller!.setExposurePoint(normalized);
+      HapticFeedback.selectionClick();
+    } catch (e) {
+      debugPrint('setFocusPoint failed: $e');
+    }
+  }
+
+  /// 스탬프 master on/off 토글
+  void _toggleStampEnabled() {
+    HapticFeedback.selectionClick();
+    setState(() => _stampEnabled = !_stampEnabled);
+    // 스탬프 재활성화 시 현재 시각으로 즉시 반영
+    if (_stampEnabled) _nowNotifier.value = NtpService.now();
+  }
+
   Future<void> _takePicture() async {
     if (_controller == null || !_controller!.value.isInitialized) return;
     if (_controller!.value.isTakingPicture) return;
@@ -417,6 +482,15 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
     try {
       final xFile = await _controller!.takePicture();
+
+      // Wow 모먼트 — 증거 배지 2초 표시
+      if (mounted) {
+        setState(() => _showCaptureBadge = true);
+        _captureBadgeTimer?.cancel();
+        _captureBadgeTimer = Timer(const Duration(milliseconds: 2000), () {
+          if (mounted) setState(() => _showCaptureBadge = false);
+        });
+      }
 
       // 즉시 썸네일 갱신 — 저장 완료 기다리지 않음
       if (mounted) setState(() => _lastPhotoPath = xFile.path);
@@ -456,6 +530,14 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
           : null;
       // M23: locale 기반 요일명 전달
       final captureWeekdays = _weekdayNames(locale);
+      // v12: 스탬프 커스터마이징 확장 — 촬영 시점 캡처
+      final captureStampSize = _stampConfig?.stampSize ?? 'medium';
+      final captureStampOpacity = _stampConfig?.stampOpacity ?? 1.0;
+      final captureStampBgColor = _stampConfig?.stampBgColor ?? '#000000';
+      final captureCustomLine1 = _stampConfig?.customLine1;
+      final captureCustomLine2 = _stampConfig?.customLine2;
+      final captureSaveOriginal = _stampConfig?.saveOriginal ?? false;
+      final captureStampEnabled = _stampEnabled;
 
       // 저장은 백그라운드 — UI 차단하지 않음, 연속 촬영 가능
       _saveService.savePhoto(
@@ -488,6 +570,13 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
         speed: captureSpeed,
         weatherText: captureWeather,
         weekdayNames: captureWeekdays,
+        stampSize: captureStampSize,
+        stampOpacity: captureStampOpacity,
+        stampBgColor: captureStampBgColor,
+        customLine1: captureCustomLine1,
+        customLine2: captureCustomLine2,
+        saveOriginal: captureSaveOriginal,
+        stampEnabled: captureStampEnabled,
       ).then((savedPath) {
         if (mounted) setState(() => _lastPhotoPath = savedPath);
       }).catchError((_) {
@@ -734,6 +823,11 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
             ? '${_locationService.weather!.temperature.toStringAsFixed(0)}° ${WeatherService.weatherDesc(_locationService.weather!.weatherCode, Localizations.localeOf(context).languageCode)}'
             : null,
         weekdayNames: _weekdayNames(Localizations.localeOf(context).languageCode),
+        stampSize: _stampConfig?.stampSize ?? 'medium',
+        stampOpacity: _stampConfig?.stampOpacity ?? 1.0,
+        stampBgColor: _stampConfig?.stampBgColor ?? '#000000',
+        customLine1: _stampConfig?.customLine1,
+        customLine2: _stampConfig?.customLine2,
       );
       if (mounted) {
         setState(onSuccess);
@@ -910,16 +1004,25 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // ── 카메라 프리뷰 ──
+            // ── 카메라 프리뷰 + 탭 투 포커스 ──
             if (_isInitialized && _controller != null)
               Positioned.fill(
-                child: ClipRect(
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      width: _controller!.value.previewSize?.height ?? 1,
-                      height: _controller!.value.previewSize?.width ?? 1,
-                      child: CameraPreview(_controller!),
+                child: LayoutBuilder(
+                  builder: (ctx, constraints) => GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTapDown: (d) => _handleViewfinderTap(
+                      d,
+                      Size(constraints.maxWidth, constraints.maxHeight),
+                    ),
+                    child: ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: _controller!.value.previewSize?.height ?? 1,
+                          height: _controller!.value.previewSize?.width ?? 1,
+                          child: CameraPreview(_controller!),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -967,12 +1070,14 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                 onFlashTap: _toggleFlash,
                 onClose: () => Navigator.of(context).pop(),
                 l: l,
+                stampEnabled: _stampEnabled,
+                onStampToggle: _toggleStampEnabled,
                 stampColor: _parseStampColor(),
               ),
             ),
 
-            // ── 스탬프 오버레이 — 하단 컨트롤 위에 배치 ──
-            Positioned(
+            // ── 스탬프 오버레이 — 하단 컨트롤 위에 배치 (master toggle off 시 숨김) ──
+            if (_stampEnabled) Positioned(
               left: 0,
               right: 0,
               bottom: 230,
@@ -1012,6 +1117,12 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                         ? '${_locationService.weather!.temperature.toStringAsFixed(0)}° ${WeatherService.weatherDesc(_locationService.weather!.weatherCode, Localizations.localeOf(context).languageCode)}'
                         : null,
                     photoCode: null, // 코드는 촬영 시점에만 생성
+                    // v12: 스탬프 커스터마이징 확장
+                    stampSize: _stampConfig?.stampSize ?? 'medium',
+                    stampOpacity: _stampConfig?.stampOpacity ?? 1.0,
+                    stampBgColor: _stampConfig?.stampBgColor,
+                    customLine1: _stampConfig?.customLine1,
+                    customLine2: _stampConfig?.customLine2,
                   ),
                 ),
                 ),
@@ -1025,6 +1136,33 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                   child: Container(color: Colors.white.withValues(alpha: 0.6)),
                 ),
               ),
+
+            // ── 탭 투 포커스 인디케이터 ──
+            if (_focusPoint != null)
+              Positioned(
+                left: _focusPoint!.dx - 32,
+                top: _focusPoint!.dy - 32,
+                child: IgnorePointer(
+                  child: _FocusIndicator(key: ValueKey(_focusPoint)),
+                ),
+              ),
+
+            // ── Wow 모먼트: 촬영 성공 증거 배지 (상단 중앙) ──
+            // RepaintBoundary로 카메라 프리뷰와 분리 — 배지 애니메이션이 프리뷰 리페인트 안 함
+            Positioned(
+              top: MediaQuery.paddingOf(context).top + 96,
+              left: 0, right: 0,
+              child: IgnorePointer(
+                child: Center(
+                  child: RepaintBoundary(
+                    child: _CaptureBadgeOverlay(
+                      visible: _showCaptureBadge,
+                      l: l,
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
             // ── 하단 컨트롤 ──
             Positioned(
@@ -1106,6 +1244,213 @@ class _CameraError extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 촬영 성공 배지 오버레이 — AnimationController 단일 통합 트랜지션 (60/120fps 부드러움)
+class _CaptureBadgeOverlay extends StatefulWidget {
+  const _CaptureBadgeOverlay({required this.visible, required this.l});
+  final bool visible;
+  final AppLocalizations l;
+
+  @override
+  State<_CaptureBadgeOverlay> createState() => _CaptureBadgeOverlayState();
+}
+
+class _CaptureBadgeOverlayState extends State<_CaptureBadgeOverlay>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _slide;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+      reverseDuration: const Duration(milliseconds: 200),
+    );
+    // easeOutQuint — 빠르게 들어오고 부드럽게 안착
+    _slide = Tween<double>(begin: -16.0, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutQuint),
+    );
+    _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CaptureBadgeOverlay old) {
+    super.didUpdateWidget(old);
+    if (widget.visible != old.visible) {
+      if (widget.visible) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, child) {
+        if (_controller.value == 0) return const SizedBox.shrink();
+        return Opacity(
+          opacity: _opacity.value,
+          child: Transform.translate(
+            offset: Offset(0, _slide.value),
+            child: child,
+          ),
+        );
+      },
+      child: _CaptureSuccessBadge(l: widget.l),
+    );
+  }
+}
+
+class _CaptureSuccessBadge extends StatelessWidget {
+  const _CaptureSuccessBadge({required this.l});
+  final AppLocalizations l;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.72),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.darkAccent.withValues(alpha: 0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 24, height: 24,
+            decoration: const BoxDecoration(
+              color: AppColors.darkAccent,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(LucideIcons.check, size: 14, color: AppColors.darkBg),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l.captureSuccessTitle,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.1,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l.captureSuccessTamper,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withValues(alpha: 0.7),
+                  letterSpacing: 0.2,
+                  height: 1.1,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 탭 투 포커스 인디케이터 — 탭 지점에 나타나는 원형 링 (0.8→1.0 scale + 페이드아웃)
+class _FocusIndicator extends StatefulWidget {
+  const _FocusIndicator({super.key});
+
+  @override
+  State<_FocusIndicator> createState() => _FocusIndicatorState();
+}
+
+class _FocusIndicatorState extends State<_FocusIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<double> _opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scale = Tween<double>(begin: 1.35, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: const Interval(0, 0.35, curve: Curves.easeOutQuint)),
+    );
+    // 앞 200ms 불투명, 이후 페이드아웃
+    _opacity = TweenSequence([
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) => Opacity(
+        opacity: _opacity.value,
+        child: Transform.scale(
+          scale: _scale.value,
+          child: Container(
+            width: 64, height: 64,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.darkAccent, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.darkAccent.withValues(alpha: 0.35),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: Center(
+              child: Container(
+                width: 6, height: 6,
+                decoration: const BoxDecoration(
+                  color: AppColors.darkAccent,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

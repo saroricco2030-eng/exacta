@@ -8,6 +8,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/enums.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/data/database.dart';
 
 class ProjectFormSheet extends StatefulWidget {
@@ -202,7 +203,7 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
               spacing: 12, runSpacing: 12,
               children: List.generate(_colorOptions.length, (i) {
                 final hex = _colorOptions[i];
-                final color = Color(int.parse(hex.replaceFirst('#', '0xFF')));
+                final color = SafeParse.color(hex);
                 final isActive = i == _selectedColorIndex;
                 return GestureDetector(
                   onTap: () { HapticFeedback.selectionClick(); setState(() => _selectedColorIndex = i); },

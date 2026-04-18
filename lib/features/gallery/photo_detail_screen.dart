@@ -12,10 +12,12 @@ import 'package:share_plus/share_plus.dart';
 
 import 'package:exacta/core/enums.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/core/theme/app_theme.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/data/providers.dart';
+import 'package:exacta/services/photo_save_service.dart';
 import 'package:exacta/services/evidence_hash_service.dart';
 
 class PhotoDetailScreen extends ConsumerStatefulWidget {
@@ -293,21 +295,29 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
                 ),
                 child: Row(
                   children: [
-                    _ActionButton(
-                      icon: LucideIcons.share2,
-                      label: l.commonShare,
-                      onTap: () async {
-                        if (await File(_photo.filePath).exists()) {
-                          Share.shareXFiles([XFile(_photo.filePath)]);
-                        }
-                      },
+                    Expanded(
+                      child: _ActionButton(
+                        icon: LucideIcons.share2,
+                        label: l.commonShare,
+                        onTap: () => _sharePhoto(context),
+                      ),
                     ),
-                    const SizedBox(width: 16),
-                    _ActionButton(
-                      icon: LucideIcons.trash2,
-                      label: l.commonDelete,
-                      color: AppColors.darkDanger,
-                      onTap: () => _deletePhoto(context),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _ActionButton(
+                        icon: LucideIcons.stamp,
+                        label: l.photoDetailRestamp,
+                        onTap: () => _restampPhoto(context),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _ActionButton(
+                        icon: LucideIcons.trash2,
+                        label: l.commonDelete,
+                        color: AppColors.darkDanger,
+                        onTap: () => _deletePhoto(context),
+                      ),
                     ),
                   ],
                 ),
@@ -334,6 +344,116 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
         ),
       ),
     );
+  }
+
+  /// 사진 공유 — 원본이 있으면 선택 시트, 없으면 스탬프본 즉시 공유
+  Future<void> _sharePhoto(BuildContext context) async {
+    final l = context.l10n;
+    final stampedFile = File(_photo.filePath);
+    final hasOriginal = _photo.originalPath != null &&
+        await File(_photo.originalPath!).exists();
+
+    // 원본 없으면 바로 스탬프본 공유
+    if (!hasOriginal) {
+      if (await stampedFile.exists()) {
+        await Share.shareXFiles([XFile(_photo.filePath)]);
+      }
+      return;
+    }
+
+    // 원본 있으면 시트로 선택
+    if (!mounted) return;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: context.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36, height: 4, margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: ctx.text3.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              ListTile(
+                leading: Icon(LucideIcons.stamp, color: ctx.accent),
+                title: Text(l.photoDetailStampedLabel),
+                onTap: () => Navigator.pop(ctx, 'stamped'),
+              ),
+              ListTile(
+                leading: Icon(LucideIcons.image, color: ctx.text2),
+                title: Text(l.photoDetailOriginalLabel),
+                onTap: () => Navigator.pop(ctx, 'original'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (choice == 'stamped' && await stampedFile.exists()) {
+      await Share.shareXFiles([XFile(_photo.filePath)]);
+    } else if (choice == 'original') {
+      await Share.shareXFiles([XFile(_photo.originalPath!)]);
+    }
+  }
+
+  Future<void> _restampPhoto(BuildContext context) async {
+    final l = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.photoDetailRestamp),
+        content: Text(l.restampConfirm),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l.commonCancel)),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: ctx.accent,
+              foregroundColor: ctx.onAccent,
+            ),
+            child: Text(l.commonOk),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    HapticFeedback.mediumImpact();
+    try {
+      final db = AppDatabase.instance;
+      final config = await db.getStampConfig();
+      final locale = Localizations.localeOf(context).languageCode;
+      const weekdays = {'ko': ['월','화','수','목','금','토','일'], 'ja': ['月','火','水','木','金','土','日'], 'en': ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']};
+      final saveService = PhotoSaveService(db);
+      await saveService.restampPhoto(
+        photo: _photo,
+        config: config,
+        tamperBadgeText: l.stampTamperBadge,
+        weekdayNames: weekdays[locale] ?? weekdays['en']!,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l.restampSuccess)),
+        );
+        setState(() {}); // 이미지 새로고침
+      }
+    } catch (e) {
+      debugPrint('Restamp failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l.restampError), backgroundColor: context.danger),
+        );
+      }
+    }
   }
 
   Future<void> _deletePhoto(BuildContext context) async {
@@ -365,6 +485,11 @@ class _PhotoDetailScreenState extends ConsumerState<PhotoDetailScreen> {
       if (_photo.thumbnailPath != null) {
         final thumb = File(_photo.thumbnailPath!);
         if (await thumb.exists()) await thumb.delete();
+      }
+      // v13: 원본 사진 cascade 삭제
+      if (_photo.originalPath != null) {
+        final original = File(_photo.originalPath!);
+        if (await original.exists()) await original.delete();
       }
       await ref.read(dbProvider).deletePhoto(_photo.id);
       if (context.mounted) Navigator.of(context).pop();
@@ -973,7 +1098,7 @@ class _ProjectChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = color != null
-        ? Color(int.parse(color!.replaceFirst('#', '0xFF')))
+        ? SafeParse.color(color, fallback: AppColors.darkAccent)
         : AppColors.darkAccent;
     return GestureDetector(
       onTap: onTap,
@@ -1115,19 +1240,23 @@ class _ActionButton extends StatelessWidget {
           },
           child: Container(
             height: 56,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.darkBorder),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: 16, color: c),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 13, color: c),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12, color: c),
+                  ),
                 ),
               ],
             ),

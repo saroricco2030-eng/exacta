@@ -18,27 +18,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _currentPage = 0;
 
-  static const _pages = [
-    _PageData(
-      icon: LucideIcons.camera,
-      gradient: [Color(0xFFFF9B7B), Color(0xFFE880A0)],
-      titleKey: 'onboarding1Title',
-      descKey: 'onboarding1Desc',
-    ),
-    _PageData(
-      icon: LucideIcons.folderOpen,
-      gradient: [Color(0xFF059669), Color(0xFF7ECBB4)],
-      titleKey: 'onboarding2Title',
-      descKey: 'onboarding2Desc',
-    ),
-    _PageData(
-      icon: LucideIcons.shieldCheck,
-      gradient: [Color(0xFF7C3AED), Color(0xFFB8A0E8)],
-      titleKey: 'onboarding3Title',
-      descKey: 'onboarding3Desc',
-    ),
-  ];
-
   @override
   void dispose() {
     _controller.dispose();
@@ -47,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _next() {
     HapticFeedback.lightImpact();
-    if (_currentPage < _pages.length - 1) {
+    if (_currentPage < 2) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 400),
         curve: Curves.easeOutCubic,
@@ -68,6 +47,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final l = context.l10n;
     final isDark = context.isDark;
 
+    final pages = [
+      _PageData(
+        icon: LucideIcons.camera,
+        gradient: const [Color(0xFFFF9B7B), Color(0xFFE880A0)], // 피치 → 로즈
+        title: l.onboarding1TitleFull,
+        description: l.onboarding1DescFull,
+        bullets: [l.onboarding1Bullet1, l.onboarding1Bullet2, l.onboarding1Bullet3],
+        bulletIcons: const [LucideIcons.clock, LucideIcons.satellite, LucideIcons.mapPin],
+      ),
+      _PageData(
+        icon: LucideIcons.shieldCheck,
+        gradient: const [Color(0xFF7C9EE8), Color(0xFFB8A0E8)], // 블루 → 라벤더 (증거)
+        title: l.onboarding2TitleFull,
+        description: l.onboarding2DescFull,
+        bullets: [l.onboarding2Bullet1, l.onboarding2Bullet2, l.onboarding2Bullet3],
+        bulletIcons: const [LucideIcons.link, LucideIcons.timer, LucideIcons.fileText],
+      ),
+      _PageData(
+        icon: LucideIcons.eyeOff,
+        gradient: const [Color(0xFF34D399), Color(0xFF7ECBB4)], // 민트 → 세이지 (보안)
+        title: l.onboarding3TitleFull,
+        description: l.onboarding3DescFull,
+        bullets: [l.onboarding3Bullet1, l.onboarding3Bullet2, l.onboarding3Bullet3],
+        bulletIcons: const [LucideIcons.satelliteDish, LucideIcons.fileX, LucideIcons.lock],
+      ),
+    ];
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
@@ -83,7 +89,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: GestureDetector(
                     onTap: _complete,
                     child: Text(
-                      context.l10n.commonSkip,
+                      l.commonSkip,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -99,16 +105,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: PageView.builder(
                   controller: _controller,
                   onPageChanged: (i) => setState(() => _currentPage = i),
-                  itemCount: _pages.length,
-                  itemBuilder: (context, index) {
-                    final page = _pages[index];
-                    return _OnboardingPage(
-                      icon: page.icon,
-                      gradient: page.gradient,
-                      title: _getTitle(l, page.titleKey),
-                      description: _getDesc(l, page.descKey),
-                    );
-                  },
+                  itemCount: pages.length,
+                  itemBuilder: (context, index) => _OnboardingPage(data: pages[index]),
                 ),
               ),
 
@@ -117,9 +115,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: Row(
                   children: [
-                    // Page dots
                     Row(
-                      children: List.generate(_pages.length, (i) {
+                      children: List.generate(pages.length, (i) {
                         final isActive = i == _currentPage;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -135,21 +132,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       }),
                     ),
                     const Spacer(),
-                    // Next / Get Started
                     GestureDetector(
                       onTap: _next,
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        width: _currentPage == _pages.length - 1 ? 140 : 56,
+                        width: _currentPage == pages.length - 1 ? 140 : 56,
                         height: 56,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(colors: context.btnGradient),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Center(
-                          child: _currentPage == _pages.length - 1
+                          child: _currentPage == pages.length - 1
                               ? Text(
-                                  _getStartText(l),
+                                  l.commonStart,
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -169,95 +165,135 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
-
-  String _getTitle(dynamic l, String key) {
-    return switch (key) {
-      'onboarding1Title' => l.onboarding1TitleFull,
-      'onboarding2Title' => l.onboarding2TitleFull,
-      'onboarding3Title' => l.onboarding3TitleFull,
-      _ => '',
-    };
-  }
-
-  String _getDesc(dynamic l, String key) {
-    return switch (key) {
-      'onboarding1Desc' => l.onboarding1DescFull,
-      'onboarding2Desc' => l.onboarding2DescFull,
-      'onboarding3Desc' => l.onboarding3DescFull,
-      _ => '',
-    };
-  }
-
-  String _getStartText(dynamic l) => l.commonStart;
 }
 
 class _PageData {
   final IconData icon;
   final List<Color> gradient;
-  final String titleKey;
-  final String descKey;
-  const _PageData({required this.icon, required this.gradient, required this.titleKey, required this.descKey});
-}
-
-class _OnboardingPage extends StatelessWidget {
-  const _OnboardingPage({
+  final String title;
+  final String description;
+  final List<String> bullets;
+  final List<IconData> bulletIcons;
+  const _PageData({
     required this.icon,
     required this.gradient,
     required this.title,
     required this.description,
+    required this.bullets,
+    required this.bulletIcons,
   });
+}
 
-  final IconData icon;
-  final List<Color> gradient;
-  final String title;
-  final String description;
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({required this.data});
+  final _PageData data;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 48),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // ── 큰 아이콘 (그라디언트 카드) ──
           Container(
-            width: 120,
-            height: 120,
+            width: 124,
+            height: 124,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: gradient,
+                colors: data.gradient,
               ),
               borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
-                  color: gradient[0].withValues(alpha: 0.3),
+                  color: data.gradient[0].withValues(alpha: 0.32),
                   blurRadius: 32,
                   offset: const Offset(0, 12),
                 ),
               ],
             ),
-            child: Icon(icon, size: 48, color: Colors.white),
+            child: Icon(data.icon, size: 52, color: Colors.white),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 40),
+
+          // ── 타이틀 ──
           Text(
-            title,
+            data.title,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
               color: context.text1,
               letterSpacing: -0.5,
+              height: 1.3,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
+          // ── 설명 ──
           Text(
-            description,
+            data.description,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               color: context.text2,
               height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 28),
+
+          // ── 체크 배지 3개 ──
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: List.generate(data.bullets.length, (i) {
+              return _OnboardingBadge(
+                icon: data.bulletIcons[i],
+                label: data.bullets[i],
+                accentColor: data.gradient[0],
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OnboardingBadge extends StatelessWidget {
+  const _OnboardingBadge({
+    required this.icon,
+    required this.label,
+    required this.accentColor,
+  });
+  final IconData icon;
+  final String label;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: accentColor.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: accentColor.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: accentColor),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: accentColor,
+              letterSpacing: 0.1,
             ),
           ),
         ],

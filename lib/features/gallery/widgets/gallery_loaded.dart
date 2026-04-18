@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/core/theme/app_theme.dart';
@@ -124,7 +125,7 @@ class _GalleryLoadedState extends State<GalleryLoaded> {
     // 날짜별 그룹핑
     final groups = <String, List<Photo>>{};
     for (final photo in widget.photos) {
-      final date = photo.timestamp.substring(0, 10); // YYYY-MM-DD
+      final date = SafeParse.substringOr(photo.timestamp, 0, 10); // YYYY-MM-DD
       groups.putIfAbsent(date, () => []).add(photo);
     }
 
@@ -300,7 +301,7 @@ class PhotoTile extends ConsumerWidget {
                 Image.file(
                   File(photo.filePath),
                   fit: BoxFit.cover,
-                  cacheWidth: 200, cacheHeight: 200,
+                  cacheWidth: 400,
                   errorBuilder: (ctx, err, st) => Container(
                     color: ctx.surfaceHi,
                     child: Icon(LucideIcons.image, color: ctx.text3),

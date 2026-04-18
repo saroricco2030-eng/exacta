@@ -19,6 +19,8 @@ class CameraTopBar extends StatelessWidget {
     required this.onFlashTap,
     required this.onClose,
     required this.l,
+    required this.stampEnabled,
+    required this.onStampToggle,
     this.stampColor,
   });
 
@@ -29,6 +31,8 @@ class CameraTopBar extends StatelessWidget {
   final VoidCallback onFlashTap;
   final VoidCallback onClose;
   final AppLocalizations l;
+  final bool stampEnabled;
+  final VoidCallback onStampToggle;
   final Color? stampColor;
 
   @override
@@ -64,6 +68,19 @@ class CameraTopBar extends StatelessWidget {
             stampColor: stampColor,
           )),
           const SizedBox(width: 12),
+
+          // 스탬프 on/off 토글
+          Semantics(
+            button: true,
+            label: l.cameraStampToggleLabel,
+            toggled: stampEnabled,
+            child: _CircleButton(
+              icon: stampEnabled ? LucideIcons.stamp : LucideIcons.eyeOff,
+              onTap: onStampToggle,
+              isActive: stampEnabled,
+            ),
+          ),
+          const SizedBox(width: 8),
 
           // 플래시
           _CircleButton(

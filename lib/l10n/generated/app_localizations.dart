@@ -841,37 +841,37 @@ abstract class AppLocalizations {
   /// No description provided for @onboarding1TitleFull.
   ///
   /// In ko, this message translates to:
-  /// **'현장 촬영, 정확하게'**
+  /// **'셔터 한 번,\n시간과 위치가 박힙니다'**
   String get onboarding1TitleFull;
 
   /// No description provided for @onboarding1DescFull.
   ///
   /// In ko, this message translates to:
-  /// **'GPS · 주소 · 시간 · 날씨를 사진에 자동 기록합니다'**
+  /// **'시공·점검·배송·인수증\n현장 사진 한 장으로 끝나는 증빙'**
   String get onboarding1DescFull;
 
   /// No description provided for @onboarding2TitleFull.
   ///
   /// In ko, this message translates to:
-  /// **'프로젝트별 관리'**
+  /// **'법정에서도 통하는\n증거 사진'**
   String get onboarding2TitleFull;
 
   /// No description provided for @onboarding2DescFull.
   ///
   /// In ko, this message translates to:
-  /// **'현장별로 사진을 분류하고 PDF 리포트로 내보내세요'**
+  /// **'SHA-256 해시 체인 + NTP 서버 시간\n위변조 즉시 탐지, PDF 증거 팩 자동 생성'**
   String get onboarding2DescFull;
 
   /// No description provided for @onboarding3TitleFull.
   ///
   /// In ko, this message translates to:
-  /// **'보안 촬영 모드'**
+  /// **'민감한 촬영,\n위치는 완전 비밀'**
   String get onboarding3TitleFull;
 
   /// No description provided for @onboarding3DescFull.
   ///
   /// In ko, this message translates to:
-  /// **'위치정보 완전 차단 · EXIF 제거 · 위변조 방지 NTP 시간'**
+  /// **'보안 모드 — GPS 0, EXIF 0, 갤러리 미등록\n나만의 비공개 폴더에 안전하게'**
   String get onboarding3DescFull;
 
   /// No description provided for @themeLight.
@@ -1251,6 +1251,66 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'텍스트만'**
   String get stampLayoutText;
+
+  /// No description provided for @settingsStampSize.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 크기'**
+  String get settingsStampSize;
+
+  /// No description provided for @stampSizeSmall.
+  ///
+  /// In ko, this message translates to:
+  /// **'소'**
+  String get stampSizeSmall;
+
+  /// No description provided for @stampSizeMedium.
+  ///
+  /// In ko, this message translates to:
+  /// **'중'**
+  String get stampSizeMedium;
+
+  /// No description provided for @stampSizeLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'대'**
+  String get stampSizeLarge;
+
+  /// No description provided for @settingsStampOpacity.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 투명도'**
+  String get settingsStampOpacity;
+
+  /// No description provided for @settingsStampBgColor.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 배경색'**
+  String get settingsStampBgColor;
+
+  /// No description provided for @settingsCustomLine1.
+  ///
+  /// In ko, this message translates to:
+  /// **'회사명'**
+  String get settingsCustomLine1;
+
+  /// No description provided for @settingsCustomLine1Hint.
+  ///
+  /// In ko, this message translates to:
+  /// **'회사명을 입력하세요'**
+  String get settingsCustomLine1Hint;
+
+  /// No description provided for @settingsCustomLine2.
+  ///
+  /// In ko, this message translates to:
+  /// **'담당자명'**
+  String get settingsCustomLine2;
+
+  /// No description provided for @settingsCustomLine2Hint.
+  ///
+  /// In ko, this message translates to:
+  /// **'담당자명을 입력하세요'**
+  String get settingsCustomLine2Hint;
 
   /// No description provided for @localeSystem.
   ///
@@ -1689,6 +1749,240 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'시작'**
   String get commonStart;
+
+  /// No description provided for @stampPositionTopLeft.
+  ///
+  /// In ko, this message translates to:
+  /// **'좌상단'**
+  String get stampPositionTopLeft;
+
+  /// No description provided for @stampPositionTopCenter.
+  ///
+  /// In ko, this message translates to:
+  /// **'상단 중앙'**
+  String get stampPositionTopCenter;
+
+  /// No description provided for @stampPositionTopRight.
+  ///
+  /// In ko, this message translates to:
+  /// **'우상단'**
+  String get stampPositionTopRight;
+
+  /// No description provided for @stampPositionCenter.
+  ///
+  /// In ko, this message translates to:
+  /// **'중앙'**
+  String get stampPositionCenter;
+
+  /// No description provided for @stampPositionBottomLeft.
+  ///
+  /// In ko, this message translates to:
+  /// **'좌하단'**
+  String get stampPositionBottomLeft;
+
+  /// No description provided for @stampPositionBottomCenter.
+  ///
+  /// In ko, this message translates to:
+  /// **'하단 중앙'**
+  String get stampPositionBottomCenter;
+
+  /// No description provided for @stampPositionBottomRight.
+  ///
+  /// In ko, this message translates to:
+  /// **'우하단'**
+  String get stampPositionBottomRight;
+
+  /// No description provided for @photoDetailRestamp.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 재적용'**
+  String get photoDetailRestamp;
+
+  /// No description provided for @restampConfirm.
+  ///
+  /// In ko, this message translates to:
+  /// **'이 사진에 새 스탬프를 적용하시겠습니까?'**
+  String get restampConfirm;
+
+  /// No description provided for @restampSuccess.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프가 적용되었습니다'**
+  String get restampSuccess;
+
+  /// No description provided for @restampError.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 적용 실패'**
+  String get restampError;
+
+  /// No description provided for @homeWelcomeTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'첫 촬영을 시작하세요'**
+  String get homeWelcomeTitle;
+
+  /// No description provided for @homeWelcomeSubtitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'시간 · 위치 · 메모가 자동으로 사진에 새겨집니다'**
+  String get homeWelcomeSubtitle;
+
+  /// No description provided for @homeWelcomeStartButton.
+  ///
+  /// In ko, this message translates to:
+  /// **'촬영 시작'**
+  String get homeWelcomeStartButton;
+
+  /// No description provided for @homeWelcomeBadgeTime.
+  ///
+  /// In ko, this message translates to:
+  /// **'시간 자동 기록'**
+  String get homeWelcomeBadgeTime;
+
+  /// No description provided for @homeWelcomeBadgeGps.
+  ///
+  /// In ko, this message translates to:
+  /// **'위치 스탬프'**
+  String get homeWelcomeBadgeGps;
+
+  /// No description provided for @homeWelcomeBadgeTamper.
+  ///
+  /// In ko, this message translates to:
+  /// **'위변조 방지'**
+  String get homeWelcomeBadgeTamper;
+
+  /// No description provided for @captureSuccessTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'기록 완료'**
+  String get captureSuccessTitle;
+
+  /// No description provided for @captureSuccessTamper.
+  ///
+  /// In ko, this message translates to:
+  /// **'위변조 불가 · SHA-256 체인'**
+  String get captureSuccessTamper;
+
+  /// No description provided for @emptyGalleryExampleLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'예시'**
+  String get emptyGalleryExampleLabel;
+
+  /// No description provided for @emptyGalleryStampPreviewAddress.
+  ///
+  /// In ko, this message translates to:
+  /// **'서울 강남구'**
+  String get emptyGalleryStampPreviewAddress;
+
+  /// No description provided for @onboarding1Bullet1.
+  ///
+  /// In ko, this message translates to:
+  /// **'시간 자동'**
+  String get onboarding1Bullet1;
+
+  /// No description provided for @onboarding1Bullet2.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS 자동'**
+  String get onboarding1Bullet2;
+
+  /// No description provided for @onboarding1Bullet3.
+  ///
+  /// In ko, this message translates to:
+  /// **'주소 자동'**
+  String get onboarding1Bullet3;
+
+  /// No description provided for @onboarding2Bullet1.
+  ///
+  /// In ko, this message translates to:
+  /// **'해시 체인'**
+  String get onboarding2Bullet1;
+
+  /// No description provided for @onboarding2Bullet2.
+  ///
+  /// In ko, this message translates to:
+  /// **'NTP 시간'**
+  String get onboarding2Bullet2;
+
+  /// No description provided for @onboarding2Bullet3.
+  ///
+  /// In ko, this message translates to:
+  /// **'PDF 출력'**
+  String get onboarding2Bullet3;
+
+  /// No description provided for @onboarding3Bullet1.
+  ///
+  /// In ko, this message translates to:
+  /// **'GPS 차단'**
+  String get onboarding3Bullet1;
+
+  /// No description provided for @onboarding3Bullet2.
+  ///
+  /// In ko, this message translates to:
+  /// **'EXIF 제거'**
+  String get onboarding3Bullet2;
+
+  /// No description provided for @onboarding3Bullet3.
+  ///
+  /// In ko, this message translates to:
+  /// **'갤러리 미등록'**
+  String get onboarding3Bullet3;
+
+  /// No description provided for @settingsSaveOriginal.
+  ///
+  /// In ko, this message translates to:
+  /// **'원본도 함께 저장'**
+  String get settingsSaveOriginal;
+
+  /// No description provided for @settingsSaveOriginalDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 없는 원본을 별도 보관합니다 (보안 모드 제외)'**
+  String get settingsSaveOriginalDesc;
+
+  /// No description provided for @photoDetailViewOriginal.
+  ///
+  /// In ko, this message translates to:
+  /// **'원본 보기'**
+  String get photoDetailViewOriginal;
+
+  /// No description provided for @photoDetailShareOriginal.
+  ///
+  /// In ko, this message translates to:
+  /// **'원본 공유'**
+  String get photoDetailShareOriginal;
+
+  /// No description provided for @photoDetailOriginalLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'원본 (스탬프 없음)'**
+  String get photoDetailOriginalLabel;
+
+  /// No description provided for @photoDetailStampedLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프본'**
+  String get photoDetailStampedLabel;
+
+  /// No description provided for @cameraStampToggleLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'스탬프 켜기/끄기'**
+  String get cameraStampToggleLabel;
+
+  /// No description provided for @cameraShutterLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'셔터'**
+  String get cameraShutterLabel;
+
+  /// No description provided for @cameraStopRecordingLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'녹화 중지'**
+  String get cameraStopRecordingLabel;
 
   /// No description provided for @openSettingsAction.
   ///

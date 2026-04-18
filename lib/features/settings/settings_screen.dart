@@ -72,12 +72,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String? signaturePath,
     String? themeMode,
     String? locale,
+    // v12: 스탬프 커스터마이징 확장
+    double? stampOpacity,
+    String? stampSize,
+    String? customLine1,
+    String? customLine2,
+    String? stampBgColor,
+    // v13: 듀얼 저장
+    bool? saveOriginal,
   }) async {
     final current = _config;
     if (current == null) return;
 
     // 1. 로컬 state 즉시 갱신 (낙관적) — copyWith는 null 파라미터를 무시.
     //    logoPath/signaturePath는 빈 문자열("")로 "삭제" 의미이므로 별도 처리.
+    //    customLine1/customLine2는 빈 문자열("")로 "삭제" 의미이므로 별도 처리.
     final updated = current.copyWith(
       dateFormat: dateFormat,
       fontFamily: fontFamily,
@@ -98,6 +107,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       signaturePath: signaturePath != null
           ? Value(signaturePath.isEmpty ? null : signaturePath)
           : const Value.absent(),
+      stampOpacity: stampOpacity,
+      stampSize: stampSize,
+      stampBgColor: stampBgColor,
+      customLine1: customLine1 != null
+          ? Value(customLine1.isEmpty ? null : customLine1)
+          : const Value.absent(),
+      customLine2: customLine2 != null
+          ? Value(customLine2.isEmpty ? null : customLine2)
+          : const Value.absent(),
+      saveOriginal: saveOriginal,
     );
 
     setState(() => _config = updated);
@@ -130,6 +149,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               signaturePath: Value(updated.signaturePath),
               themeMode: Value(updated.themeMode),
               locale: Value(updated.locale),
+              stampOpacity: Value(updated.stampOpacity),
+              stampSize: Value(updated.stampSize),
+              customLine1: Value(updated.customLine1),
+              customLine2: Value(updated.customLine2),
+              stampBgColor: Value(updated.stampBgColor),
+              saveOriginal: Value(updated.saveOriginal),
             ),
           );
 
@@ -222,9 +247,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           children: [
             Text(
@@ -233,25 +255,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: 24),
 
-            StampSettingsSection(
-              config: config,
-              l: l,
-              onUpdate: _update,
-              stampColorOptions: _stampColorOptions,
+            RepaintBoundary(
+              child: StampSettingsSection(
+                config: config,
+                l: l,
+                onUpdate: _update,
+                stampColorOptions: _stampColorOptions,
+              ),
             ),
             const SizedBox(height: 24),
 
-            CameraSettingsSection(
-              config: config,
-              l: l,
-              onUpdate: _update,
+            RepaintBoundary(
+              child: CameraSettingsSection(
+                config: config,
+                l: l,
+                onUpdate: _update,
+              ),
             ),
             const SizedBox(height: 24),
 
-            SecuritySettingsSection(
-              config: config,
-              l: l,
-              onUpdate: _update,
+            RepaintBoundary(
+              child: SecuritySettingsSection(
+                config: config,
+                l: l,
+                onUpdate: _update,
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -342,7 +370,7 @@ class _StorageSectionState extends State<_StorageSection> {
         try {
           final stat = await File(path).stat();
           total += stat.size;
-        } catch (_) {}
+        } catch (e) { debugPrint('Storage stat failed for $path: $e'); }
       }
       if (mounted) {
         setState(() {

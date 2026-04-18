@@ -22,16 +22,24 @@ enum StampPreset {
       s == 'secure' ? secure : construction;
 }
 
-/// 스탬프 위치
+/// 스탬프 위치 (7곳)
 enum StampPosition {
-  bottom('bottom'),
-  top('top');
+  topLeft('topLeft'),
+  topCenter('topCenter'),
+  topRight('topRight'),
+  center('center'),
+  bottomLeft('bottomLeft'),
+  bottomCenter('bottomCenter'),
+  bottomRight('bottomRight');
 
   final String value;
   const StampPosition(this.value);
 
   static StampPosition fromString(String s) =>
-      s == 'top' ? top : bottom;
+      StampPosition.values.firstWhere(
+        (e) => e.value == s,
+        orElse: () => bottomLeft,
+      );
 }
 
 /// 해상도

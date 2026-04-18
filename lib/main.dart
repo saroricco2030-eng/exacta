@@ -2,10 +2,12 @@
 /// Entry point: Riverpod + theme/locale init + onboarding routing
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'package:exacta/l10n/generated/app_localizations.dart';
 import 'package:exacta/core/colors.dart';
@@ -18,19 +20,36 @@ import 'package:exacta/features/splash/splash_screen.dart';
 import 'package:exacta/services/ntp_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Sentry DSN — 출시 전 https://sentry.io 에서 프로젝트 생성 후 DSN 입력
+/// 빈 문자열이면 Sentry 비활성화 (개발 중에는 비워둠)
+const _sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+
 Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
-  // 스플래시 유지 — Android 12+ 시스템 스플래시가 너무 빨리 사라지는 것을 막고
-  // 브랜드 스플래시 전용 이미지를 충분히 노출시키기 위함.
   FlutterNativeSplash.preserve(widgetsBinding: binding);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  await initializeDateFormatting();
-  NtpService.sync();
-  // Google Fonts: 오프라인에서도 캐시된 폰트 사용, 실패 시 시스템 폰트 폴백
+  // ── 블로킹 초기화 최소화 — 빈화면 시간 단축 ──
   GoogleFonts.config.allowRuntimeFetching = true;
-  // 갤러리에서 대량 사진 스크롤 시 메모리 안정화
   PaintingBinding.instance.imageCache.maximumSizeBytes = 100 * 1024 * 1024;
-  runApp(const ProviderScope(child: ExactaApp()));
+  // 나머지는 fire-and-forget — 첫 프레임 렌더링 차단 방지
+  initializeDateFormatting();
+  NtpService.sync();
+  FlutterDisplayMode.setHighRefreshRate().catchError((_) {});
+
+  // Sentry: DSN 미설정 시 일반 runApp, 설정 시 크래시 자동 보고
+  if (_sentryDsn.isEmpty) {
+    runApp(const ProviderScope(child: ExactaApp()));
+  } else {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = _sentryDsn;
+        options.tracesSampleRate = 0.1; // 10% 트랜잭션 샘플링
+        options.attachScreenshot = false; // 개인정보 보호 — 스크린샷 비전송
+        options.sendDefaultPii = false; // PII 비전송
+      },
+      appRunner: () => runApp(const ProviderScope(child: ExactaApp())),
+    );
+  }
 }
 
 class ExactaApp extends ConsumerStatefulWidget {

@@ -726,6 +726,17 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _originalPathMeta = const VerificationMeta(
+    'originalPath',
+  );
+  @override
+  late final GeneratedColumn<String> originalPath = GeneratedColumn<String>(
+    'original_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -758,6 +769,7 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
     prevHash,
     chainHash,
     ntpSynced,
+    originalPath,
     createdAt,
   ];
   @override
@@ -895,6 +907,15 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
         ntpSynced.isAcceptableOrUnknown(data['ntp_synced']!, _ntpSyncedMeta),
       );
     }
+    if (data.containsKey('original_path')) {
+      context.handle(
+        _originalPathMeta,
+        originalPath.isAcceptableOrUnknown(
+          data['original_path']!,
+          _originalPathMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -988,6 +1009,10 @@ class $PhotosTable extends Photos with TableInfo<$PhotosTable, Photo> {
         DriftSqlType.bool,
         data['${effectivePrefix}ntp_synced'],
       )!,
+      originalPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}original_path'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_at'],
@@ -1021,6 +1046,7 @@ class Photo extends DataClass implements Insertable<Photo> {
   final String? prevHash;
   final String? chainHash;
   final bool ntpSynced;
+  final String? originalPath;
   final String createdAt;
   const Photo({
     required this.id,
@@ -1042,6 +1068,7 @@ class Photo extends DataClass implements Insertable<Photo> {
     this.prevHash,
     this.chainHash,
     required this.ntpSynced,
+    this.originalPath,
     required this.createdAt,
   });
   @override
@@ -1090,6 +1117,9 @@ class Photo extends DataClass implements Insertable<Photo> {
       map['chain_hash'] = Variable<String>(chainHash);
     }
     map['ntp_synced'] = Variable<bool>(ntpSynced);
+    if (!nullToAbsent || originalPath != null) {
+      map['original_path'] = Variable<String>(originalPath);
+    }
     map['created_at'] = Variable<String>(createdAt);
     return map;
   }
@@ -1135,6 +1165,9 @@ class Photo extends DataClass implements Insertable<Photo> {
           ? const Value.absent()
           : Value(chainHash),
       ntpSynced: Value(ntpSynced),
+      originalPath: originalPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(originalPath),
       createdAt: Value(createdAt),
     );
   }
@@ -1164,6 +1197,7 @@ class Photo extends DataClass implements Insertable<Photo> {
       prevHash: serializer.fromJson<String?>(json['prevHash']),
       chainHash: serializer.fromJson<String?>(json['chainHash']),
       ntpSynced: serializer.fromJson<bool>(json['ntpSynced']),
+      originalPath: serializer.fromJson<String?>(json['originalPath']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
   }
@@ -1190,6 +1224,7 @@ class Photo extends DataClass implements Insertable<Photo> {
       'prevHash': serializer.toJson<String?>(prevHash),
       'chainHash': serializer.toJson<String?>(chainHash),
       'ntpSynced': serializer.toJson<bool>(ntpSynced),
+      'originalPath': serializer.toJson<String?>(originalPath),
       'createdAt': serializer.toJson<String>(createdAt),
     };
   }
@@ -1214,6 +1249,7 @@ class Photo extends DataClass implements Insertable<Photo> {
     Value<String?> prevHash = const Value.absent(),
     Value<String?> chainHash = const Value.absent(),
     bool? ntpSynced,
+    Value<String?> originalPath = const Value.absent(),
     String? createdAt,
   }) => Photo(
     id: id ?? this.id,
@@ -1237,6 +1273,7 @@ class Photo extends DataClass implements Insertable<Photo> {
     prevHash: prevHash.present ? prevHash.value : this.prevHash,
     chainHash: chainHash.present ? chainHash.value : this.chainHash,
     ntpSynced: ntpSynced ?? this.ntpSynced,
+    originalPath: originalPath.present ? originalPath.value : this.originalPath,
     createdAt: createdAt ?? this.createdAt,
   );
   Photo copyWithCompanion(PhotosCompanion data) {
@@ -1266,6 +1303,9 @@ class Photo extends DataClass implements Insertable<Photo> {
       prevHash: data.prevHash.present ? data.prevHash.value : this.prevHash,
       chainHash: data.chainHash.present ? data.chainHash.value : this.chainHash,
       ntpSynced: data.ntpSynced.present ? data.ntpSynced.value : this.ntpSynced,
+      originalPath: data.originalPath.present
+          ? data.originalPath.value
+          : this.originalPath,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1292,13 +1332,14 @@ class Photo extends DataClass implements Insertable<Photo> {
           ..write('prevHash: $prevHash, ')
           ..write('chainHash: $chainHash, ')
           ..write('ntpSynced: $ntpSynced, ')
+          ..write('originalPath: $originalPath, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     projectId,
     filePath,
@@ -1318,8 +1359,9 @@ class Photo extends DataClass implements Insertable<Photo> {
     prevHash,
     chainHash,
     ntpSynced,
+    originalPath,
     createdAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1343,6 +1385,7 @@ class Photo extends DataClass implements Insertable<Photo> {
           other.prevHash == this.prevHash &&
           other.chainHash == this.chainHash &&
           other.ntpSynced == this.ntpSynced &&
+          other.originalPath == this.originalPath &&
           other.createdAt == this.createdAt);
 }
 
@@ -1366,6 +1409,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
   final Value<String?> prevHash;
   final Value<String?> chainHash;
   final Value<bool> ntpSynced;
+  final Value<String?> originalPath;
   final Value<String> createdAt;
   const PhotosCompanion({
     this.id = const Value.absent(),
@@ -1387,6 +1431,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     this.prevHash = const Value.absent(),
     this.chainHash = const Value.absent(),
     this.ntpSynced = const Value.absent(),
+    this.originalPath = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   PhotosCompanion.insert({
@@ -1409,6 +1454,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     this.prevHash = const Value.absent(),
     this.chainHash = const Value.absent(),
     this.ntpSynced = const Value.absent(),
+    this.originalPath = const Value.absent(),
     required String createdAt,
   }) : filePath = Value(filePath),
        presetType = Value(presetType),
@@ -1434,6 +1480,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     Expression<String>? prevHash,
     Expression<String>? chainHash,
     Expression<bool>? ntpSynced,
+    Expression<String>? originalPath,
     Expression<String>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -1456,6 +1503,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
       if (prevHash != null) 'prev_hash': prevHash,
       if (chainHash != null) 'chain_hash': chainHash,
       if (ntpSynced != null) 'ntp_synced': ntpSynced,
+      if (originalPath != null) 'original_path': originalPath,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -1480,6 +1528,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     Value<String?>? prevHash,
     Value<String?>? chainHash,
     Value<bool>? ntpSynced,
+    Value<String?>? originalPath,
     Value<String>? createdAt,
   }) {
     return PhotosCompanion(
@@ -1502,6 +1551,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
       prevHash: prevHash ?? this.prevHash,
       chainHash: chainHash ?? this.chainHash,
       ntpSynced: ntpSynced ?? this.ntpSynced,
+      originalPath: originalPath ?? this.originalPath,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -1566,6 +1616,9 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
     if (ntpSynced.present) {
       map['ntp_synced'] = Variable<bool>(ntpSynced.value);
     }
+    if (originalPath.present) {
+      map['original_path'] = Variable<String>(originalPath.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<String>(createdAt.value);
     }
@@ -1594,6 +1647,7 @@ class PhotosCompanion extends UpdateCompanion<Photo> {
           ..write('prevHash: $prevHash, ')
           ..write('chainHash: $chainHash, ')
           ..write('ntpSynced: $ntpSynced, ')
+          ..write('originalPath: $originalPath, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1806,6 +1860,79 @@ class $StampConfigsTable extends StampConfigs
     requiredDuringInsert: false,
     defaultValue: const Constant('text'),
   );
+  static const VerificationMeta _stampOpacityMeta = const VerificationMeta(
+    'stampOpacity',
+  );
+  @override
+  late final GeneratedColumn<double> stampOpacity = GeneratedColumn<double>(
+    'stamp_opacity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _stampSizeMeta = const VerificationMeta(
+    'stampSize',
+  );
+  @override
+  late final GeneratedColumn<String> stampSize = GeneratedColumn<String>(
+    'stamp_size',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('medium'),
+  );
+  static const VerificationMeta _customLine1Meta = const VerificationMeta(
+    'customLine1',
+  );
+  @override
+  late final GeneratedColumn<String> customLine1 = GeneratedColumn<String>(
+    'custom_line1',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customLine2Meta = const VerificationMeta(
+    'customLine2',
+  );
+  @override
+  late final GeneratedColumn<String> customLine2 = GeneratedColumn<String>(
+    'custom_line2',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stampBgColorMeta = const VerificationMeta(
+    'stampBgColor',
+  );
+  @override
+  late final GeneratedColumn<String> stampBgColor = GeneratedColumn<String>(
+    'stamp_bg_color',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('#000000'),
+  );
+  static const VerificationMeta _saveOriginalMeta = const VerificationMeta(
+    'saveOriginal',
+  );
+  @override
+  late final GeneratedColumn<bool> saveOriginal = GeneratedColumn<bool>(
+    'save_original',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("save_original" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1824,6 +1951,12 @@ class $StampConfigsTable extends StampConfigs
     themeMode,
     locale,
     stampLayout,
+    stampOpacity,
+    stampSize,
+    customLine1,
+    customLine2,
+    stampBgColor,
+    saveOriginal,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1951,6 +2084,57 @@ class $StampConfigsTable extends StampConfigs
         ),
       );
     }
+    if (data.containsKey('stamp_opacity')) {
+      context.handle(
+        _stampOpacityMeta,
+        stampOpacity.isAcceptableOrUnknown(
+          data['stamp_opacity']!,
+          _stampOpacityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('stamp_size')) {
+      context.handle(
+        _stampSizeMeta,
+        stampSize.isAcceptableOrUnknown(data['stamp_size']!, _stampSizeMeta),
+      );
+    }
+    if (data.containsKey('custom_line1')) {
+      context.handle(
+        _customLine1Meta,
+        customLine1.isAcceptableOrUnknown(
+          data['custom_line1']!,
+          _customLine1Meta,
+        ),
+      );
+    }
+    if (data.containsKey('custom_line2')) {
+      context.handle(
+        _customLine2Meta,
+        customLine2.isAcceptableOrUnknown(
+          data['custom_line2']!,
+          _customLine2Meta,
+        ),
+      );
+    }
+    if (data.containsKey('stamp_bg_color')) {
+      context.handle(
+        _stampBgColorMeta,
+        stampBgColor.isAcceptableOrUnknown(
+          data['stamp_bg_color']!,
+          _stampBgColorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('save_original')) {
+      context.handle(
+        _saveOriginalMeta,
+        saveOriginal.isAcceptableOrUnknown(
+          data['save_original']!,
+          _saveOriginalMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2024,6 +2208,30 @@ class $StampConfigsTable extends StampConfigs
         DriftSqlType.string,
         data['${effectivePrefix}stamp_layout'],
       )!,
+      stampOpacity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stamp_opacity'],
+      )!,
+      stampSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stamp_size'],
+      )!,
+      customLine1: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_line1'],
+      ),
+      customLine2: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_line2'],
+      ),
+      stampBgColor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stamp_bg_color'],
+      )!,
+      saveOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}save_original'],
+      )!,
     );
   }
 
@@ -2050,6 +2258,12 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
   final String themeMode;
   final String locale;
   final String stampLayout;
+  final double stampOpacity;
+  final String stampSize;
+  final String? customLine1;
+  final String? customLine2;
+  final String stampBgColor;
+  final bool saveOriginal;
   const StampConfig({
     required this.id,
     required this.dateFormat,
@@ -2067,6 +2281,12 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
     required this.themeMode,
     required this.locale,
     required this.stampLayout,
+    required this.stampOpacity,
+    required this.stampSize,
+    this.customLine1,
+    this.customLine2,
+    required this.stampBgColor,
+    required this.saveOriginal,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2091,6 +2311,16 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
     map['theme_mode'] = Variable<String>(themeMode);
     map['locale'] = Variable<String>(locale);
     map['stamp_layout'] = Variable<String>(stampLayout);
+    map['stamp_opacity'] = Variable<double>(stampOpacity);
+    map['stamp_size'] = Variable<String>(stampSize);
+    if (!nullToAbsent || customLine1 != null) {
+      map['custom_line1'] = Variable<String>(customLine1);
+    }
+    if (!nullToAbsent || customLine2 != null) {
+      map['custom_line2'] = Variable<String>(customLine2);
+    }
+    map['stamp_bg_color'] = Variable<String>(stampBgColor);
+    map['save_original'] = Variable<bool>(saveOriginal);
     return map;
   }
 
@@ -2116,6 +2346,16 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
       themeMode: Value(themeMode),
       locale: Value(locale),
       stampLayout: Value(stampLayout),
+      stampOpacity: Value(stampOpacity),
+      stampSize: Value(stampSize),
+      customLine1: customLine1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customLine1),
+      customLine2: customLine2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customLine2),
+      stampBgColor: Value(stampBgColor),
+      saveOriginal: Value(saveOriginal),
     );
   }
 
@@ -2143,6 +2383,12 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
       themeMode: serializer.fromJson<String>(json['themeMode']),
       locale: serializer.fromJson<String>(json['locale']),
       stampLayout: serializer.fromJson<String>(json['stampLayout']),
+      stampOpacity: serializer.fromJson<double>(json['stampOpacity']),
+      stampSize: serializer.fromJson<String>(json['stampSize']),
+      customLine1: serializer.fromJson<String?>(json['customLine1']),
+      customLine2: serializer.fromJson<String?>(json['customLine2']),
+      stampBgColor: serializer.fromJson<String>(json['stampBgColor']),
+      saveOriginal: serializer.fromJson<bool>(json['saveOriginal']),
     );
   }
   @override
@@ -2165,6 +2411,12 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
       'themeMode': serializer.toJson<String>(themeMode),
       'locale': serializer.toJson<String>(locale),
       'stampLayout': serializer.toJson<String>(stampLayout),
+      'stampOpacity': serializer.toJson<double>(stampOpacity),
+      'stampSize': serializer.toJson<String>(stampSize),
+      'customLine1': serializer.toJson<String?>(customLine1),
+      'customLine2': serializer.toJson<String?>(customLine2),
+      'stampBgColor': serializer.toJson<String>(stampBgColor),
+      'saveOriginal': serializer.toJson<bool>(saveOriginal),
     };
   }
 
@@ -2185,6 +2437,12 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
     String? themeMode,
     String? locale,
     String? stampLayout,
+    double? stampOpacity,
+    String? stampSize,
+    Value<String?> customLine1 = const Value.absent(),
+    Value<String?> customLine2 = const Value.absent(),
+    String? stampBgColor,
+    bool? saveOriginal,
   }) => StampConfig(
     id: id ?? this.id,
     dateFormat: dateFormat ?? this.dateFormat,
@@ -2204,6 +2462,12 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
     themeMode: themeMode ?? this.themeMode,
     locale: locale ?? this.locale,
     stampLayout: stampLayout ?? this.stampLayout,
+    stampOpacity: stampOpacity ?? this.stampOpacity,
+    stampSize: stampSize ?? this.stampSize,
+    customLine1: customLine1.present ? customLine1.value : this.customLine1,
+    customLine2: customLine2.present ? customLine2.value : this.customLine2,
+    stampBgColor: stampBgColor ?? this.stampBgColor,
+    saveOriginal: saveOriginal ?? this.saveOriginal,
   );
   StampConfig copyWithCompanion(StampConfigsCompanion data) {
     return StampConfig(
@@ -2245,6 +2509,22 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
       stampLayout: data.stampLayout.present
           ? data.stampLayout.value
           : this.stampLayout,
+      stampOpacity: data.stampOpacity.present
+          ? data.stampOpacity.value
+          : this.stampOpacity,
+      stampSize: data.stampSize.present ? data.stampSize.value : this.stampSize,
+      customLine1: data.customLine1.present
+          ? data.customLine1.value
+          : this.customLine1,
+      customLine2: data.customLine2.present
+          ? data.customLine2.value
+          : this.customLine2,
+      stampBgColor: data.stampBgColor.present
+          ? data.stampBgColor.value
+          : this.stampBgColor,
+      saveOriginal: data.saveOriginal.present
+          ? data.saveOriginal.value
+          : this.saveOriginal,
     );
   }
 
@@ -2266,13 +2546,19 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
           ..write('signaturePath: $signaturePath, ')
           ..write('themeMode: $themeMode, ')
           ..write('locale: $locale, ')
-          ..write('stampLayout: $stampLayout')
+          ..write('stampLayout: $stampLayout, ')
+          ..write('stampOpacity: $stampOpacity, ')
+          ..write('stampSize: $stampSize, ')
+          ..write('customLine1: $customLine1, ')
+          ..write('customLine2: $customLine2, ')
+          ..write('stampBgColor: $stampBgColor, ')
+          ..write('saveOriginal: $saveOriginal')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     dateFormat,
     fontFamily,
@@ -2289,7 +2575,13 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
     themeMode,
     locale,
     stampLayout,
-  );
+    stampOpacity,
+    stampSize,
+    customLine1,
+    customLine2,
+    stampBgColor,
+    saveOriginal,
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2309,7 +2601,13 @@ class StampConfig extends DataClass implements Insertable<StampConfig> {
           other.signaturePath == this.signaturePath &&
           other.themeMode == this.themeMode &&
           other.locale == this.locale &&
-          other.stampLayout == this.stampLayout);
+          other.stampLayout == this.stampLayout &&
+          other.stampOpacity == this.stampOpacity &&
+          other.stampSize == this.stampSize &&
+          other.customLine1 == this.customLine1 &&
+          other.customLine2 == this.customLine2 &&
+          other.stampBgColor == this.stampBgColor &&
+          other.saveOriginal == this.saveOriginal);
 }
 
 class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
@@ -2329,6 +2627,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
   final Value<String> themeMode;
   final Value<String> locale;
   final Value<String> stampLayout;
+  final Value<double> stampOpacity;
+  final Value<String> stampSize;
+  final Value<String?> customLine1;
+  final Value<String?> customLine2;
+  final Value<String> stampBgColor;
+  final Value<bool> saveOriginal;
   const StampConfigsCompanion({
     this.id = const Value.absent(),
     this.dateFormat = const Value.absent(),
@@ -2346,6 +2650,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
     this.themeMode = const Value.absent(),
     this.locale = const Value.absent(),
     this.stampLayout = const Value.absent(),
+    this.stampOpacity = const Value.absent(),
+    this.stampSize = const Value.absent(),
+    this.customLine1 = const Value.absent(),
+    this.customLine2 = const Value.absent(),
+    this.stampBgColor = const Value.absent(),
+    this.saveOriginal = const Value.absent(),
   });
   StampConfigsCompanion.insert({
     this.id = const Value.absent(),
@@ -2364,6 +2674,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
     this.themeMode = const Value.absent(),
     this.locale = const Value.absent(),
     this.stampLayout = const Value.absent(),
+    this.stampOpacity = const Value.absent(),
+    this.stampSize = const Value.absent(),
+    this.customLine1 = const Value.absent(),
+    this.customLine2 = const Value.absent(),
+    this.stampBgColor = const Value.absent(),
+    this.saveOriginal = const Value.absent(),
   });
   static Insertable<StampConfig> custom({
     Expression<int>? id,
@@ -2382,6 +2698,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
     Expression<String>? themeMode,
     Expression<String>? locale,
     Expression<String>? stampLayout,
+    Expression<double>? stampOpacity,
+    Expression<String>? stampSize,
+    Expression<String>? customLine1,
+    Expression<String>? customLine2,
+    Expression<String>? stampBgColor,
+    Expression<bool>? saveOriginal,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2401,6 +2723,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
       if (themeMode != null) 'theme_mode': themeMode,
       if (locale != null) 'locale': locale,
       if (stampLayout != null) 'stamp_layout': stampLayout,
+      if (stampOpacity != null) 'stamp_opacity': stampOpacity,
+      if (stampSize != null) 'stamp_size': stampSize,
+      if (customLine1 != null) 'custom_line1': customLine1,
+      if (customLine2 != null) 'custom_line2': customLine2,
+      if (stampBgColor != null) 'stamp_bg_color': stampBgColor,
+      if (saveOriginal != null) 'save_original': saveOriginal,
     });
   }
 
@@ -2421,6 +2749,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
     Value<String>? themeMode,
     Value<String>? locale,
     Value<String>? stampLayout,
+    Value<double>? stampOpacity,
+    Value<String>? stampSize,
+    Value<String?>? customLine1,
+    Value<String?>? customLine2,
+    Value<String>? stampBgColor,
+    Value<bool>? saveOriginal,
   }) {
     return StampConfigsCompanion(
       id: id ?? this.id,
@@ -2439,6 +2773,12 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
       themeMode: themeMode ?? this.themeMode,
       locale: locale ?? this.locale,
       stampLayout: stampLayout ?? this.stampLayout,
+      stampOpacity: stampOpacity ?? this.stampOpacity,
+      stampSize: stampSize ?? this.stampSize,
+      customLine1: customLine1 ?? this.customLine1,
+      customLine2: customLine2 ?? this.customLine2,
+      stampBgColor: stampBgColor ?? this.stampBgColor,
+      saveOriginal: saveOriginal ?? this.saveOriginal,
     );
   }
 
@@ -2493,6 +2833,24 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
     if (stampLayout.present) {
       map['stamp_layout'] = Variable<String>(stampLayout.value);
     }
+    if (stampOpacity.present) {
+      map['stamp_opacity'] = Variable<double>(stampOpacity.value);
+    }
+    if (stampSize.present) {
+      map['stamp_size'] = Variable<String>(stampSize.value);
+    }
+    if (customLine1.present) {
+      map['custom_line1'] = Variable<String>(customLine1.value);
+    }
+    if (customLine2.present) {
+      map['custom_line2'] = Variable<String>(customLine2.value);
+    }
+    if (stampBgColor.present) {
+      map['stamp_bg_color'] = Variable<String>(stampBgColor.value);
+    }
+    if (saveOriginal.present) {
+      map['save_original'] = Variable<bool>(saveOriginal.value);
+    }
     return map;
   }
 
@@ -2514,7 +2872,13 @@ class StampConfigsCompanion extends UpdateCompanion<StampConfig> {
           ..write('signaturePath: $signaturePath, ')
           ..write('themeMode: $themeMode, ')
           ..write('locale: $locale, ')
-          ..write('stampLayout: $stampLayout')
+          ..write('stampLayout: $stampLayout, ')
+          ..write('stampOpacity: $stampOpacity, ')
+          ..write('stampSize: $stampSize, ')
+          ..write('customLine1: $customLine1, ')
+          ..write('customLine2: $customLine2, ')
+          ..write('stampBgColor: $stampBgColor, ')
+          ..write('saveOriginal: $saveOriginal')
           ..write(')'))
         .toString();
   }
@@ -2903,6 +3267,7 @@ typedef $$PhotosTableCreateCompanionBuilder =
       Value<String?> prevHash,
       Value<String?> chainHash,
       Value<bool> ntpSynced,
+      Value<String?> originalPath,
       required String createdAt,
     });
 typedef $$PhotosTableUpdateCompanionBuilder =
@@ -2926,6 +3291,7 @@ typedef $$PhotosTableUpdateCompanionBuilder =
       Value<String?> prevHash,
       Value<String?> chainHash,
       Value<bool> ntpSynced,
+      Value<String?> originalPath,
       Value<String> createdAt,
     });
 
@@ -3047,6 +3413,11 @@ class $$PhotosTableFilterComposer
 
   ColumnFilters<bool> get ntpSynced => $composableBuilder(
     column: $table.ntpSynced,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get originalPath => $composableBuilder(
+    column: $table.originalPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3178,6 +3549,11 @@ class $$PhotosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get originalPath => $composableBuilder(
+    column: $table.originalPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -3276,6 +3652,11 @@ class $$PhotosTableAnnotationComposer
   GeneratedColumn<bool> get ntpSynced =>
       $composableBuilder(column: $table.ntpSynced, builder: (column) => column);
 
+  GeneratedColumn<String> get originalPath => $composableBuilder(
+    column: $table.originalPath,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -3350,6 +3731,7 @@ class $$PhotosTableTableManager
                 Value<String?> prevHash = const Value.absent(),
                 Value<String?> chainHash = const Value.absent(),
                 Value<bool> ntpSynced = const Value.absent(),
+                Value<String?> originalPath = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => PhotosCompanion(
                 id: id,
@@ -3371,6 +3753,7 @@ class $$PhotosTableTableManager
                 prevHash: prevHash,
                 chainHash: chainHash,
                 ntpSynced: ntpSynced,
+                originalPath: originalPath,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -3394,6 +3777,7 @@ class $$PhotosTableTableManager
                 Value<String?> prevHash = const Value.absent(),
                 Value<String?> chainHash = const Value.absent(),
                 Value<bool> ntpSynced = const Value.absent(),
+                Value<String?> originalPath = const Value.absent(),
                 required String createdAt,
               }) => PhotosCompanion.insert(
                 id: id,
@@ -3415,6 +3799,7 @@ class $$PhotosTableTableManager
                 prevHash: prevHash,
                 chainHash: chainHash,
                 ntpSynced: ntpSynced,
+                originalPath: originalPath,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -3500,6 +3885,12 @@ typedef $$StampConfigsTableCreateCompanionBuilder =
       Value<String> themeMode,
       Value<String> locale,
       Value<String> stampLayout,
+      Value<double> stampOpacity,
+      Value<String> stampSize,
+      Value<String?> customLine1,
+      Value<String?> customLine2,
+      Value<String> stampBgColor,
+      Value<bool> saveOriginal,
     });
 typedef $$StampConfigsTableUpdateCompanionBuilder =
     StampConfigsCompanion Function({
@@ -3519,6 +3910,12 @@ typedef $$StampConfigsTableUpdateCompanionBuilder =
       Value<String> themeMode,
       Value<String> locale,
       Value<String> stampLayout,
+      Value<double> stampOpacity,
+      Value<String> stampSize,
+      Value<String?> customLine1,
+      Value<String?> customLine2,
+      Value<String> stampBgColor,
+      Value<bool> saveOriginal,
     });
 
 class $$StampConfigsTableFilterComposer
@@ -3607,6 +4004,36 @@ class $$StampConfigsTableFilterComposer
 
   ColumnFilters<String> get stampLayout => $composableBuilder(
     column: $table.stampLayout,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get stampOpacity => $composableBuilder(
+    column: $table.stampOpacity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stampSize => $composableBuilder(
+    column: $table.stampSize,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customLine1 => $composableBuilder(
+    column: $table.customLine1,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customLine2 => $composableBuilder(
+    column: $table.customLine2,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stampBgColor => $composableBuilder(
+    column: $table.stampBgColor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get saveOriginal => $composableBuilder(
+    column: $table.saveOriginal,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3699,6 +4126,36 @@ class $$StampConfigsTableOrderingComposer
     column: $table.stampLayout,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get stampOpacity => $composableBuilder(
+    column: $table.stampOpacity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stampSize => $composableBuilder(
+    column: $table.stampSize,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customLine1 => $composableBuilder(
+    column: $table.customLine1,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customLine2 => $composableBuilder(
+    column: $table.customLine2,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stampBgColor => $composableBuilder(
+    column: $table.stampBgColor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get saveOriginal => $composableBuilder(
+    column: $table.saveOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StampConfigsTableAnnotationComposer
@@ -3779,6 +4236,34 @@ class $$StampConfigsTableAnnotationComposer
     column: $table.stampLayout,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get stampOpacity => $composableBuilder(
+    column: $table.stampOpacity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stampSize =>
+      $composableBuilder(column: $table.stampSize, builder: (column) => column);
+
+  GeneratedColumn<String> get customLine1 => $composableBuilder(
+    column: $table.customLine1,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customLine2 => $composableBuilder(
+    column: $table.customLine2,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stampBgColor => $composableBuilder(
+    column: $table.stampBgColor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get saveOriginal => $composableBuilder(
+    column: $table.saveOriginal,
+    builder: (column) => column,
+  );
 }
 
 class $$StampConfigsTableTableManager
@@ -3828,6 +4313,12 @@ class $$StampConfigsTableTableManager
                 Value<String> themeMode = const Value.absent(),
                 Value<String> locale = const Value.absent(),
                 Value<String> stampLayout = const Value.absent(),
+                Value<double> stampOpacity = const Value.absent(),
+                Value<String> stampSize = const Value.absent(),
+                Value<String?> customLine1 = const Value.absent(),
+                Value<String?> customLine2 = const Value.absent(),
+                Value<String> stampBgColor = const Value.absent(),
+                Value<bool> saveOriginal = const Value.absent(),
               }) => StampConfigsCompanion(
                 id: id,
                 dateFormat: dateFormat,
@@ -3845,6 +4336,12 @@ class $$StampConfigsTableTableManager
                 themeMode: themeMode,
                 locale: locale,
                 stampLayout: stampLayout,
+                stampOpacity: stampOpacity,
+                stampSize: stampSize,
+                customLine1: customLine1,
+                customLine2: customLine2,
+                stampBgColor: stampBgColor,
+                saveOriginal: saveOriginal,
               ),
           createCompanionCallback:
               ({
@@ -3864,6 +4361,12 @@ class $$StampConfigsTableTableManager
                 Value<String> themeMode = const Value.absent(),
                 Value<String> locale = const Value.absent(),
                 Value<String> stampLayout = const Value.absent(),
+                Value<double> stampOpacity = const Value.absent(),
+                Value<String> stampSize = const Value.absent(),
+                Value<String?> customLine1 = const Value.absent(),
+                Value<String?> customLine2 = const Value.absent(),
+                Value<String> stampBgColor = const Value.absent(),
+                Value<bool> saveOriginal = const Value.absent(),
               }) => StampConfigsCompanion.insert(
                 id: id,
                 dateFormat: dateFormat,
@@ -3881,6 +4384,12 @@ class $$StampConfigsTableTableManager
                 themeMode: themeMode,
                 locale: locale,
                 stampLayout: stampLayout,
+                stampOpacity: stampOpacity,
+                stampSize: stampSize,
+                customLine1: customLine1,
+                customLine2: customLine2,
+                stampBgColor: stampBgColor,
+                saveOriginal: saveOriginal,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

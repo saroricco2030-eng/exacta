@@ -44,6 +44,8 @@ class Photos extends Table {
   TextColumn get prevHash => text().nullable()(); // 직전 사진의 chainHash — 체인 연결
   TextColumn get chainHash => text().nullable()(); // SHA-256(photoHash|prevHash|timestamp|lat|lng)
   BoolColumn get ntpSynced => boolean().withDefault(const Constant(false))(); // 촬영 시 NTP 동기화 상태
+  // ── 듀얼 저장 (v13) ──
+  TextColumn get originalPath => text().nullable()(); // 원본 파일 경로 (saveOriginal 옵션 시)
   TextColumn get createdAt => text()();
 }
 
@@ -65,6 +67,16 @@ class StampConfigs extends Table {
   TextColumn get locale => text().withDefault(const Constant('system'))(); // 'system' | 'ko' | 'en' | 'ja'
   TextColumn get stampLayout => text().withDefault(const Constant('text'))(); // 'bar' | 'card' | 'text'
 
+  // v12: 스탬프 커스터마이징 확장
+  RealColumn get stampOpacity => real().withDefault(const Constant(1.0))();
+  TextColumn get stampSize => text().withDefault(const Constant('medium'))(); // 'small' | 'medium' | 'large'
+  TextColumn get customLine1 => text().nullable()(); // 회사명
+  TextColumn get customLine2 => text().nullable()(); // 담당자명
+  TextColumn get stampBgColor => text().withDefault(const Constant('#000000'))();
+
+  // v13: 듀얼 저장 (원본 + 스탬프본)
+  BoolColumn get saveOriginal => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -79,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase get instance => _instance ??= AppDatabase._();
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -137,11 +149,22 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(photos, photos.ntpSynced);
           }
           if (from < 11) {
-            // 기본 스탬프 레이아웃을 'text'로 변경
-            // (카드/풀바 → 배경 없는 텍스트만 = Timemark 스타일)
             await customStatement(
               "UPDATE stamp_configs SET stamp_layout = 'text' WHERE stamp_layout = 'card' OR stamp_layout = 'bar'",
             );
+          }
+          if (from < 12) {
+            // 스탬프 커스터마이징 확장: 투명도, 크기, 커스텀 텍스트, 배경색
+            await m.addColumn(stampConfigs, stampConfigs.stampOpacity);
+            await m.addColumn(stampConfigs, stampConfigs.stampSize);
+            await m.addColumn(stampConfigs, stampConfigs.customLine1);
+            await m.addColumn(stampConfigs, stampConfigs.customLine2);
+            await m.addColumn(stampConfigs, stampConfigs.stampBgColor);
+          }
+          if (from < 13) {
+            // 듀얼 저장: 원본 사진 별도 보관
+            await m.addColumn(photos, photos.originalPath);
+            await m.addColumn(stampConfigs, stampConfigs.saveOriginal);
           }
         },
       );
@@ -458,6 +481,47 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  /// 여러 프로젝트의 사진 카운트 + 썸네일을 한 번에 조회 (N+1 방지)
+  /// Returns: { projectId: (count, thumbnails) }
+  Future<Map<int, (int, List<Photo>)>> getProjectsSummary(
+      List<int> projectIds) async {
+    if (projectIds.isEmpty) return {};
+
+    // 1) 모든 프로젝트의 사진 카운트 — 단일 GROUP BY 쿼리
+    final countExp = photos.id.count();
+    final countQuery = selectOnly(photos)
+      ..addColumns([photos.projectId, countExp])
+      ..where(photos.projectId.isIn(projectIds))
+      ..groupBy([photos.projectId]);
+    final countRows = await countQuery.get();
+    final countMap = <int, int>{};
+    for (final row in countRows) {
+      final pid = row.read(photos.projectId);
+      final cnt = row.read(countExp);
+      if (pid != null) countMap[pid] = cnt ?? 0;
+    }
+
+    // 2) 모든 프로젝트의 최신 사진 (썸네일 후보) — 단일 쿼리에 끌어와 in-memory 그루핑
+    //    프로젝트당 최대 3개로 제한하기 위해 모든 사진 가져온 뒤 슬라이스
+    final thumbsQuery = (select(photos)
+          ..where((t) => t.projectId.isIn(projectIds) & t.isVideo.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.timestamp)]));
+    final allPhotos = await thumbsQuery.get();
+    final thumbsMap = <int, List<Photo>>{};
+    for (final photo in allPhotos) {
+      final pid = photo.projectId;
+      if (pid == null) continue;
+      final list = thumbsMap.putIfAbsent(pid, () => []);
+      if (list.length < 3) list.add(photo);
+    }
+
+    // 3) 결과 머지
+    return {
+      for (final id in projectIds)
+        id: (countMap[id] ?? 0, thumbsMap[id] ?? const <Photo>[]),
+    };
+  }
+
   /// 전체 사진/영상 파일 경로만 조회 (SELECT filePath ONLY — 메모리 최적화)
   Future<List<String>> getAllFilePaths() async {
     final query = selectOnly(photos)..addColumns([photos.filePath]);
@@ -468,13 +532,19 @@ class AppDatabase extends _$AppDatabase {
   // ── StampConfig DAO ─────────────────────────────────────────
 
   Future<StampConfig> getStampConfig() async {
-    final result = await (select(stampConfigs)
-          ..where((t) => t.id.equals(1)))
-        .getSingleOrNull();
-    if (result != null) return result;
-    // 없으면 기본값 삽입 후 반환
-    await into(stampConfigs).insert(StampConfigsCompanion.insert());
-    return (select(stampConfigs)..where((t) => t.id.equals(1))).getSingle();
+    // 트랜잭션 + INSERT OR IGNORE — 동시 호출 시 UNIQUE 제약 위반 방지
+    return transaction(() async {
+      final existing = await (select(stampConfigs)
+            ..where((t) => t.id.equals(1)))
+          .getSingleOrNull();
+      if (existing != null) return existing;
+      // INSERT OR IGNORE: 다른 트랜잭션이 먼저 삽입했어도 안전
+      await into(stampConfigs).insert(
+        StampConfigsCompanion.insert(),
+        mode: InsertMode.insertOrIgnore,
+      );
+      return (select(stampConfigs)..where((t) => t.id.equals(1))).getSingle();
+    });
   }
 
   Stream<StampConfig> watchStampConfig() =>

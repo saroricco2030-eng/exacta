@@ -396,22 +396,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get photoDeleted => '写真が削除されました';
 
   @override
-  String get onboarding1TitleFull => '正確な現場撮影';
+  String get onboarding1TitleFull => 'シャッター一回で\n時刻と位置を刻みます';
 
   @override
-  String get onboarding1DescFull => 'GPS・住所・時間・天気を写真に自動記録します';
+  String get onboarding1DescFull => '施工・点検・配送・受領証\n現場写真一枚で完結する証拠';
 
   @override
-  String get onboarding2TitleFull => 'プロジェクト管理';
+  String get onboarding2TitleFull => '法廷でも通用する\n証拠写真';
 
   @override
-  String get onboarding2DescFull => '現場別に写真を分類しPDFレポートで出力';
+  String get onboarding2DescFull =>
+      'SHA-256ハッシュチェーン + NTPサーバー時刻\n改ざんを即座に検知、PDF証拠パック自動生成';
 
   @override
-  String get onboarding3TitleFull => 'セキュア撮影モード';
+  String get onboarding3TitleFull => '繊細な撮影、\n位置情報は完全非公開';
 
   @override
-  String get onboarding3DescFull => '位置情報完全遮断・EXIF削除・NTP改ざん防止時間';
+  String get onboarding3DescFull =>
+      'セキュアモード — GPS 0、EXIF 0、ギャラリー未登録\n専用プライベートフォルダに安全に保管';
 
   @override
   String get themeLight => 'ライト';
@@ -625,6 +627,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get stampLayoutText => 'テキストのみ';
+
+  @override
+  String get settingsStampSize => 'スタンプサイズ';
+
+  @override
+  String get stampSizeSmall => '小';
+
+  @override
+  String get stampSizeMedium => '中';
+
+  @override
+  String get stampSizeLarge => '大';
+
+  @override
+  String get settingsStampOpacity => 'スタンプ透明度';
+
+  @override
+  String get settingsStampBgColor => 'スタンプ背景色';
+
+  @override
+  String get settingsCustomLine1 => '会社名';
+
+  @override
+  String get settingsCustomLine1Hint => '会社名を入力してください';
+
+  @override
+  String get settingsCustomLine2 => '担当者名';
+
+  @override
+  String get settingsCustomLine2Hint => '担当者名を入力してください';
 
   @override
   String get localeSystem => 'システム';
@@ -854,6 +886,123 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get commonStart => 'スタート';
+
+  @override
+  String get stampPositionTopLeft => '左上';
+
+  @override
+  String get stampPositionTopCenter => '上中央';
+
+  @override
+  String get stampPositionTopRight => '右上';
+
+  @override
+  String get stampPositionCenter => '中央';
+
+  @override
+  String get stampPositionBottomLeft => '左下';
+
+  @override
+  String get stampPositionBottomCenter => '下中央';
+
+  @override
+  String get stampPositionBottomRight => '右下';
+
+  @override
+  String get photoDetailRestamp => 'スタンプ再適用';
+
+  @override
+  String get restampConfirm => 'この写真に新しいスタンプを適用しますか？';
+
+  @override
+  String get restampSuccess => 'スタンプを適用しました';
+
+  @override
+  String get restampError => 'スタンプ適用に失敗しました';
+
+  @override
+  String get homeWelcomeTitle => '最初の撮影を始めましょう';
+
+  @override
+  String get homeWelcomeSubtitle => '時刻・位置・メモが自動で写真に刻まれます';
+
+  @override
+  String get homeWelcomeStartButton => '撮影を始める';
+
+  @override
+  String get homeWelcomeBadgeTime => '時刻自動記録';
+
+  @override
+  String get homeWelcomeBadgeGps => '位置スタンプ';
+
+  @override
+  String get homeWelcomeBadgeTamper => '改ざん防止';
+
+  @override
+  String get captureSuccessTitle => '記録完了';
+
+  @override
+  String get captureSuccessTamper => '改ざん不可 · SHA-256チェーン';
+
+  @override
+  String get emptyGalleryExampleLabel => '例';
+
+  @override
+  String get emptyGalleryStampPreviewAddress => '東京 渋谷区';
+
+  @override
+  String get onboarding1Bullet1 => '時刻自動';
+
+  @override
+  String get onboarding1Bullet2 => 'GPS自動';
+
+  @override
+  String get onboarding1Bullet3 => '住所自動';
+
+  @override
+  String get onboarding2Bullet1 => 'ハッシュチェーン';
+
+  @override
+  String get onboarding2Bullet2 => 'NTP時刻';
+
+  @override
+  String get onboarding2Bullet3 => 'PDF出力';
+
+  @override
+  String get onboarding3Bullet1 => 'GPS遮断';
+
+  @override
+  String get onboarding3Bullet2 => 'EXIF削除';
+
+  @override
+  String get onboarding3Bullet3 => 'ギャラリー非表示';
+
+  @override
+  String get settingsSaveOriginal => 'オリジナルも保存';
+
+  @override
+  String get settingsSaveOriginalDesc => 'スタンプなしのオリジナルを別フォルダに保管 (セキュアモード除く)';
+
+  @override
+  String get photoDetailViewOriginal => 'オリジナルを見る';
+
+  @override
+  String get photoDetailShareOriginal => 'オリジナルを共有';
+
+  @override
+  String get photoDetailOriginalLabel => 'オリジナル (スタンプなし)';
+
+  @override
+  String get photoDetailStampedLabel => 'スタンプ済み';
+
+  @override
+  String get cameraStampToggleLabel => 'スタンプ 切替';
+
+  @override
+  String get cameraShutterLabel => 'シャッター';
+
+  @override
+  String get cameraStopRecordingLabel => '録画停止';
 
   @override
   String get openSettingsAction => '設定を開く';

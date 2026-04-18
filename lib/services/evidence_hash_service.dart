@@ -12,6 +12,8 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 
+import 'package:exacta/core/safe_parse.dart';
+
 class EvidenceHashService {
   EvidenceHashService._();
 
@@ -71,6 +73,8 @@ class EvidenceHashService {
   /// 예: "3f4a9b...2e8c"
   static String shortPreview(String fullHash) {
     if (fullHash.length < 12) return fullHash;
-    return '${fullHash.substring(0, 6)}...${fullHash.substring(fullHash.length - 4)}';
+    final head = SafeParse.substringOr(fullHash, 0, 6);
+    final tail = SafeParse.substringOr(fullHash, fullHash.length - 4, null);
+    return '$head...$tail';
   }
 }

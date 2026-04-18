@@ -1,3 +1,8 @@
+# 릴리즈 키스토어 + 비밀번호 (Git 절대 커밋 금지)
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+
 # Miscellaneous
 *.class
 *.log

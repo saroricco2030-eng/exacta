@@ -7,6 +7,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/enums.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/data/database.dart';
 
 class ProjectCard extends StatelessWidget {
@@ -103,6 +104,29 @@ class ProjectCard extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
                 child: Row(
                   children: [
+                    // 프로젝트 아이콘 — 활성 시 프로젝트 컬러, 완료 시 회색
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isDone
+                            ? context.text3.withValues(alpha: 0.08)
+                            : _projectColor(context).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isDone
+                              ? context.text3.withValues(alpha: 0.15)
+                              : _projectColor(context).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Icon(
+                        isDone ? LucideIcons.folderCheck : LucideIcons.folderOpen,
+                        size: 18,
+                        color: isDone ? context.text3 : _projectColor(context),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     // 이름 + 날짜 + 사진 수
                     Expanded(
                       child: Column(
@@ -125,7 +149,7 @@ class ProjectCard extends StatelessWidget {
                             children: [
                               if (project.startDate != null) ...[
                                 Text(
-                                  project.startDate!.substring(0, 10),
+                                  SafeParse.substringOr(project.startDate, 0, 10),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: context.text3,

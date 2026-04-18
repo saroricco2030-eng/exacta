@@ -35,7 +35,9 @@ class _SplashScreenState extends State<SplashScreen> {
       final info = await PackageInfo.fromPlatform();
       if (!mounted) return;
       setState(() => _versionText = 'v${info.version} · build ${info.buildNumber}');
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('Splash version load failed: $e');
+    }
   }
 
   @override

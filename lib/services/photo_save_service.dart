@@ -20,9 +20,8 @@ class PhotoSaveService {
   final AppDatabase _db;
   final StampBurnService _stampService = StampBurnService();
 
-  // 디렉토리 캐시 — 매 촬영마다 getApplicationDocumentsDirectory() 호출 방지
+  // 디렉토리 캐시 — 매 촬영마다 OS 호출 방지 (앱 라이프타임 고정 경로)
   static Directory? _cachedAppDir;
-  static final Set<String> _createdDirs = {};
 
   PhotoSaveService(this._db);
 
@@ -57,18 +56,30 @@ class PhotoSaveService {
     double? speed,
     String? weatherText,
     List<String>? weekdayNames,
+    // v12: 스탬프 커스터마이징 확장
+    String stampSize = 'medium',
+    double stampOpacity = 1.0,
+    String stampBgColor = '#000000',
+    String? customLine1,
+    String? customLine2,
+    // v13: 듀얼 저장 — 보안 모드는 강제 비활성
+    bool saveOriginal = false,
+    // v13: 스탬프 master toggle — false면 번인 스킵 (원본 그대로 저장)
+    bool stampEnabled = true,
   }) async {
     final now = NtpService.now(); // NTP 보정 시간
     final isSecure = preset == CameraPreset.secure;
     final photoCode = PhotoCodeService.generate(now);
+    // 보안 모드는 원본 저장 금지 (보안 무력화 방지)
+    final shouldSaveOriginal = saveOriginal && !isSecure;
+    // 보안 모드는 스탬프 토글 무시 — EXIF 제거 + 보안 배지 유지 목적으로 항상 번인
+    final effectiveStampEnabled = stampEnabled || isSecure;
 
     // 1. 앱 내부 저장 디렉토리 (캐시 — 매번 OS 호출 방지)
+    // create(recursive: true)는 idempotent — 존재 여부 체크 없이 호출 (TOCTOU 회피)
     _cachedAppDir ??= await getApplicationDocumentsDirectory();
     final photoDir = Directory(p.join(_cachedAppDir!.path, 'photos'));
-    if (!_createdDirs.contains(photoDir.path)) {
-      if (!await photoDir.exists()) await photoDir.create(recursive: true);
-      _createdDirs.add(photoDir.path);
-    }
+    await photoDir.create(recursive: true);
 
     // 2. 파일명 생성
     final ds =
@@ -92,15 +103,31 @@ class PhotoSaveService {
     } else {
       targetDir = photoDir;
     }
-    if (!_createdDirs.contains(targetDir.path)) {
-      if (!await targetDir.exists()) await targetDir.create(recursive: true);
-      _createdDirs.add(targetDir.path);
-    }
+    await targetDir.create(recursive: true);
 
     final destPath = p.join(targetDir.path, fileName);
 
-    // 3. 스탬프 번인
-    final burnedBytes = await _stampService.burnStamp(
+    // v13: 원본 복사 (보안 모드 제외) — photos/originals/IMG_...jpg
+    String? originalDestPath;
+    if (shouldSaveOriginal) {
+      final originalsDir = Directory(p.join(photoDir.path, 'originals'));
+      await originalsDir.create(recursive: true);
+      // 원본은 항상 jpg (camera plugin이 jpg 출력)
+      originalDestPath = p.join(originalsDir.path, 'IMG_${ds}_${ts}_$ms.jpg');
+      try {
+        await File(tempFilePath).copy(originalDestPath);
+      } catch (e) {
+        debugPrint('Original copy failed: $e');
+        originalDestPath = null; // 실패 시 NULL로 처리, 스탬프 저장은 계속 진행
+      }
+    }
+
+    // 3. 스탬프 번인 (effectiveStampEnabled=false면 원본 바이트 그대로 사용)
+    final Uint8List burnedBytes;
+    if (!effectiveStampEnabled) {
+      burnedBytes = await File(tempFilePath).readAsBytes();
+    } else {
+      burnedBytes = await _stampService.burnStamp(
       imagePath: tempFilePath,
       timestamp: now,
       preset: preset,
@@ -129,7 +156,13 @@ class PhotoSaveService {
       weatherText: weatherText,
       photoCode: photoCode,
       weekdayNames: weekdayNames ?? const ['월', '화', '수', '목', '금', '토', '일'],
+      stampSize: stampSize,
+      stampOpacity: stampOpacity,
+      stampBgColor: stampBgColor,
+      customLine1: customLine1,
+      customLine2: customLine2,
     );
+    }
 
     // 4. 파일 저장 + 해시 계산 병렬 실행 (I/O와 CPU를 동시에 활용)
     String? photoHash;
@@ -186,6 +219,7 @@ class PhotoSaveService {
         prevHash: Value(prevHash),
         chainHash: Value(chainHash),
         ntpSynced: Value(NtpService.isSynced),
+        originalPath: Value(originalDestPath),
         createdAt: now.toIso8601String(),
       ),
     ).catchError((e) {
@@ -216,6 +250,59 @@ class PhotoSaveService {
     return destPath;
   }
 
+  /// 기존 사진에 스탬프 재적용 — 현재 설정으로 덮어쓰기
+  Future<void> restampPhoto({
+    required Photo photo,
+    required StampConfig config,
+    required String tamperBadgeText,
+    required List<String> weekdayNames,
+  }) async {
+    final isSecure = photo.isSecure;
+    final preset = isSecure ? CameraPreset.secure : CameraPreset.construction;
+    final ts = DateTime.tryParse(photo.timestamp) ?? DateTime.now();
+
+    final burnedBytes = await _stampService.burnStamp(
+      imagePath: photo.filePath,
+      timestamp: ts,
+      preset: preset,
+      showTime: true,
+      showDate: true,
+      showAddress: !isSecure && photo.address != null,
+      showGps: !isSecure && photo.latitude != null,
+      address: photo.address,
+      latitude: photo.latitude,
+      longitude: photo.longitude,
+      memo: photo.memo,
+      dateFormat: config.dateFormat,
+      stampColorHex: config.stampColor,
+      stampPosition: config.stampPosition,
+      stampLayout: config.stampLayout,
+      tamperBadgeText: tamperBadgeText,
+      logoPath: config.logoPath,
+      signaturePath: config.signaturePath,
+      stampSize: config.stampSize,
+      stampOpacity: config.stampOpacity,
+      stampBgColor: config.stampBgColor,
+      customLine1: config.customLine1,
+      customLine2: config.customLine2,
+      weekdayNames: weekdayNames,
+    );
+
+    await File(photo.filePath).writeAsBytes(burnedBytes);
+
+    // 해시 재계산
+    try {
+      final newHash = await compute(_computeHashIsolate, burnedBytes);
+      await _db.updatePhoto(PhotosCompanion(
+        id: Value(photo.id),
+        filePath: Value(photo.filePath),
+        photoHash: Value(newHash),
+      ));
+    } catch (e) {
+      debugPrint('Restamp hash update failed: $e');
+    }
+  }
+
   /// 영상 저장 — 앱 내부 디렉토리로 복사 + DB 삽입
   Future<int> saveVideo({
     required String tempFilePath,
@@ -232,9 +319,7 @@ class PhotoSaveService {
 
     final appDir = await getApplicationDocumentsDirectory();
     final videoDir = Directory(p.join(appDir.path, 'videos'));
-    if (!await videoDir.exists()) {
-      await videoDir.create(recursive: true);
-    }
+    await videoDir.create(recursive: true);
 
     final ds =
         '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
@@ -252,9 +337,7 @@ class PhotoSaveService {
     } else {
       targetDir = videoDir;
     }
-    if (!await targetDir.exists()) {
-      await targetDir.create(recursive: true);
-    }
+    await targetDir.create(recursive: true);
 
     final destPath = p.join(targetDir.path, fileName);
 
@@ -314,7 +397,7 @@ class PhotoSaveService {
       debugPrint('insertPhoto (video) failed: $e');
       try {
         File(destPath).deleteSync();
-      } catch (_) {}
+      } catch (e) { debugPrint('Cleanup of orphaned video file failed ($destPath): $e'); }
       throw Exception('Failed to insert video into DB: $e');
     }
   }

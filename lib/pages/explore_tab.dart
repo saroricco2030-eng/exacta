@@ -1,17 +1,20 @@
 /// Exacta light home tab - hero card, calendar, today strip, photo history, stats
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:exacta/core/colors.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/core/theme/app_theme.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/data/providers.dart';
-import '../features/camera/camera_screen.dart';
-import '../features/gallery/photo_detail_screen.dart';
-import '../features/home/photo_calendar.dart';
 import 'package:exacta/core/transitions.dart';
+import 'package:exacta/features/camera/camera_screen.dart';
+import 'package:exacta/features/gallery/photo_detail_screen.dart';
+import 'package:exacta/features/home/photo_calendar.dart';
+import 'package:exacta/features/home/widgets/welcome_hero.dart';
 
 class ExploreTab extends ConsumerStatefulWidget {
   const ExploreTab({super.key});
@@ -88,16 +91,17 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-          // ── 마지막 촬영 히어로 카드 ──
+          // ── 히어로 영역: 사진 있으면 최근 촬영, 없으면 웰컴 CTA ──
           SliverToBoxAdapter(
             child: latestAsync.when(
               loading: () => const SizedBox.shrink(),
               error: (_, _) => const SizedBox.shrink(),
               data: (photo) {
-                if (photo == null) return const SizedBox.shrink();
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: _HeroPhotoCard(photo: photo, label: l.homeLastPhoto),
+                  child: photo == null
+                      ? const WelcomeHero(isDark: false)
+                      : _HeroPhotoCard(photo: photo, label: l.homeLastPhoto),
                 );
               },
             ),
@@ -258,7 +262,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
 
               final groups = <String, List<Photo>>{};
               for (final photo in photos) {
-                final date = photo.timestamp.substring(0, 10);
+                final date = SafeParse.substringOr(photo.timestamp, 0, 10);
                 groups.putIfAbsent(date, () => []).add(photo);
               }
               final sortedDates = groups.keys.toList()..sort((a, b) => b.compareTo(a));
@@ -308,7 +312,7 @@ class _ExploreTabState extends ConsumerState<ExploreTab> {
                               child: photo.isVideo
                                 ? Container(color: LightPageColors.bg2,
                                     child: const Center(child: Icon(LucideIcons.play, size: 24, color: LightPageColors.text3)))
-                                : Image.file(File(photo.filePath), fit: BoxFit.cover, cacheWidth: 400, cacheHeight: 400,
+                                : Image.file(File(photo.filePath), fit: BoxFit.cover, cacheWidth: 400,
                                     errorBuilder: (_, _, _) => Container(color: LightPageColors.bg2)),
                             ),
                           );
@@ -432,7 +436,7 @@ class _HeroPhotoCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      photo.timestamp.substring(11, 16),
+                      SafeParse.substringOr(photo.timestamp, 11, 16),
                       style: TextStyle(
                         fontFamily: AppTheme.monoFontFamily,
                         fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),

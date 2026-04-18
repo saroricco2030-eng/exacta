@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
+import 'package:exacta/core/stamp_date_formatter.dart';
 import 'package:exacta/core/theme/app_colors.dart';
 import 'package:exacta/core/theme/app_theme.dart';
 import 'package:exacta/features/camera/camera_screen.dart';
@@ -14,7 +16,7 @@ class StampOverlay extends StatelessWidget {
   // RegExp 캐시 — build()마다 재생성 방지
   static final _addressSplitRegex = RegExp(r'[,\s]');
 
-  const StampOverlay({
+  StampOverlay({
     super.key,
     required this.now,
     required this.preset,
@@ -44,6 +46,12 @@ class StampOverlay extends StatelessWidget {
     this.projectName,
     this.weatherText,
     this.photoCode,
+    // v12: 스탬프 커스터마이징 확장
+    this.stampSize = 'medium',
+    this.stampOpacity = 1.0,
+    this.stampBgColor,
+    this.customLine1,
+    this.customLine2,
   });
 
   final DateTime now;
@@ -58,13 +66,37 @@ class StampOverlay extends StatelessWidget {
   final String stampPosition;
   final String stampLayout;
   final VoidCallback onEditTap;
+  // v12: 스탬프 커스터마이징 확장
+  final String stampSize;
+  final double stampOpacity;
+  final String? stampBgColor;
+  final String? customLine1;
+  final String? customLine2;
 
-  Color get _color {
-    if (stampColorHex != null) {
-      try { return Color(int.parse(stampColorHex!.replaceFirst('#', '0xFF'))); }
-      catch (_) {}
+  // ── 매 프레임 재계산 방지용 캐시 (StatelessWidget이므로 인스턴스당 1회 계산) ──
+  late final Color _color = _computeColor();
+  late final Color _bgColorCached = _computeBgColor();
+  late final String _customLineJoined = _computeCustomLine();
+
+  Color _computeColor() {
+    final parsed = SafeParse.color(stampColorHex);
+    return parsed.withValues(alpha: parsed.a * stampOpacity);
+  }
+
+  Color _computeBgColor() {
+    if (stampBgColor != null && stampBgColor!.isNotEmpty) {
+      final parsed = SafeParse.color(stampBgColor, fallback: const Color(0xFF000000));
+      return parsed.withValues(alpha: 0.7 * stampOpacity);
     }
-    return Colors.white;
+    return AppColors.stampBg.withValues(alpha: AppColors.stampBg.a * stampOpacity);
+  }
+
+  String _computeCustomLine() {
+    final parts = <String>[
+      if (customLine1 != null && customLine1!.isNotEmpty) customLine1!,
+      if (customLine2 != null && customLine2!.isNotEmpty) customLine2!,
+    ];
+    return parts.isEmpty ? '' : parts.join(' · ');
   }
 
   bool get _isSecure => preset == CameraPreset.secure;
@@ -84,14 +116,7 @@ class StampOverlay extends StatelessWidget {
   String get _hhmm => '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
   String get _ss => ':${now.second.toString().padLeft(2, '0')}';
 
-  String get _dateStr {
-    final y = now.year, mo = now.month.toString().padLeft(2, '0'), d = now.day.toString().padLeft(2, '0');
-    return switch (dateFormat) {
-      'MM/DD/YYYY' => '$mo/$d/$y',
-      'DD-MM-YYYY' => '$d-$mo-$y',
-      _ => '$y.$mo.$d',
-    };
-  }
+  String get _dateStr => StampDateFormatter.format(now, dateFormat);
 
   String _weekday(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
@@ -192,18 +217,22 @@ class StampOverlay extends StatelessWidget {
           child: Text('$_dateStr ${_weekday(context)}',
             style: _ts(13, FontWeight.w600, c.withValues(alpha: a(0.9)), shadows: sh)),
         ),
-      if (hasAddress)
-        Padding(
-          padding: const EdgeInsets.only(top: 3),
-          child: Text(address, maxLines: 1, overflow: TextOverflow.ellipsis,
-            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.75)), shadows: sh)),
-        ),
+      // 좌측 주소는 우측 도시명과 중복 방지 — 우측에 도시명이 있으므로 좌측은 생략
+      // (풀 주소는 bar/card 모드에서만 표시)
       if (sensorText.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 2),
           child: Text(sensorText, maxLines: 1, overflow: TextOverflow.ellipsis,
             style: _ts(10, FontWeight.w500, c.withValues(alpha: a(0.6)),
               letterSpacing: 0.2, shadows: sh)),
+        ),
+      // v12: 커스텀 텍스트 — 캐시된 한 줄
+      if (_customLineJoined.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(_customLineJoined,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: _ts(11, FontWeight.w500, c.withValues(alpha: a(0.7)), shadows: sh)),
         ),
     ];
 
@@ -333,7 +362,7 @@ class StampOverlay extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         constraints: const BoxConstraints(maxWidth: 280),
         decoration: BoxDecoration(
-          color: AppColors.stampBg,
+          color: _bgColorCached,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: c.withValues(alpha: 0.12)),
         ),
@@ -377,6 +406,15 @@ class StampOverlay extends StatelessWidget {
                       style: _ts(11, FontWeight.w500, c.withValues(alpha: 0.6)))),
                   ],
                 ),
+              ),
+
+            // v12: 커스텀 텍스트 — 캐시된 한 줄
+            if (_customLineJoined.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(_customLineJoined,
+                  maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: _ts(11, FontWeight.w500, c.withValues(alpha: 0.7))),
               ),
 
             // 주소
@@ -464,7 +502,7 @@ class StampOverlay extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.stampBg,
+        color: _bgColorCached,
         border: Border(top: BorderSide(color: c.withValues(alpha: 0.15), width: 1)),
       ),
       child: Column(
@@ -501,6 +539,14 @@ class StampOverlay extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(projectName!, maxLines: 1, overflow: TextOverflow.ellipsis,
                           style: _ts(12, FontWeight.w500, c.withValues(alpha: 0.6))),
+                      ),
+                    // v12: 커스텀 텍스트 — 캐시된 한 줄
+                    if (_customLineJoined.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Text(_customLineJoined,
+                          maxLines: 1, overflow: TextOverflow.ellipsis,
+                          style: _ts(11, FontWeight.w500, c.withValues(alpha: 0.7))),
                       ),
                   ],
                 ),
@@ -642,9 +688,16 @@ class StampOverlay extends StatelessWidget {
     ],
   );
 
+  // 스탬프 크기 배수 (small 0.7x, medium 1.0x, large 1.3x) — 폰트 사이즈에 직접 반영
+  late final double _sizeMultiplier = switch (stampSize) {
+    'small' => 0.7,
+    'large' => 1.3,
+    _ => 1.0,
+  };
+
   TextStyle _ts(double size, FontWeight w, Color c, {List<Shadow>? shadows, double letterSpacing = 0}) => TextStyle(
     fontFamily: AppTheme.monoFontFamily,
-    fontSize: size, fontWeight: w, color: c, height: 1.2,
+    fontSize: size * _sizeMultiplier, fontWeight: w, color: c, height: 1.2,
     letterSpacing: letterSpacing, shadows: shadows,
   );
 }

@@ -7,15 +7,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:exacta/core/colors.dart';
 import 'package:exacta/core/extensions/build_context_ext.dart';
+import 'package:exacta/core/safe_parse.dart';
 import 'package:exacta/core/theme/app_theme.dart';
 import 'package:exacta/data/database.dart';
 import 'package:exacta/data/providers.dart';
-import '../features/camera/camera_screen.dart';
-import '../features/gallery/gallery_screen.dart';
-import '../features/gallery/photo_detail_screen.dart';
-import '../features/projects/projects_screen.dart';
-import '../features/export/export_screen.dart';
 import 'package:exacta/core/transitions.dart';
+import 'package:exacta/features/camera/camera_screen.dart';
+import 'package:exacta/features/gallery/gallery_screen.dart';
+import 'package:exacta/features/gallery/photo_detail_screen.dart';
+import 'package:exacta/features/home/widgets/welcome_hero.dart';
+import 'package:exacta/features/projects/projects_screen.dart';
+import 'package:exacta/features/export/export_screen.dart';
 
 class ListenNowPage extends ConsumerWidget {
   const ListenNowPage({super.key});
@@ -102,30 +104,11 @@ class ListenNowPage extends ConsumerWidget {
           ],
           data: (photos) {
             if (photos.isEmpty) {
-              return [
+              return const [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 48),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 80, height: 80,
-                            decoration: BoxDecoration(
-                              color: DarkModeColors.surface2,
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(color: DarkModeColors.glassBorder),
-                            ),
-                            child: const Icon(LucideIcons.camera, size: 36, color: DarkModeColors.accent),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(l.emptyGallery, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: DarkModeColors.text1)),
-                          const SizedBox(height: 8),
-                          Text(l.emptyGalleryAction, style: TextStyle(fontSize: 13, color: DarkModeColors.text2)),
-                        ],
-                      ),
-                    ),
+                    padding: EdgeInsets.fromLTRB(24, 8, 24, 24),
+                    child: WelcomeHero(isDark: true),
                   ),
                 ),
               ];
@@ -134,7 +117,7 @@ class ListenNowPage extends ConsumerWidget {
             // 날짜별 그룹핑
             final groups = <String, List<Photo>>{};
             for (final photo in photos) {
-              final date = photo.timestamp.substring(0, 10);
+              final date = SafeParse.substringOr(photo.timestamp, 0, 10);
               groups.putIfAbsent(date, () => []).add(photo);
             }
             final sortedDates = groups.keys.toList()..sort((a, b) => b.compareTo(a));
@@ -187,7 +170,7 @@ class ListenNowPage extends ConsumerWidget {
                               : Image.file(
                                   File(photo.filePath),
                                   fit: BoxFit.cover,
-                                  cacheWidth: 400, cacheHeight: 400,
+                                  cacheWidth: 400,
                                   errorBuilder: (_, _, _) => Container(color: DarkModeColors.surface2),
                                 ),
                           ),

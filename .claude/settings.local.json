@@ -73,7 +73,12 @@
       "Bash(start:*)",
       "Bash(cmd.exe:*)",
       "Bash(adb:*)",
-      "Bash(C:/Users/saror/AppData/Local/Android/sdk/platform-tools/adb.exe:*)"
+      "Bash(C:/Users/saror/AppData/Local/Android/sdk/platform-tools/adb.exe:*)",
+      "Bash(gh --version)",
+      "Bash(gh auth:*)",
+      "Bash(gh repo:*)",
+      "Bash(\"C:/Users/saror/AppData/Local/Android/sdk/platform-tools/adb.exe\" -s R3CY10CR5EW install -r \"C:/Users/saror/Desktop/exacta/build/app/outputs/flutter-apk/app-release.apk\")",
+      "Bash(\"C:/Users/saror/AppData/Local/Android/sdk/platform-tools/adb.exe\" -s R3CY10CR5EW pull /sdcard/Pictures/Exacta/IMG_20260410_205952_420.jpg C:/tmp/exacta_latest.jpg)"
     ]
   }
 }

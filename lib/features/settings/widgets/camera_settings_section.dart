@@ -76,6 +76,26 @@ class CameraSettingsSection extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 8),
+
+        // v13: 듀얼 저장 — 원본도 별도 보관
+        ToggleTile(
+          icon: LucideIcons.copy,
+          label: l.settingsSaveOriginal,
+          value: config.saveOriginal,
+          onChanged: (v) => onUpdate(saveOriginal: v),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 56, top: 4),
+          child: Text(
+            l.settingsSaveOriginalDesc,
+            style: TextStyle(
+              fontSize: 11,
+              color: context.text3,
+              height: 1.4,
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -151,28 +151,33 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
                     );
                   }
 
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 8),
-                    itemCount: filtered.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final project = filtered[index];
-                      final db = ref.read(dbProvider);
-                      return FutureBuilder<(int, List<Photo>)>(
-                        future: Future.wait([
-                          db.getPhotoCountByProject(project.id),
-                          db.getProjectThumbnails(project.id),
-                        ]).then((r) => (r[0] as int, r[1] as List<Photo>)),
-                        builder: (ctx, snap) => ProjectCard(
-                          project: project,
-                          photoCount: snap.data?.$1 ?? 0,
-                          thumbnails: snap.data?.$2 ?? const [],
-                          onTap: () =>
-                              _showProjectForm(context, project: project),
-                          onToggleStatus: () => _toggleStatus(project),
-                          onDelete: () => _deleteProject(project),
-                        ),
+                  // N+1 방지: 모든 프로젝트의 카운트+썸네일을 한 번에 조회
+                  final db = ref.read(dbProvider);
+                  return FutureBuilder<Map<int, (int, List<Photo>)>>(
+                    future: db.getProjectsSummary(
+                      filtered.map((p) => p.id).toList(),
+                    ),
+                    builder: (ctx, summarySnap) {
+                      final summary = summarySnap.data ?? const {};
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 8),
+                        itemCount: filtered.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final project = filtered[index];
+                          final entry = summary[project.id];
+                          return ProjectCard(
+                            project: project,
+                            photoCount: entry?.$1 ?? 0,
+                            thumbnails: entry?.$2 ?? const [],
+                            onTap: () =>
+                                _showProjectForm(context, project: project),
+                            onToggleStatus: () => _toggleStatus(project),
+                            onDelete: () => _deleteProject(project),
+                          );
+                        },
                       );
                     },
                   );
@@ -356,6 +361,11 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
             if (photo.thumbnailPath != null) {
               final thumb = File(photo.thumbnailPath!);
               if (await thumb.exists()) await thumb.delete();
+            }
+            // v13: 원본 사진 cascade 삭제
+            if (photo.originalPath != null) {
+              final original = File(photo.originalPath!);
+              if (await original.exists()) await original.delete();
             }
           } catch (_) {
             // 개별 파일 삭제 실패는 무시 — DB는 삭제 계속 진행

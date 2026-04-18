@@ -396,22 +396,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get photoDeleted => '사진이 삭제되었습니다';
 
   @override
-  String get onboarding1TitleFull => '현장 촬영, 정확하게';
+  String get onboarding1TitleFull => '셔터 한 번,\n시간과 위치가 박힙니다';
 
   @override
-  String get onboarding1DescFull => 'GPS · 주소 · 시간 · 날씨를 사진에 자동 기록합니다';
+  String get onboarding1DescFull => '시공·점검·배송·인수증\n현장 사진 한 장으로 끝나는 증빙';
 
   @override
-  String get onboarding2TitleFull => '프로젝트별 관리';
+  String get onboarding2TitleFull => '법정에서도 통하는\n증거 사진';
 
   @override
-  String get onboarding2DescFull => '현장별로 사진을 분류하고 PDF 리포트로 내보내세요';
+  String get onboarding2DescFull =>
+      'SHA-256 해시 체인 + NTP 서버 시간\n위변조 즉시 탐지, PDF 증거 팩 자동 생성';
 
   @override
-  String get onboarding3TitleFull => '보안 촬영 모드';
+  String get onboarding3TitleFull => '민감한 촬영,\n위치는 완전 비밀';
 
   @override
-  String get onboarding3DescFull => '위치정보 완전 차단 · EXIF 제거 · 위변조 방지 NTP 시간';
+  String get onboarding3DescFull =>
+      '보안 모드 — GPS 0, EXIF 0, 갤러리 미등록\n나만의 비공개 폴더에 안전하게';
 
   @override
   String get themeLight => '라이트';
@@ -625,6 +627,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get stampLayoutText => '텍스트만';
+
+  @override
+  String get settingsStampSize => '스탬프 크기';
+
+  @override
+  String get stampSizeSmall => '소';
+
+  @override
+  String get stampSizeMedium => '중';
+
+  @override
+  String get stampSizeLarge => '대';
+
+  @override
+  String get settingsStampOpacity => '스탬프 투명도';
+
+  @override
+  String get settingsStampBgColor => '스탬프 배경색';
+
+  @override
+  String get settingsCustomLine1 => '회사명';
+
+  @override
+  String get settingsCustomLine1Hint => '회사명을 입력하세요';
+
+  @override
+  String get settingsCustomLine2 => '담당자명';
+
+  @override
+  String get settingsCustomLine2Hint => '담당자명을 입력하세요';
 
   @override
   String get localeSystem => '시스템';
@@ -854,6 +886,123 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get commonStart => '시작';
+
+  @override
+  String get stampPositionTopLeft => '좌상단';
+
+  @override
+  String get stampPositionTopCenter => '상단 중앙';
+
+  @override
+  String get stampPositionTopRight => '우상단';
+
+  @override
+  String get stampPositionCenter => '중앙';
+
+  @override
+  String get stampPositionBottomLeft => '좌하단';
+
+  @override
+  String get stampPositionBottomCenter => '하단 중앙';
+
+  @override
+  String get stampPositionBottomRight => '우하단';
+
+  @override
+  String get photoDetailRestamp => '스탬프 재적용';
+
+  @override
+  String get restampConfirm => '이 사진에 새 스탬프를 적용하시겠습니까?';
+
+  @override
+  String get restampSuccess => '스탬프가 적용되었습니다';
+
+  @override
+  String get restampError => '스탬프 적용 실패';
+
+  @override
+  String get homeWelcomeTitle => '첫 촬영을 시작하세요';
+
+  @override
+  String get homeWelcomeSubtitle => '시간 · 위치 · 메모가 자동으로 사진에 새겨집니다';
+
+  @override
+  String get homeWelcomeStartButton => '촬영 시작';
+
+  @override
+  String get homeWelcomeBadgeTime => '시간 자동 기록';
+
+  @override
+  String get homeWelcomeBadgeGps => '위치 스탬프';
+
+  @override
+  String get homeWelcomeBadgeTamper => '위변조 방지';
+
+  @override
+  String get captureSuccessTitle => '기록 완료';
+
+  @override
+  String get captureSuccessTamper => '위변조 불가 · SHA-256 체인';
+
+  @override
+  String get emptyGalleryExampleLabel => '예시';
+
+  @override
+  String get emptyGalleryStampPreviewAddress => '서울 강남구';
+
+  @override
+  String get onboarding1Bullet1 => '시간 자동';
+
+  @override
+  String get onboarding1Bullet2 => 'GPS 자동';
+
+  @override
+  String get onboarding1Bullet3 => '주소 자동';
+
+  @override
+  String get onboarding2Bullet1 => '해시 체인';
+
+  @override
+  String get onboarding2Bullet2 => 'NTP 시간';
+
+  @override
+  String get onboarding2Bullet3 => 'PDF 출력';
+
+  @override
+  String get onboarding3Bullet1 => 'GPS 차단';
+
+  @override
+  String get onboarding3Bullet2 => 'EXIF 제거';
+
+  @override
+  String get onboarding3Bullet3 => '갤러리 미등록';
+
+  @override
+  String get settingsSaveOriginal => '원본도 함께 저장';
+
+  @override
+  String get settingsSaveOriginalDesc => '스탬프 없는 원본을 별도 보관합니다 (보안 모드 제외)';
+
+  @override
+  String get photoDetailViewOriginal => '원본 보기';
+
+  @override
+  String get photoDetailShareOriginal => '원본 공유';
+
+  @override
+  String get photoDetailOriginalLabel => '원본 (스탬프 없음)';
+
+  @override
+  String get photoDetailStampedLabel => '스탬프본';
+
+  @override
+  String get cameraStampToggleLabel => '스탬프 켜기/끄기';
+
+  @override
+  String get cameraShutterLabel => '셔터';
+
+  @override
+  String get cameraStopRecordingLabel => '녹화 중지';
 
   @override
   String get openSettingsAction => '설정 열기';
